@@ -102,6 +102,7 @@ import { finalAttemptRetryCases } from "../../testing/cases/final-native-retry.t
 import { frozenConfigProcessCases } from "../../testing/cases/frozen-config.ts";
 import { graphValidationCases } from "../../testing/cases/graph-validation.ts";
 import { helperProcessCases } from "../../testing/cases/helper-process.ts";
+import { hostFileLeaseGuardCases } from "../../testing/cases/host-file-claims.ts";
 import { installedUpdateCases } from "../../testing/cases/installed-update.ts";
 import { mcpStdioFramesCases } from "../../testing/cases/mcp-stdio.ts";
 import { mcpSubmissionCases } from "../../testing/cases/mcp-submission.ts";
@@ -172,6 +173,7 @@ import { finalAttemptRetry } from "../../testing/factories/final-native-retry.ts
 import { frozenConfigProcess } from "../../testing/factories/frozen-config.ts";
 import { graphValidation } from "../../testing/factories/graph-validation.ts";
 import { helperProcess } from "../../testing/factories/helper-process.ts";
+import { hostFileLeaseProcess } from "../../testing/factories/host-file-claims.ts";
 import { installedRegistration } from "../../testing/factories/installed-registration.ts";
 import { installedUpdate } from "../../testing/factories/installed-update.ts";
 import { mcpStdioFrames } from "../../testing/factories/mcp-stdio.ts";
@@ -1505,6 +1507,20 @@ await all(
   TestScheduling.Maximum,
 );
 console.log(JSON.stringify({ installed_config_boundary_cases: 7 }));
+
+await all(
+  [...hostFileLeaseGuardCases.positive, ...hostFileLeaseGuardCases.negative].map(
+    (scenario) => async () => {
+      const result = await Reflect.apply(hostFileLeaseProcess, undefined, [
+        ...scenario.args,
+        { cli, vendors: resolve(Packaging.VendorStubs) },
+      ]);
+      assert.deepEqual(result, scenario.expected, scenario.name);
+    },
+  ),
+  TestScheduling.Maximum,
+);
+console.log(JSON.stringify({ installed_host_lease_boundary_cases: 52 }));
 
 await all(
   [...frozenConfigProcessCases.positive, ...frozenConfigProcessCases.negative].map(

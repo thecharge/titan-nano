@@ -1,11 +1,24 @@
 import { expect } from "bun:test";
-import { link, mkdir, symlink, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { AgentHost, FileAccessMode } from "@titan/constants";
-import { claimHostFiles } from "@titan/runtime";
+import { link, mkdir, readFile, realpath, stat, symlink, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { agentHostEnvironment } from "@titan/config";
+import {
+  AgentHost,
+  AgentHostKind,
+  Backend,
+  ConfigDefault,
+  ErrorCode,
+  FileAccessMode,
+  Packaging,
+  ProcessIo,
+  VendorFixture,
+  VendorStubMode,
+} from "@titan/constants";
+import { claimHostFiles, hostedTurn } from "@titan/runtime";
 import { agentSpec } from "@titan/test-factories";
 import { thrownBy } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
+import type { AgentSpec, SdkProbePaths } from "@titan/types";
 
 export async function hostFileClaims(mode: string): Promise<boolean> {
   return withTemporaryDirectory(async (root) => {
@@ -199,4 +212,74 @@ export async function hostFileBounds(mode: string): Promise<boolean> {
     else expect(failure).toBeInstanceOf(Error);
     return true;
   });
+}
+
+async function claimProcess(spec: AgentSpec, paths: SdkProbePaths): Promise<void> {
+  const entry = paths.cli
+    ? resolve(dirname(await realpath(paths.cli)), Packaging.AgentBundle)
+    : resolve(Packaging.AgentSource);
+  await hostedTurn(
+    {
+      type: AgentHostKind.Start,
+      backend: Backend.Codex,
+      launch: {
+        executable: resolve(paths.vendors ?? Packaging.VendorSources, VendorFixture.Codex),
+      },
+      spec,
+      session_id: null,
+      prompt: VendorStubMode.Complete,
+    },
+    async () => {},
+    new AbortController().signal,
+    (receive) =>
+      Bun.spawn([process.execPath, entry], {
+        detached: true,
+        env: agentHostEnvironment(ConfigDefault.HostGcMarkers),
+        stdin: ProcessIo.Ignore,
+        stdout: ProcessIo.Ignore,
+        stderr: ProcessIo.Ignore,
+        ipc: receive,
+        serialization: AgentHost.Serialization,
+      }),
+  );
+}
+
+export async function hostFileLeaseGuard(
+  lease: string,
+  suffix: string,
+  mode: string,
+  paths?: SdkProbePaths,
+) {
+  return withTemporaryDirectory(async (root) => {
+    await using resources = new AsyncDisposableStack();
+    const spec = agentSpec(root);
+    spec.file_scope = { mode: FileAccessMode.Write, paths: ["one.txt"] };
+    const owner = resolve(root, AgentHost.Directory);
+    await mkdir(resolve(owner, AgentHost.ClaimsDirectory), { recursive: true });
+    const guarded = resolve(owner, lease + suffix);
+    const external = resolve(root, "external.db");
+    const bytes = Buffer.from("Preserve unrelated lease target");
+    await writeFile(external, bytes, { mode: 0o644 });
+    const metadata = await stat(external);
+    if (mode === "symbolic") await symlink(external, guarded);
+    if (mode === "hard") await link(external, guarded);
+    if (mode === "directory") await mkdir(guarded);
+    const failure = await thrownBy(() =>
+      paths ? claimProcess(spec, paths) : claimHostFiles(spec, resources),
+    );
+    if (mode === "regular") expect(failure).toBeUndefined();
+    else expect(failure).toMatchObject({ code: ErrorCode.ExecutionInterrupted });
+    expect(await readFile(external)).toEqual(bytes);
+    expect((await stat(external)).mode).toBe(metadata.mode);
+    return true;
+  });
+}
+
+export function hostFileLeaseProcess(
+  lease: string,
+  suffix: string,
+  mode: string,
+  paths: SdkProbePaths = {},
+) {
+  return hostFileLeaseGuard(lease, suffix, mode, paths);
 }

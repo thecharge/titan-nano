@@ -1,5 +1,16 @@
 import { positive, rejected } from "@titan/test-factories";
 
+export const fileReaderPrecedenceCases = {
+  positive: [
+    positive("an earlier file writer precedes later readers", [false, false], true),
+    positive("an earlier parent writer precedes later nested readers", [true, false], true),
+  ],
+  negative: [
+    rejected("cancelling a waiting writer releases the later file reader", [false, true], true),
+    rejected("cancelling a waiting parent writer releases the nested reader", [true, true], true),
+  ],
+};
+
 export const reconciliationClaimCases = {
   positive: [
     positive("a script retains write admission with a writable reconciler", [true, true], true),

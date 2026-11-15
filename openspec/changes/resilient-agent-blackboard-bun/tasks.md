@@ -1,3 +1,5 @@
+The [delivery sessions](research/delivery-sessions.md) group open work by dependency and preserve each parent task and its acceptance scenarios.
+
 Implementation follows the delivery stages in design decision 36. Work on each package together with its mapped tests. The acceptance map records planned coverage, not tests that passed. All checkboxes below describe product work and remain open until their evidence exists.
 
 The [shared fabric delivery sequence](research/shared-fabric-delivery.md) expands the live-tree coordination and recovery work into bounded implementation sessions. It preserves the owning tasks and their complete acceptance scenarios. Other applicable backlog still needs its own detailed execution sequence; this document does not close repair task 5.2.

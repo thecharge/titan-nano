@@ -4,9 +4,13 @@ import { resolve } from "node:path";
 import {
   AgentHost,
   ErrorCode,
+  ErrorField,
+  FileErrorCode,
+  KnowledgeFile,
   ServerDatabaseAdapter,
   ServerLimit,
   ServerSql,
+  WorkspaceFileLinks,
 } from "@titan/constants";
 import { fileScopesOverlap } from "@titan/core";
 import { OperationalError } from "@titan/errors";
@@ -26,19 +30,41 @@ async function directory(path: string): Promise<void> {
     throw new OperationalError(ErrorCode.ExecutionInterrupted, AgentHostMessage.Busy);
 }
 
-async function database(path: string, resources: AsyncDisposableStack): Promise<Bun.SQL> {
+async function guardLease(
+  path: string,
+  resources: AsyncDisposableStack,
+  create: boolean,
+): Promise<void> {
   const file = await open(
     path,
-    constants.O_CREAT | constants.O_RDWR | constants.O_NOFOLLOW,
+    constants.O_RDWR |
+      constants.O_NOFOLLOW |
+      constants.O_NONBLOCK |
+      (create ? constants.O_CREAT : 0),
     ServerLimit.FileMode,
-  );
-  try {
-    const status = await file.stat();
-    if (!status.isFile() || status.nlink !== 1)
-      throw new OperationalError(ErrorCode.ExecutionInterrupted, AgentHostMessage.Busy);
-  } finally {
-    await file.close();
-  }
+  ).catch((error: unknown) => {
+    if (
+      !create &&
+      error instanceof Error &&
+      Reflect.get(error, ErrorField.Code) === FileErrorCode.Missing
+    )
+      return undefined;
+    throw error;
+  });
+  if (!file) return;
+  resources.defer(() => file.close());
+  const status = await file.stat();
+  if (
+    !status.isFile() ||
+    status.nlink !== WorkspaceFileLinks ||
+    (process.getuid && status.uid !== process.getuid())
+  )
+    throw new OperationalError(ErrorCode.ExecutionInterrupted, AgentHostMessage.Busy);
+}
+
+async function database(path: string, resources: AsyncDisposableStack): Promise<Bun.SQL> {
+  for (const suffix of KnowledgeFile.SqliteSidecars)
+    await guardLease(path + suffix, resources, suffix.length === 0);
   const lease = new Bun.SQL({ adapter: ServerDatabaseAdapter, filename: path });
   resources.defer(() => lease.close());
   return lease;

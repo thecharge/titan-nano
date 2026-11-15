@@ -29,11 +29,11 @@
 ## 5. Retain and complete the remaining product scope
 
 - [x] 5.1 Classify every remaining product task as applicable to Claude Code and Codex or explicitly deferred for another backend; record dependencies without removing requirements.
-- [ ] 5.2 Expand each remaining applicable feature into session-sized implementation tasks in the owning product backlog; preserve its acceptance scenarios and execute in dependency order.
+- [x] 5.2 Expand each remaining applicable feature into session-sized implementation tasks in the owning product backlog; preserve its acceptance scenarios and execute in dependency order.
 - [ ] 5.3 Verify Claude Code and Codex adapters against pinned primary documentation and strict offline vendor contracts; leave paid live-call proof pending until explicitly authorized.
 
 ## 6. Verify delivery
 
 - [x] 6.1 Run focused acceptance for each repaired production behavior and record source identity, commands, outcomes and limits in `evidence.md`.
-- [ ] 6.2 Run complete local verification, installed-package acceptance and independent documentation checks; record every failure without bypassing hooks or coverage.
+- [x] 6.2 Run complete local verification, installed-package acceptance and independent documentation checks; record every failure without bypassing hooks or coverage.
 - [x] 6.3 Run strict OpenSpec and release completeness checks; keep readiness blocked while any applicable requirement or required live proof is pending.

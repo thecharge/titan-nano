@@ -13,12 +13,12 @@ import {
   RunEventKind,
   StepStatus,
 } from "@titan/constants";
-import { newId } from "@titan/core";
+import { newId, settle } from "@titan/core";
 import { Engine, FileAccess } from "@titan/runner";
 import { vendorRecoveryWorkflow } from "@titan/test-factories";
 import { thrownBy, waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
-import { FileAccessClaimSchema } from "@titan/types";
+import { FileAccessClaimSchema, ObjectSchema } from "@titan/types";
 import { validateWorkflow } from "@titan/workflow";
 
 export async function reconciliationClaim(writable: boolean, script: boolean) {
@@ -257,5 +257,101 @@ export async function fileClaimOrdering(nested: boolean, cancel: boolean) {
         acquired.push(FileAccessClaimSchema.parse(event.data).step_id);
     assert.deepEqual(acquired, cancel ? [peerStep.id] : [firstStep.id, peerStep.id]);
     return true;
+  });
+}
+
+export async function fileReaderPrecedence(nested: boolean, cancel: boolean) {
+  return withTemporaryDirectory(async (project) => {
+    const workflow = vendorRecoveryWorkflow();
+    const source = workflow.steps[0];
+    assert.ok(source);
+    const scope = nested ? "folder" : "result.txt";
+    const leaf = nested ? "folder/result.txt" : scope;
+    const plan = validateWorkflow({
+      ...workflow,
+      personas: {
+        ...workflow.personas,
+        reader: { description: "Reader", role: "Read", tools: [AgentTool.Read] },
+      },
+      steps: ["first", "second", "writer", "later", "peer"].map((id) => ({
+        ...source,
+        id,
+        do: { ...source.do, persona: id === "writer" ? "worker" : "reader" },
+        files: [id === "peer" ? "independent.txt" : id === "writer" ? scope : leaf],
+      })),
+    });
+    const run = await new Engine(() => new FakeBackend()).create({
+      project,
+      plan,
+      config: await resolveConfig({ home: resolve(project, "home"), project }),
+      backend: Backend.Fake,
+      client_id: "reader-order",
+      submission_id: "reader-order",
+    });
+    const store = new RunStore(run.root);
+    await store.read();
+    const waiting = new Set<string>();
+    const started: string[] = [];
+    const readers = Promise.withResolvers<void>();
+    const writer = Promise.withResolvers<void>();
+    const controller = new AbortController();
+    const files = new FileAccess(async (state, type, data) => {
+      await store.commit(state, type, data);
+      if (type === RunEventKind.FileAccessWaiting)
+        waiting.add(FileAccessClaimSchema.shape.step_id.parse(ObjectSchema.parse(data).step_id));
+    }, 4);
+    const jobs: Promise<unknown>[] = [];
+    const start = (index: number) => {
+      const step = plan.nodes[index];
+      assert.ok(step);
+      const work = thrownBy(() =>
+        files.use(
+          run,
+          step,
+          step.id === "writer" ? controller.signal : new AbortController().signal,
+          async () => {
+            started.push(step.id);
+            if (step.id === "first" || step.id === "second") await readers.promise;
+            if (step.id === "writer") await writer.promise;
+          },
+        ),
+      );
+      jobs.push(work);
+      return work;
+    };
+    try {
+      const first = start(0);
+      const second = start(1);
+      assert.ok(await waitUntil(async () => started.length === 2));
+      assert.deepEqual(started, ["first", "second"]);
+      const pendingWriter = start(2);
+      assert.ok(await waitUntil(async () => waiting.has("writer")));
+      const later = start(3);
+      assert.ok(await waitUntil(async () => waiting.has("later")));
+      assert.equal(await start(4), undefined);
+      assert.deepEqual(started, ["first", "second", "peer"]);
+      if (cancel) {
+        controller.abort();
+        assert.ok(await pendingWriter);
+        assert.equal(await later, undefined);
+        assert.deepEqual(started, ["first", "second", "peer", "later"]);
+      } else {
+        readers.resolve();
+        assert.ok(await waitUntil(async () => started.includes("writer")));
+        assert.equal(started.includes("later"), false);
+        writer.resolve();
+        assert.equal(await pendingWriter, undefined);
+        assert.equal(await later, undefined);
+        assert.deepEqual(started, ["first", "second", "peer", "writer", "later"]);
+      }
+      readers.resolve();
+      assert.equal(await first, undefined);
+      assert.equal(await second, undefined);
+      return true;
+    } finally {
+      readers.resolve();
+      writer.resolve();
+      await settle(jobs.map((job) => () => job));
+    }
   });
 }

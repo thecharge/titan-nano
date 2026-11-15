@@ -1,4 +1,33 @@
+import { AgentHost, KnowledgeFile } from "@titan/constants";
 import { positive, rejected } from "@titan/test-factories";
+
+const leases = [
+  AgentHost.AdmissionLease,
+  AgentHost.Lease,
+  AgentHost.ScopeCatalogue,
+  `${AgentHost.ClaimsDirectory}/0.db`,
+];
+
+export const hostFileLeaseGuardCases = {
+  positive: leases.map((lease) =>
+    positive(
+      `regular lease admission remains available for ${lease}`,
+      [lease, "", "regular"],
+      true,
+    ),
+  ),
+  negative: leases.flatMap((lease) =>
+    KnowledgeFile.SqliteSidecars.flatMap((suffix) =>
+      ["symbolic", "hard", "directory"].map((mode) =>
+        rejected(
+          `${mode} lease path is refused before SQLite admission for ${lease}${suffix}`,
+          [lease, suffix, mode],
+          true,
+        ),
+      ),
+    ),
+  ),
+};
 
 export const hostFileClaimsCases = {
   positive: [
