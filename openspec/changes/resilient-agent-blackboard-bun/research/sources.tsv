@@ -1,0 +1,75 @@
+id	title_as_cited	url
+1	The Blackboard Architecture: Solving the Agent 'Phone Game'	https://rajatpandit.com/agentic-ai/the-blackboard-architecture/
+2	The shared blackboard pattern is back and it's solving multi-agent	https://dev.to/alex_aslam/the-shared-blackboard-pattern-is-back-and-its-solving-multi-agent-context-loss-4kfc
+3	Exploring Advanced LLM Multi-Agent Systems Based on Blackboard	https://arxiv.org/html/2507.01701v1
+4	LLM-based Multi-Agent Blackboard System for Information ... - arXiv	https://arxiv.org/html/2510.01285v1
+5	Multi-agent Collaboration with Tuple Spaces - Datom.World	https://datom.world/blog/multi-agent-collaboration-with-tuple-spaces.blog
+6	LbMAS Implementation: Multi-Agent LLM System - Emergent Mind	https://www.emergentmind.com/topics/lbmas-implementation
+7	Tuple space - Wikipedia	https://en.wikipedia.org/wiki/Tuple_space
+8	Implementation of Tuple Space Machines - Yale Engineering	https://engineering.yale.edu/download_file/view/560a7d7d-ab3d-4cd5-943a-183a58d0ffc6/431
+9	The Linda Model and System - The Netlib	https://netlib.org/utk/papers/comp-phy7/node3.html
+10	An Architecture for Tuple-based Coordination of Multi-agent Systems	https://lia.disi.unibo.it/~ao/pubs/pdf/1999/spe.pdf
+11	Context Compaction Theory - arXiv	https://arxiv.org/pdf/2608.01326
+12	The Context Rot Problem: Why AI Coding Agents Get Worse As	https://empromptu.ai/resources/context-rot-progressive-prompt-ephemerality
+13	Papers Explained 445: Context Rot - Ritvik Rastogi	https://ritvik19.medium.com/papers-explained-443-context-rot-4bbd72d77631
+14	Context Rot: How Increasing Input Tokens Impacts LLM Performance	https://www.trychroma.com/research/context-rot
+15	Coding Agents are Effective Long-Context Processors - arXiv	https://arxiv.org/html/2603.20432v1
+16	Compact Constraint Encoding for LLM Code Generation - arXiv	https://arxiv.org/pdf/2604.07192
+17	[2601.17152] Dynamic Role Assignment for Multi-Agent Debate - arXiv	https://arxiv.org/abs/2601.17152
+18	Dynamic Tool Selection and Integration for Agentic Reasoning - arXiv	https://arxiv.org/html/2512.13278v2
+19	MetaGPT: Meta Programming for A Multi-Agent Collaborative ... - arXiv	https://arxiv.org/abs/2308.00352
+20	[2510.14205] DPRF: A Generalizable Dynamic Persona Refinement	https://arxiv.org/abs/2510.14205
+21	LLM-BASED MULTI-AGENT BLACKBOARD SYSTEM - OpenReview	https://openreview.net/pdf?id=egTQgf89Lm
+22	Voting Protocols as Coordination Mechanisms for Role-Constrained	https://arxiv.org/abs/2606.08030
+23	Debate or Vote: Which Yields Better Decisions in Multi-Agent ... - arXiv	https://arxiv.org/html/2508.17536v1
+24	Decision Protocols in Multi-Agent Large Language Model ... - arXiv	https://arxiv.org/abs/2607.05477
+25	Voting or Consensus? Decision-Making in Multi-Agent Debate - arXiv	https://arxiv.org/html/2502.19130v4
+26	[2605.04188] A Multi-Agent Consensus Protocol for Stable Software	https://arxiv.org/abs/2605.04188
+27	A Multi-Agent Consensus Protocol for Stable Software (ResearchGate)	https://www.researchgate.net/publication/404542652_A_Multi-Agent_Consensus_Protocol_for_Stable_Software_Remodularization
+28	arXiv:2009.09361v1 [eess.SY] 20 Sep 2020	https://arxiv.org/pdf/2009.09361
+29	Lyapunov-Based Reinforcement Learning for Decentralized Multi	https://arxiv.org/abs/2009.09361
+30	What is Model Context Protocol (MCP)? A guide | Google Cloud	https://cloud.google.com/discover/what-is-model-context-protocol
+31	Model Context Protocol - Wikipedia	https://en.wikipedia.org/wiki/Model_Context_Protocol
+32	Introducing the Model Context Protocol - Anthropic	https://www.anthropic.com/news/model-context-protocol
+33	Prompt Injection Attacks on Agentic Coding Assistants - arXiv	https://arxiv.org/pdf/2601.17548
+34	Protocol Clarification Needed: When Should tools/list Be Called? #908	https://github.com/modelcontextprotocol/modelcontextprotocol/issues/908
+35	Tools - What is the Model Context Protocol (MCP)?	https://modelcontextprotocol.io/specification/draft/server/tools
+36	JSON-RPC Explained for MCP Developers | by Kuldeep Singh	https://medium.com/@kuldeepsingh382002/json-rpc-explained-for-mcp-developers-56e6a23d6c57
+37	Design Patterns for Deploying AI Agents with Model Context Protocol	https://arxiv.org/html/2603.13417v1
+38	Can MCP Clients Decide What to Do After Failure? A Result-Only	https://arxiv.org/pdf/2609.00072
+39	Tool-Calling LLM Agents Under Realistic MCP Faults - arXiv	https://arxiv.org/html/2610.32555v1
+40	MCP Error Messages Written for Developers Hurt the Most Capable	https://arxiv.org/pdf/2609.35381
+41	Metacognitive Self-Correction for Multi-Agent System via Prototype	https://aclanthology.org/2026.findings-acl.1168.pdf
+42	From Tool Orchestration to Code Execution: A Study of MCP Design	https://arxiv.org/html/2602.15945v1
+43	Prompt Injection Attack to Tool Selection in LLM Agents - arXiv	https://arxiv.org/html/2504.19793v2
+44	Beyond Prompt Injection: The Tool Update Gap in LLM Agent Security	https://arxiv.org/html/2611.01976v1
+45	A Dynamic Open-Ended Benchmark for Evaluating Prompt Injection	https://arxiv.org/html/2602.03117v1
+46	CaMeL: Google DeepMind's Prompt-Injection Defense Architecture	https://ai-coding.wiselychen.com/en/camel-privileged-quarantined-agent/
+47	LLM Security: Prompt Injection Defense with CaMeL Framework	https://afine.com/llm-security-prompt-injection-camel
+48	Ten Months After CaMeL, Where Are the Secure AI Agents?	https://neuraltrust.ai/blog/camel-prompt-injection
+49	[2503.18813] Defeating Prompt Injections by Design - arXiv	https://arxiv.org/abs/2503.18813
+50	CaMeL offers a promising new direction for mitigating prompt	https://simonwillison.net/2025/Apr/11/camel/
+51	E2B: a code sandbox for agents - Jacar	https://jacar.es/en/e2b-code-sandbox-for-agents/
+52	Best Code Execution Sandboxes for AI Agents in 2026 - E2B	https://e2b.dev/resources/best-code-execution-sandboxes-for-ai-agents
+53	AI Agent Code Execution Sandboxes: E2B, Daytona, Firecracker	https://www.spheron.network/blog/ai-agent-code-execution-sandbox-e2b-daytona-firecracker/
+54	E2B — AI Sandboxes for AI Agents - AgenticSkills	https://agenticskills.io/tools/e2b
+55	A Survey on Action-Level Safety Enforcement for Multi-Agent LLM	https://openreview.net/pdf?id=khqxyqvDhv
+56	Harnessing Code Agents for Automatic Software Verification - arXiv	https://arxiv.org/abs/2607.06341
+57	Agentic Verification of Software Systems - arXiv	https://arxiv.org/html/2511.17330v3
+58	Action Verification through Conjecture and Refutation for Language	https://arxiv.org/html/2611.02950v1
+59	Automated Hypothesis Validation with Agentic Sequential ... - arXiv	https://arxiv.org/abs/2502.09858
+60	Automated Hypothesis Validation with Agentic Sequential (ICML)	https://icml.cc/virtual/2025/poster/44356
+61	Metamorphic Testing of Large Language Models for Natural ... - arXiv	https://arxiv.org/html/2511.02108v1
+62	Validating LLM-Generated Programs with Metamorphic Prompt	https://arxiv.org/abs/2406.06864
+63	Sound Test Batteries and Their Detection Limits - arXiv	https://arxiv.org/pdf/2607.16646
+64	Cross-Cutting Security Analysis of LLM-Generated Code via ... - arXiv	https://arxiv.org/abs/2607.12089
+65	A Measurement Study of Post-Hoc Falsification Operators for Frozen	https://arxiv.org/pdf/2606.16999
+66	and Reveals 86% of Its Own Discoveries Are Statistical - arXiv	https://arxiv.org/html/2610.32245v1
+67	Minimum description length - Wikipedia	https://en.wikipedia.org/wiki/Minimum_description_length
+68	[1809.00652] Minimum Description Length codes are critical - arXiv	https://arxiv.org/abs/1809.00652
+69	A Minimum Description Length Approach to Regularization in ... - arXiv	https://arxiv.org/abs/2505.13398
+70	Towards Engineering Multi-Agent LLMs: A Protocol-Driven Approach	https://arxiv.org/abs/2510.12120
+R1	A Practical Guide for Designing, Developing, and Deploying Agentic AI Workflows (arXiv:2512.08769)	https://arxiv.org/abs/2512.08769
+R2	MCP Official Docs	https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+R3	Emergent Mind: bMAS Research (no URL given in blueprint)	https://www.emergentmind.com/topics/bmas
+R4	Beam.ai: MCP for AI Agents Explained (no URL given in blueprint)	https://beam.ai/agentic-insights/mcp-for-ai-agents-explained

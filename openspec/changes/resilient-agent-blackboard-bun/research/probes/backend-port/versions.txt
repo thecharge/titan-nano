@@ -1,0 +1,12 @@
+claude-agent-sdk   "version": "0.3.318",
+codex-sdk   "version": "0.166.0",
+ai   "version": "7.0.163",
+@ai-sdk/anthropic   "version": "4.0.97",
+@ai-sdk/openai   "version": "4.0.109",
+@ai-sdk/google   "version": "4.0.112",
+@ai-sdk/mcp   "version": "2.0.91",
+@modelcontextprotocol/sdk     "version": "1.32.2",
+@ai-sdk/anthropic key: environmentVariableName: "ANTHROPIC_API_KEY"
+@ai-sdk/openai key: environmentVariableName: "OPENAI_API_KEY"
+@ai-sdk/google key: environmentVariableName: "GOOGLE_GENERATIVE_AI_API_KEY"
+codex binary strings: base_instructions developer_instructions 

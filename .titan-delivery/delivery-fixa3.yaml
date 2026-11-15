@@ -1,0 +1,38 @@
+name: Fix tests fixa3
+goal: |-
+  Fix exactly these two remaining test failures, changing nothing else. Both come from the same kind of cause, and neither is a test mistake: a durable event is refused by parseEvent in packages/board/src/index.ts (line ~113, catch block turns any error into corrupt_board "Durable run record does not match its schema, paths or frozen plan"), called from RunStore.commit (index.ts ~149) via packages/runner/src/engine.ts commit (line ~304).
+  FAILURE 1: testing/integration/split-width.test.ts (factory testing/factories/split-width.ts) runs a graph with a plan step and an edit step that has `split: { parts: plan.files, width }`. Expected "6 2 passed" (six workers, peak two), received "2 2 blocked". Other cases: expected "3 3 passed" received "3 3 blocked"; "a width above max_parallel", "a missing width" also blocked. The case "a part source that is not a list blocks the run" passes. The code is RunSteps.parts in packages/runner/src/steps.ts (reads items, runs runParts from packages/runner/src/split.ts, then writeTree/readTree of the work folder into the candidate folder, treeHash, atomicWrite of RunFile.CandidateHash, then commits RunEventKind.PhaseCompleted with phase ExecutionPhase.Worker) and each part runs this.phases.execute with key `part-<index>` (packages/runner/src/phases.ts). Find from the code why a commit from this path is refused (read validateRecord and the run schemas in packages/board/src/index.ts and packages/types/src/board.ts, and the phase handling in packages/runner/src/phases.ts: for example part phases storing candidate_hash, request_turn, paths or other fields that validateRecord checks against folders that do not exist for the part key, or a commit with a phase state that is not complete) and fix it in product code so that the split step runs all parts, then passes.
+  FAILURE 2: testing/integration/open-call.test.ts: openCallScenario (4 tests: "a proven chemist answers the chemistry call", "a trial chemist with more tags answers the chemistry call", "a tax-law persona in the register means no request", "a needs_update tax-law persona means no request") fail with TitanError corrupt_board thrown from parseEvent at engine.ts commit (~line 410, the commit made when a step with `call: { tags, task }` is resolved). openCallResume negatives "a resume of a call that a chemist answered is refused" and "a resume of a call that a trial chemist answered is refused" expect error code terminal_run ("A terminal run requires a new submission") but receive the corrupt_board error. Find what event or state the open-call code in packages/runner/src/engine.ts (around lines 380-430) and packages/knowledge/src/open-call.ts commits that RunEventSchema, validateRecord or the node schema refuses (a missing or unknown field, a new RunEventKind not accepted, a persona id or reference with the version mark that fails an identifier pattern, a new request kind missing from the request schema) and fix the product code or the schema so it is accepted, the same way other fields are declared.
+  Read the named files before editing. Do not change tests unless a test is plainly wrong; if you change one, say why. No comments in code. Literals in packages/constants, messages in packages/messages, schemas and types in packages/types. Tests use unit(factory, cases). No direct Promise.all. Keep 100 percent line and function coverage: every new branch needs a test case. You have no shell: after editing, read the changed files again and list the exact files changed in your summary, and say plainly which part of each failure you could not confirm by reading.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixa3
+    do:
+      persona: builder
+      task: Fix failure 1 and failure 2 as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that the cause named for each failure is real in the code, that the fix removes it, that new branches have tests, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 60

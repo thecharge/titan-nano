@@ -1,0 +1,52 @@
+name: Deliver titan delivery 1 groups 7 to 32
+goal: >-
+  Deliver the open tasks of OpenSpec change resilient-agent-blackboard-bun in groups 7, 8, 9, 10, 13, 14, 16,
+  26, 27, 28, 29, 30 and 32 for Claude Code and Codex. Each task is done only when its named scenarios pass
+  in bun run test with 100 percent coverage, the acceptance map and tasks.md are updated with seen proof,
+  and the change is committed with a Conventional Commit subject.
+personas:
+  builder:
+    description: Writes the code, the tests and the spec updates for one task group.
+    role: >-
+      Follow the project rules in CLAUDE.md and the tasks in openspec/changes/resilient-agent-blackboard-bun/tasks.md.
+      Write tests first in testing/factories, testing/cases and testing/unit|integration|e2e. Keep literals in
+      constants, messages in messages and schemas in types. Run the focused tests and report the exact output.
+    tools: [Read, Glob, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to show that the claimed delivery is wrong or unproven.
+    role: >-
+      Read the diff and the test output. Return refuted with a concrete missing scenario, an unbacked claim
+      or a failing check. Otherwise return survived with the checks you ran.
+    tools: [Read, Glob, Grep]
+steps:
+  - id: detection
+    do:
+      {
+        persona: builder,
+        task: "Deliver group 7: harness detection and titan doctor, tasks 7.1 and 7.2.",
+      }
+    falsify:
+      [
+        {
+          persona: skeptic,
+          task: "Check every scenario of spec harness-detection against real test output.",
+        },
+      ]
+  - id: runtime
+    do: { persona: builder, task: "Deliver groups 8, 9 and 10 in task order." }
+    falsify:
+      [{ persona: skeptic, task: "Check each task's named scenarios pass and the map matches." }]
+    inputs: { detection: detection.summary }
+  - id: rest
+    do:
+      {
+        persona: builder,
+        task: "Deliver groups 13, 14, 16, 26, 27, 28, 29, 30 and 32 in task order.",
+      }
+    falsify:
+      [{ persona: skeptic, task: "Check each task's named scenarios pass and the map matches." }]
+    inputs: { runtime: runtime.summary }
+limits: { max_parallel: 1, max_minutes: 55 }

@@ -1,0 +1,6 @@
+docker.io/clickhouse/clickhouse-server:25.12 sha256:0e76d9807edfac0345554816cd7f54aa9b650892848809932557c46e46bc3450
+docker.langfuse.com/langfuse/langfuse:4.66.0 sha256:6689df70556efed0c9f6b82115aaf023de779164f19d286c2e5499ef3c2832b2
+docker.langfuse.com/langfuse/langfuse-worker:4.66.0 sha256:dc1243ef1a29da88613bf7f3a748fa231af09edf1531abaf6efba891259bd285
+cgr.dev/chainguard/minio:latest sha256:27b26f1a032a625b537a25c527ac8464edc02b76ff9381d517221404b28d5b4d
+docker.io/library/postgres:17 sha256:eb0fb2377534e65aad04f37838956b3dfb888e1a3dd3c1acf957bc6557eb6c7d
+docker.io/library/redis:7 sha256:3a17a97bb6c7d9a7ee1bd3d5ecf7c6d02adf4bfd9fe73a974b3767b442dfbfaa

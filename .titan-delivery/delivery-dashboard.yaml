@@ -1,0 +1,45 @@
+name: Deliver the titan dashboard group 23
+goal: >-
+  Deliver tasks 23.1 to 23.6 of OpenSpec change resilient-agent-blackboard-bun: the read-only run dashboard
+  served by packages/server, the titan dashboard command with the one-time code and cookie, the shared run-number
+  function, the run page with steps, attempts, verdicts, proofs, board messages and requests, and live events.
+  Read specs/run-dashboard/spec.md, research/dashboard.md and the probe in research/probes/dashboard first.
+  You have no shell. Write the code and flat positive and negative test tables under testing/ in packages/server/src (dashboard.ts, dashboard-session.ts, run-numbers.ts) with constants, messages and types in their packages; wire them into the index files, and write the tests.
+  Do not claim that any test passed. Report files changed and scenarios lacking proof.
+personas:
+  builder:
+    description: Writes the dashboard code and its tests.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md. Literals in packages/constants, messages in packages/messages, schemas
+      in packages/types. No comments. Tests use unit(factory, cases) with at least 2 positive and 2 negative
+      cases. The page loads only from titan with Content-Security-Policy default-src self and is read-only. Use only simple relative patterns in Glob and Grep: no braces, never an absolute path (omit the path argument or use a relative one), one directory per call.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a scenario has no test, a write route is reachable from the dashboard
+      cookie, the one-time code can be logged or reused, or a claim is unbacked. Otherwise survive. Use only simple relative patterns in Glob and Grep: no braces, never an absolute path (omit the path argument or use a relative one).
+    tools: [Read, Grep]
+steps:
+  - id: server
+    do:
+      persona: builder
+      task: Tasks 23.1, 23.3 and 23.6 in packages/server and packages/types.
+    falsify:
+      - persona: skeptic
+        task: Check scenarios of tasks 23.1, 23.3 and 23.6 each have tests and matching code.
+  - id: command
+    do:
+      persona: builder
+      task: Tasks 23.2, 23.4 and 23.5 - titan dashboard, one-time code, cookie, run page and live events.
+    falsify:
+      - persona: skeptic
+        task: Check scenarios of tasks 23.2, 23.4 and 23.5 each have tests and matching code.
+limits:
+  max_parallel: 1
+  max_minutes: 30

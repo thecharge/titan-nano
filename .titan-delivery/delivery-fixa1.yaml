@@ -1,0 +1,42 @@
+name: Fix tests fixa1
+goal: |-
+  Fix exactly these full-test failures (bun run test, 4690 tests, 36 distinct failures, 4 coverage gaps), changing nothing else.
+  ROOT CAUSE A (about 28 failures: automaticWorkflowExample, cliConfiguredStartup, requestTurnProcess, runCompatibility, runtimePinProcess: every test that registers personas then restarts the daemon). packages/knowledge/src/persona-register.ts writeRecord() writes PersonaRecord YAML ({name, version, parent, persona}) straight into <home>/knowledge/persona/<name>.yaml. The hub (packages/knowledge/src/catalog.ts loadFiles, line ~155) reads every file in that folder with parseKnowledgeEntry (packages/knowledge/src/format.ts) which needs KnowledgeEntrySchema: id is a uuid, kind persona, title, tags, body, version. It also needs knowledgePath(root, kind, entry.id) to equal the file path, and knowledgePath (packages/knowledge/src/files.ts) needs a uuid id. So on the next daemon start the hub throws KnowledgeCorrupt (knowledge_corrupt) and the server does not start. Reproduced: serve, run a fake-harness workflow, stop, serve again gives knowledge_corrupt.
+  REQUIRED FIX: the register must store every persona version as a valid hub entry. Entry format for persona kind: the whole file is Bun.YAML.stringify(entry, null, 2) of a KnowledgeEntry (see knowledgeBytes in format.ts). Use a deterministic uuid for each name@version (hash of the reference text turned into uuid form, put the helper in packages/core or knowledge, literals in packages/constants), title = the reference name@version, tags from the persona, version = 1, and the body = YAML of the PersonaRecord so readRecord/versionsOf can find it again (versionsOf must list by reading entries, or by deterministic file names, so that existing lookups by name and version still work). Keep the spec behaviour: personas are searchable with titan kb search --kind persona (see openspec/changes/resilient-agent-blackboard-bun/specs/persona-registry/spec.md). Also make packages/knowledge/src/persona-lifecycle.ts line ~157 (knowledgePath(root, KnowledgeKind.Persona, name)) and personaId use the same uuid mapping, so there is one rule. Entries written by registerPersonas must pass parseKnowledgeEntry so a restart works; add a unit test with positive and negative cases that writes a register entry and loads it with parseKnowledgeEntry, and one that opens KnowledgeHub.open(home) on a folder holding the entry. recordRunPersonas writes personas.json into the run folder and is not part of the problem.
+  FAILURE B (openCallScenario, 4 tests): error corrupt_board; an event is rejected by parseEvent in packages/board. Find the event type the open-call code (packages/knowledge/src/open-call.ts, testing/factories/open-call.ts) or the runner posts that is not in the board event schema (packages/types/src/board.ts, packages/constants/src/board.ts) and add it the same way the other types are.
+  FAILURE C (personaFromRun dry run, 1 test): testing/factories/persona-register.ts passes --detach together with --dry-run, which the CLI rejects. Remove --detach from that dry-run case.
+  FAILURE D (splitWidth, 6 tests): testing/factories/split-width.ts builds a workflow with needs outside graph mode and titan check refuses it. Make the factory workflow valid (graph mode when it uses needs, or no needs).
+  COVERAGE GAPS (100% lines and functions required): packages/runner/src/steps.ts lines 177-214, packages/runner/src/engine.ts lines 500-502, packages/runner/src/split.ts, packages/knowledge/src/persona-register.ts lines 84 and 151-152. Add tests (positive and negative) in the existing test style, or remove code that nothing can reach.
+  Read each named file before editing. No comments in code. Literals in packages/constants, messages in packages/messages, schemas and types in packages/types. Tests use unit(factory, cases) in testing/. No direct Promise.all. You have no shell: after editing, read the changed files again and list in your summary the exact files changed.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixa1
+    do:
+      persona: builder
+      task: Fix root cause A, failures B, C, D and the coverage gaps exactly as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that persona register files now match KnowledgeEntrySchema and knowledgePath, that B, C, D are fixed, that each coverage gap has a test, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 60

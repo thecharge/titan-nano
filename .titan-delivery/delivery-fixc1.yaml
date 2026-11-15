@@ -1,0 +1,56 @@
+name: Fix tests fixc1
+goal: |-
+  Fix exactly these typecheck failures, changing nothing else. Several titan runs (tasks 17.1 policy store and reward, 17.2 width learner, 17.3 policy alarms, 17.4 trails, 20.1 fixed embedder, 20.5 Wilson tests, 21.2 failure kinds, 22.5 probability floor) were merged into one tree; the merge dropped lines in the barrel files (index.ts) and left duplicates. `bun run typecheck` reports:
+  $ tsc --noEmit
+  packages/knowledge/src/policy.ts(3,10): error TS2305: Module '"@titan/constants"' has no exported member 'PolicyDefault'.
+  packages/knowledge/src/policy.ts(3,25): error TS2305: Module '"@titan/constants"' has no exported member 'PolicyStore'.
+  packages/knowledge/src/width-learner.ts(34,7): error TS2322: Type 'number' is not assignable to type '-1'.
+  packages/knowledge/src/width-learner.ts(35,7): error TS2322: Type 'number' is not assignable to type '0'.
+  packages/policy/src/trails.ts(1,10): error TS2305: Module '"@titan/constants"' has no exported member 'TrailFade'.
+  packages/policy/src/trails.ts(2,15): error TS2305: Module '"@titan/types"' has no exported member 'Trails'.
+  packages/policy/src/trails.ts(2,23): error TS2305: Module '"@titan/types"' has no exported member 'TrailsSchema'.
+  packages/policy/src/trails.ts(7,62): error TS18046: 'count' is of type 'unknown'.
+  packages/types/src/index.ts(66,1): error TS2308: Module "./policy.ts" has already exported a member named 'PolicyRun'. Consider explicitly re-exporting to resolve the ambiguity.
+  packages/types/src/index.ts(66,1): error TS2308: Module "./policy.ts" has already exported a member named 'PolicyRunSchema'. Consider explicitly re-exporting to resolve the ambiguity.
+  testing/factories/persona-lifecycle.ts(16,3): error TS2305: Module '"@titan/knowledge"' has no exported member 'floorShare'.
+  testing/factories/policy-alarms.ts(2,10): error TS2305: Module '"@titan/knowledge"' has no exported member 'policyAlarms'.
+  testing/factories/policy.ts(3,10): error TS2305: Module '"@titan/constants"' has no exported member 'PolicyStore'.
+  testing/factories/policy.ts(5,10): error TS2305: Module '"@titan/knowledge"' has no exported member 'policyKind'.
+  testing/factories/policy.ts(5,22): error TS2305: Module '"@titan/knowledge"' has no exported member 'policyPath'.
+  testing/factories/policy.ts(5,34): error TS2305: Module '"@titan/knowledge"' has no exported member 'recordPolicyRun'.
+  testing/factories/policy.ts(5,51): error TS2305: Module '"@titan/knowledge"' has no exported member 'runReward'.
+  testing/factories/trails.ts(14,18): error TS18046: 'count' is of type 'unknown'.
+
+  What to do: (1) In packages/constants/src/index.ts, packages/types/src/index.ts, packages/knowledge/src/index.ts, packages/messages/src/index.ts and packages/policy/src/index.ts (create it if the package has none, check its package.json main), make every new module export itself the way its neighbours do: list the files in packages/constants/src, packages/types/src, packages/types/src/contracts, packages/knowledge/src, packages/messages/src and packages/policy/src, and for each file that no barrel exports, add the export line in the same style (export * from or named exports as the barrel does today). New files include constants/src/policy.ts, trails (find where TrailFade and Trails are defined with Grep, they may be missing and then must be written: TrailFade is the fade factor and Trails a zod schema of counts per key, see task 17.4: 'Trail fades', spec self-training-orchestration), types/src/policy.ts, knowledge/src/policy.ts, policy-alarms.ts, width-learner.ts. (2) Remove the duplicate line `export * from "./policy.ts"` in packages/types/src/index.ts and resolve the duplicate names PolicyRun and PolicyRunSchema (one definition only: find both definitions with Grep and keep the one the policy code and tests use; update the other users). (3) Export floorShare from packages/knowledge/src/index.ts where it is defined (Grep floorShare in packages/knowledge/src) and policyAlarms, policyKind, policyPath, recordPolicyRun, runReward likewise. (4) Fix width-learner.ts lines 34-35 (a number assigned to literal types -1 and 0: widen the declared type using the schema type or a number) and the 'count' is unknown errors in packages/policy/src/trails.ts line 7 and testing/factories/trails.ts line 14 (type Trails as a record of numbers in packages/types). After editing run no shell (you have none): re-read each file and make sure every name imported by a file in the error list is now exported once. List the changed files in your summary. No comments, no inline string literals.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixc1
+    do:
+      persona: builder
+      task: Fix the typecheck failures as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that every import named in the error list resolves to exactly one export and no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 60

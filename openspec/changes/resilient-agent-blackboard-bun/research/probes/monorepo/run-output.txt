@@ -1,0 +1,13 @@
+$ bun --version
+1.3.10
+$ bun apps/cli/src/main.ts
+core ok {"fts5":"ok","vec":"v0.1.9 (package)"}
+exit 0
+$ bun build --compile apps/cli/src/main.ts --outfile dist/titan
+   [8ms]  bundle  4 modules
+  [74ms] compile  dist/titan
+$ ls -l dist/titan
+103922452 bytes
+$ ./dist/titan (vec0.so next to binary)
+core ok {"fts5":"ok","vec":"v0.1.9 (next to binary)"}
+exit 0

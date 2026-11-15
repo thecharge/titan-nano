@@ -1,0 +1,18 @@
+$ git log --format=%s | bun commit-check.ts
+FAIL Add hive, approvals, persona lifecycle, titan server, self-training orchestration and RunPod backends to resilient-agent-blackboard-bun
+FAIL Add backend port with adapters, tool servers, plug-ins, data and monorepo decisions to resilient-agent-blackboard-bun
+FAIL Add persona register, board, knowledge hub with readable search, and per-persona backends to resilient-agent-blackboard-bun
+FAIL Move harness-detecting CLI design into resilient-agent-blackboard-bun, replacing its earlier version
+FAIL Add OpenSpec change swarm-falsify-cli: harness-detecting CLI with falsified steps and self-improving loop
+FAIL Rewrite resilient-agent-blackboard-bun in plain language (ISO 24495-1)
+FAIL Integrate falsify, gap and architecture reviews into resilient-agent-blackboard-bun
+FAIL Rework resilient-agent-blackboard-bun after review rejection
+FAIL Add OpenSpec change: resilient-agent-blackboard-bun (proposal, design, 15 specs, tasks)
+0 ok, 9 fail
+exit code: 1
+
+$ printf "docs(openspec): add test strategy\nfeat(cli)!: rename install-skill to install\n" | bun commit-check.ts
+ok   docs(openspec): add test strategy
+ok   feat(cli)!: rename install-skill to install
+2 ok, 0 fail
+exit code: 0

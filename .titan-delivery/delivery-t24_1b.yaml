@@ -1,0 +1,35 @@
+name: Fix tests t24_1b
+goal: |-
+  Fix exactly this, changing nothing else. Task 24.1 scenario "A check of an unknown kind" (spec verified-checks): when a verify entry has kind coq, titan check fails at the path of that entry with the text "kind must be lean, smt or script". The goal-level test passes. The step-level negative case "a check of an unknown kind fails at its path" in testing/cases/workflow-file.ts (run by testing/e2e/workflow-file.test.ts) fails because the message holds the wanted line and also the issues of the other step shapes (sequential, parallel). Received message: "steps[0].verify[0].kind: kind must be lean, smt or script" then lines "steps[0].sequential: Required", then four lines `steps[0].id|do|falsify|verify: Unrecognized keys: "id", "do", "falsify", "verify"`, then "steps[0].parallel: Required", then the same four Unrecognized keys lines again. Expected: only the first line. Read packages/types/src/workflow.ts (VerifyEntrySchema with the custom error, the step schema that is a union of shapes, and where the issues are turned into the message, probably in packages/workflow or a check function) and make the step-level message contain only the verify path line when the only real fault is the unknown verify kind, without changing other workflow error messages that existing tests expect. Do not weaken the expected text in the test. Rules: no comments in code; no inline string literals (enums and consts in packages/constants, messages in packages/messages, zod schemas and types in packages/types); no direct Promise.all; tests use unit(factory, cases); keep 100 percent line and function coverage; do not edit tasks.md or the acceptance map. You have no shell: re-read every changed file and list them.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder, never /dev/null or any device file.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: t24_1b
+    do:
+      persona: builder
+      task: Deliver task 24.1 as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+limits:
+  max_parallel: 1
+  max_minutes: 60

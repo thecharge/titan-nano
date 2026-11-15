@@ -1,0 +1,33 @@
+name: Deliver titan dashboard command 23.2
+goal: >-
+  Deliver task 23.2 of OpenSpec change resilient-agent-blackboard-bun: the titan dashboard command. Read the requirement "A person logs in to the dashboard with a one-time code" in openspec/changes/resilient-agent-blackboard-bun/specs/run-dashboard/spec.md first. The server already has POST /dashboard-code (person token needed, packages/server/src/index.ts and packages/server/src/dashboard.ts) and GET /login. The command must start the server when needed, ask for a code with the person token from the titan home (person-token file), and print the link http://127.0.0.1:port/login?code=code as one text line, or with --json one object containing the link. Follow how the answer command is wired (apps/cli/src/commands/requests.ts, apps/cli/src/bootstrap.ts defaultServices, CliServices in packages/types, CliCommand in packages/constants, CliDescription in packages/messages, apps/cli/src/catalog.ts) and add a client in packages/server like packages/server/src/requests.ts. Write flat positive and negative test tables under testing/ in the same style as testing/cases/dashboard.ts and testing/factories/dashboard.ts, including a check that no log holds the code. Literals live in packages/constants, messages in packages/messages, schemas and types in packages/types. Required tests, each as its own case: (1) the real defaultServices dashboard entry in apps/cli/src/bootstrap.ts starts the server when none runs (use the daemon test helpers in testing/factories/daemon.ts and daemon-clients.ts); (2) --json goes through the real renderer and prints one object with the link; (3) a server answer whose url does not match the code is rejected; (4) a stale server.json for a dead server gives a server-unavailable error; (5) the code works once and is refused after 60 s (use the clock the server already takes in tests); (6) an extra argument and --watch are refused; (7) no log or file holds the code or the cookie. Use the exact error codes defined in packages/constants. A later gate runs typecheck, lint and tests, so you have no shell and need not run anything. Report files changed and scenarios lacking a test.
+personas:
+  builder:
+    description: Writes the dashboard code and its tests.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md. Literals in packages/constants, messages in packages/messages, schemas
+      in packages/types. No comments. Tests use unit(factory, cases) with at least 2 positive and 2 negative
+      cases. The page loads only from titan with Content-Security-Policy default-src self and is read-only. Use only simple relative patterns in Glob and Grep: no braces, never an absolute path (omit the path argument or use a relative one), one directory per call.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a scenario has no test, a write route is reachable from the dashboard
+      cookie, the one-time code can be logged or reused, or a claim is unbacked. Otherwise survive. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests. Use only simple relative patterns in Glob and Grep: no braces, never an absolute path (omit the path argument or use a relative one).
+    tools: [Read, Grep]
+steps:
+  - id: command
+    do:
+      persona: builder
+      task: Task 23.2 - titan dashboard, the link, the client and its tests.
+    falsify:
+      - persona: skeptic
+        task: Check that every scenario of task 23.2 has a test and matching code, that --json returns one object, and that the code is not logged.
+limits:
+  max_parallel: 1
+  max_minutes: 30

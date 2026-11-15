@@ -1,0 +1,17 @@
+{
+  "name": "dev-standards-probe",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "ai": "^7.0.163",
+    "fast-check": "^4.10.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.5",
+    "@stryker-mutator/core": "^10.1.1",
+    "@types/bun": "^1.4.4",
+    "typescript": "^7.0.2"
+  }
+}

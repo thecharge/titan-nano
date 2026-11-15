@@ -1,0 +1,26 @@
+{
+  "name": "@titan/config",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./native-tools": "./src/native-tools.ts",
+    "./files": "./src/files.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/core": "workspace:*",
+    "zod": "catalog:",
+    "@titan/errors": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/streams": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

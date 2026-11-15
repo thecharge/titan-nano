@@ -1,0 +1,35 @@
+name: Fix tests fixb1
+goal: |-
+  Fix exactly this, changing nothing else. `git push origin main` fails in the pre-push hook (lefthook.yml job outgoing-snapshots runs `bun tooling/scripts/check-hook.ts push`) with: "Hook dependencies are missing or changed. Run bun install --frozen-lockfile, then retry." for the snapshot of the oldest of 8 outgoing commits (tree 27ec68f1c66251d42b9eb0b8959425afa1ed29ed, commit 877dc997). `bun install --frozen-lockfile` reports "Checked 459 installs ... no changes", so the install is current. Cause found by reading: tooling/scripts/check-hook.ts checkTree links dependencies for the snapshot of EVERY outgoing commit through linkSnapshotDependencies (tooling/scripts/hook-dependencies.ts). dependencyTarget() there throws HookMessage.MissingDependencies when the installed node_modules version differs from the version in that old commit's package.json (packages/runner/package.json and packages/server/package.json differ between the oldest outgoing commit and HEAD). So any push of several commits fails after a dependency change, although every commit passed the full gate when it was made. Required behaviour: on push, the full snapshot check (with dependencies linked) runs for the tip commit being pushed; older commits in the outgoing range are still checked for commit message policy and secrets, but a dependency version that differs from the installed one in an older commit must not fail the push. A missing dependency or a dependency mismatch in the TIP commit must still fail with HookMessage.MissingDependencies. Read tooling/scripts/check-hook.ts, hook-dependencies.ts, hook-revisions.ts and testing/cases/hooks.ts (existing cases around line 134) first. Add test cases (positive and negative) in the existing hook test style for: older commit with changed dependency passes, tip commit with changed dependency fails. No comments. Literals in packages/constants, messages in packages/messages. Keep 100 percent line and function coverage. You have no shell: re-read the changed files after editing and list them in your summary.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixb1
+    do:
+      persona: builder
+      task: Fix the push hook as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that the tip commit still fails on a dependency mismatch, older commits do not, tests cover both, and no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 60

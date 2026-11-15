@@ -1,0 +1,10 @@
+import { init } from "z3-solver";
+const t0 = performance.now();
+const { Context } = await init();
+const { Solver, Int, Not } = new Context("main");
+const x = Int.const("x");
+const s = new Solver();
+s.add(Not(x.mul(x).gt(x)));
+const r = await s.check();
+console.log(`runtime ${typeof Bun !== "undefined" ? "bun " + Bun.version : "node " + process.version}: "x*x > x" negation ${r}, x = ${s.model().eval(x).toString()}, ms ${Math.round(performance.now() - t0)}`);
+process.exit(0);

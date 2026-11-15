@@ -1,0 +1,1 @@
+{ "name": "plugin-probe", "private": true, "workspaces": ["apps/*", "packages/*"] }

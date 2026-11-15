@@ -1,0 +1,17 @@
+export enum NativePhaseFixture {
+  Clean = "clean",
+  Content = "content",
+  Filename = "filename",
+  Boundary = "boundary",
+  Event = "event",
+  Answer = "answer",
+  Session = "session",
+  Error = "error",
+  Close = "close",
+  Start = "start",
+  Resume = "resume",
+  OwnerClose = "owner_close",
+  LateEvent = "late_event",
+  CodexResult = "codex_result",
+  ClaudeResult = "claude_result",
+}

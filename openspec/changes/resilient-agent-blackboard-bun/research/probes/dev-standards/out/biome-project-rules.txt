@@ -1,0 +1,32 @@
+$ biome lint .   (a.ts imports b.ts, b.ts imports a.ts; run() does not await save(); biome.json: domains.project = all)
+a.ts:1:19 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+a.ts:1:19 lint/suspicious/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+b.ts:1:19 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+b.ts:1:19 lint/suspicious/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Checked 3 files in 1873µs. No fixes applied.
+Found 4 warnings.
+Found 1 info.
+
+$ biome lint .   (same files; biome.json also sets nursery.noFloatingPromises = error)
+a.ts:1:19 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+a.ts:1:19 lint/suspicious/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+b.ts:1:19 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+b.ts:1:19 lint/suspicious/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+a.ts:4:25 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Checked 3 files in 1957µs. No fixes applied.
+Found 1 error.
+Found 4 warnings.
+Found 1 info.
+exit code: 1
+
+$ biome ci .   (same files and biome.json)
+a.ts:1:19 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+a.ts:1:19 lint/suspicious/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+b.ts:1:19 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+b.ts:1:19 lint/suspicious/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+a.ts:4:25 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Checked 3 files in 2ms. No fixes applied.
+Found 3 errors.
+Found 4 warnings.
+Found 1 info.
+exit code: 1

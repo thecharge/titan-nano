@@ -1,0 +1,4 @@
+FROM docker.io/oven/bun@sha256:367842b35abbdf23f39e23c71f3a08eee940ff2679a14e08a5afcf4a1436cd89
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
+ENV HOME=/tmp/titan-home
+WORKDIR /workspace

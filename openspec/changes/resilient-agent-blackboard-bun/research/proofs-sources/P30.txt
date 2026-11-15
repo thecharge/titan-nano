@@ -1,0 +1,1 @@
+This is the v4.35.0 release of Lean. View the [release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/) for more information.

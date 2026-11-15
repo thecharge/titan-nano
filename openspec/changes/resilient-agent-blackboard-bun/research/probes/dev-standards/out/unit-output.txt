@@ -1,0 +1,9 @@
+$ ANTHROPIC_API_KEY=fake-not-real RUNPOD_API_KEY=fake-not-real bun test
+bun test v1.3.10 (30e609e0)
+
+ 21 pass
+ 2 skip
+ 0 fail
+ 28 expect() calls
+Ran 23 tests across 5 files. [189.00ms]
+exit code: 0

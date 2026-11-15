@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+  "through": 197,
+  "history_complete": true,
+  "summary": {
+    "proven": 0,
+    "refuted": 0,
+    "not_proven": 0,
+    "total": 0
+  },
+  "discarded_attempts": {
+    "proven": 0,
+    "refuted": 0,
+    "not_proven": 0,
+    "total": 0
+  },
+  "checks": []
+}

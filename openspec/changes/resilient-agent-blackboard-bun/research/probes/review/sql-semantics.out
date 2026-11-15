@@ -1,0 +1,10 @@
+sync reaction threw: no contract/pre
+rows after sync throw: 0
+async reaction rejected later: async veto
+rows after async throw: 1 [{"e":"p2"}]
+db.function: undefined db.loadExtension: function
+fts match w/o triggers: []
+fts match after rebuild: [{"rowid":2}]
+tx ids of two writes in one transaction: [{"tx":3,"e":"t1","a":"x","op":"retract"},{"tx":4,"e":"t1","a":"claim","op":"assert"}]
+after update+delete: 2
+content ids of two identical outs: bab4be52 bab4be52

@@ -1,0 +1,6 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+TsStringLiteralType() as $n where {
+  register_diagnostic(span=$n, message="String literal type. Declare an enum in packages/constants and use it instead of a literal or a union of literals.", severity="error")
+}

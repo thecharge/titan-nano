@@ -1,0 +1,314 @@
+
+
+Lean Programming Language
+
+☰
+Install
+Learn
+Community
+Use Cases
+FRO
+
+Playground
+Mathlib
+CSLib
+Reservoir
+
+Install
+Learn
+Community
+Use Cases
+Playground
+Mathlib
+CSLib
+Reservoir
+FRO
+Home
+About
+Team
+Roadmap
+Contact
+
+The Proof in the Code by Kevin Hartnett FROM Quanta Books | available now×
+
+Lean is an open-source programming language and proof assistant that enables correct, maintainable, and formally verified code
+Get Started
+
+Powerful Automation
+
+Mathematics
+
+Program Verification
+
+import Std
+/-- Induction and SMT-like reasoning using `grind` -/
+theorem geometric_series_sum (x : Int) (n : Nat) :
+ (x - 1) * ((List.range n).map (x ^ ·)).sum
+ = x ^ n - 1 := by
+ induction n <;> grind [List.range_succ]
+
+/-- Algebraic reasoning using `grind` -/
+theorem eulers_four_square_identity (a b c d p q r s : Int) :
+ (a^2 + b^2 + c^2 + d^2) * (p^2 + q^2 + r^2 + s^2) =
+ (a*p - b*q - c*r - d*s)^2 + (a*q + b*p + c*s - d*r)^2
+ + (a*r - b*s + c*p + d*q)^2
+ + (a*s + b*r - c*q + d*p)^2 := by
+ grind
+
+/-- `bv_decide` decides bitvector equations -/
+theorem power_of_two_bit_test (x : BitVec 64) :
+ (x != 0 && x &&& (x - 1) == 0) = (x.cpop == 1) := by
+ bv_decide
+/-- A prime is a number larger than 1 with only trivial divisors -/
+def IsPrime (n : Nat) := 1 < n ∧ ∀ k, 1 < k → k < n → ¬ k ∣ n
+
+/-- Every number larger than 1 has a prime factor -/
+theorem exists_prime_factor :
+ ∀ n, 1 < n → ∃ k, IsPrime k ∧ k ∣ n := by
+ intro n h1
+ -- Either `n` is prime...
+ by_cases hprime : IsPrime n
+ · grind [Nat.dvd_refl]
+ -- ... or it has a non-trivial divisor with a prime factor
+ · obtain ⟨k, _⟩ : ∃ k, 1 < k ∧ k < n ∧ k ∣ n := by
+ simp_all [IsPrime]
+ obtain ⟨p, _, _⟩ := exists_prime_factor k (by grind)
+ grind [Nat.dvd_trans]
+
+/-- The factorial, defined recursively, with custom notation -/
+def factorial : Nat → Nat
+ | 0 => 1
+ | n+1 => (n + 1) * factorial n
+notation:10000 n "!" => factorial n
+
+/-- The factorial is always positive -/
+theorem factorial_pos : ∀ n, 0 < n ! := by
+ intro n; induction n <;> grind [factorial]
+
+/-- ... and divided by its constituent factors -/
+theorem dvd_factorial : ∀ n, ∀ k ≤ n, 0 < k → k ∣ n ! := by
+ intro n; induction n <;>
+ grind [Nat.dvd_mul_right, Nat.dvd_mul_left_of_dvd, factorial]
+
+/-- We show that we find arbitrary large (and thus infinitely
+many) prime numbers, by picking an arbitrary number `n`
+and showing that `n! + 1` has a prime factor larger than `n`
+-/
+theorem InfinitudeOfPrimes : ∀ n, ∃ p > n, IsPrime p := by
+ intro n
+ have : 1 < n ! + 1 := by grind [factorial_pos]
+ obtain ⟨p, hp, _⟩ := exists_prime_factor (n ! + 1) this
+ suffices ¬p ≤ n by grind
+ intro (_ : p ≤ n)
+ have : 1 < p := hp.1
+ have : p ∣ n ! := dvd_factorial n p ‹p ≤ n› (by grind)
+ have := Nat.dvd_sub ‹p ∣ n ! + 1› ‹p ∣ n !›
+ grind [Nat.add_sub_cancel_left, Nat.dvd_one]
+/-- Every a[m] is proven in bounds at compile time
+Recursing on `m` instead of `m + 1` loops forever, so Lean would reject it
+-/
+def bsearch (a : Array UInt64) (x : UInt64) (lo hi : Nat)
+ (h : hi ≤ a.size) : Option Nat :=
+ if _ : lo < hi then
+ let m := lo + (hi - lo) / 2
+ if a[m] < x then bsearch a x (m + 1) hi h
+ else if x < a[m] then bsearch a x lo m (by lia)
+ else some m
+ else none
+termination_by hi - lo
+
+/-- On sorted input, `none` means x really is absent:
+no off-by-one can skip over it
+-/
+theorem bsearch_none (a : Array UInt64) (x lo hi h)
+ (sorted : a.toList.Pairwise (· ≤ ·))
+ (hn : bsearch a x lo hi h = none) :
+ ∀ i (_ : lo ≤ i) (_ : i < hi), a[i] ≠ x := by
+ fun_induction bsearch <;>
+ grind [List.pairwise_iff_getElem]
+
+Grind is a powerful tool that can help you prove theorems quickly and efficiently.
+
+Build a formal argument one tactic at a time and let Lean track every remaining goal.
+
+Index safety, termination and correctness are all checked by Lean, so off-by-one bugs never compile.
+
+Trustworthy
+Lean's minimal trusted kernel guarantees absolute correctness in mathematical proof, software and hardware verification.
+
+Powerful
+From elementary concepts to cutting-edge research, Lean's expressive language and extensive built-in tools let users focus on the big picture rather than routine details.
+
+Extensible
+Lean's metaprogramming capabilities enable users to extend the language with domain-specific notations and new proof automation techniques.
+
+USE CASES
+Lean in Action
+Showcasing real-world applications.
+
+Mathlib
+
+Mathlib is Lean's comprehensive mathematical library containing over a million lines of formalized mathematics spanning algebra, analysis, topology, probability, and computer science. This community-driven resource enables mathematicians to tackle frontier research problems and engineers to build verified systems by providing a rigorously verified foundation of mathematical knowledge that eliminates duplication of effort.Explore Project →
+Aeneas
+
+Aeneas takes a novel approach to Rust verification. Unlike other verification approaches that must reason about memory directly, Aeneas leverages Rust's rich type system to eliminate memory reasoning entirely for many Rust programs.Explore Project →
+Cedar
+
+AWS uses Lean and verification-guided development to formally verify Cedar, the AWS authorization policy language. The approach involves creating executable models in Lean, proving security properties, and validating them against production code through differential testing. This achieves high assurance with minimal runtime overhead, demonstrating Lean's viability for verifying critical software.Explore Project →
+MathlibThe community mathematics libraryMathlib is Lean's comprehensive mathematical library containing over a million lines of formalized mathematics spanning algebra, analysis, topology, probability, and computer science. This community-driven resource enables mathematicians to tackle frontier research problems and engineers to build verified systems by providing a rigorously verified foundation of mathematical knowledge that eliminates duplication of effort.Explore Project →AeneasVerified RustAeneas takes a novel approach to Rust verification. Unlike other verification approaches that must reason about memory directly, Aeneas leverages Rust's rich type system to eliminate memory reasoning entirely for many Rust programs.Explore Project →CedarVerified authorization policiesAWS uses Lean and verification-guided development to formally verify Cedar, the AWS authorization policy language. The approach involves creating executable models in Lean, proving security properties, and validating them against production code through differential testing. This achieves high assurance with minimal runtime overhead, demonstrating Lean's viability for verifying critical software.Explore Project →
+MORE FROM THE LEAN ECOSYSTEM
+
+Tau Ceti
+Tau Ceti uses AI to build a reusable library of formalized mathematics on top of Mathlib. Humans direct the work through curated roadmaps, AI contributors write and review the code, and Lean's kernel checks the proofs. Recent results include Burnside's theorem, Carathéodory's boundary extension theorem, and Schur–Weyl duality. The goal is to provide the foundations researchers need to reach the mathematical research frontier.Read more
+
+Fermat's Last Theorem
+The Fermat's Last Theorem project is formalizing one of mathematics' most complex proofs in Lean, demonstrating the proof assistant's capacity to handle frontier research mathematics. This ambitious work is creating formalized definitions for advanced number-theoretic objects, enabling mathematicians to build machine-verified proofs of cutting-edge results while establishing Lean as a powerful platform for mathematical collaboration.Read more
+
+USE CASES
+Browse the full gallery
+See how engineering teams and research labs are putting Lean to work.Explore All Use Cases
+
+COMMUNITY
+From our Community
+Voices from the people formalizing math and verifying software with Lean.
+Lean enables large-scale collaboration by allowing mathematicians to break down complex proofs into smaller, verifiable components […] With Lean, we are beginning to see how AI can accelerate the formalization of mathematics, opening up new possibilities for research.Terence TaoMathematician, UCLAMathematical Superintelligence (MSI) with Lean will play a critical role in any industry where safety is paramount, including aerospace, automotive, and medical technology.Tudor AchimCo-Founder and CEO, HarmonicAt Google DeepMind, we used Lean to build AlphaProof, a new reinforcement-learning based system for formal math reasoning. Lean’s extensibility and verification capabilities were key in enabling the development of AlphaProof.Pushmeet KohliVP, Science and Strategic Initiatives, Google DeepMindLean has become a key enabler in scaling automated reasoning at Amazon. Its capacity to verify complex systems involving advanced mathematical concepts has transformed how we tackle problems once thought too complex or impractical. Lean is an indispensable tool in modern, large-scale software engineering, helping ensure soundness, correctness, and verified AI across our systems.Byron CookVP and Distinguished Scientist, AWSLean is the core verification technology behind Cedar, the open-source authorization language that powers cloud services like Amazon Verified Permissions and AWS Verified Access […] Lean’s efficiency, extensive libraries, and vibrant community enable us to develop and maintain Cedar at scale, while ensuring the key correctness and security properties that our users depend on.Emina TorlakSenior Principal Applied Scientist, AWS
+
+FOR DEVELOPERS
+Write software. Prove it correct.
+Lean is a real functional language that compiles to native code. Its dependent type system lets you write a precise specification, then prove your software meets it.
+
+Covers every case
+A single proof guarantees correctness for every possible input a function could receive, not just the tested examples.
+
+Proofs live with your code
+There's no separate spec language. You write proofs in the same language you write your program in.Get StartedRead: Functional Programming in Lean
+
+Service.lean
+
+Service.lean
+
+import Std.Http
+
+open Std Async
+open Std Http Server
+
+structure Service
+/-- The only paths this service answers. -/
+def route : String → Option String
+ | "/" => some "hello from Lean"
+ | "/health" => some "ok"
+ | _ => none
+
+instance : Handler Service where
+ onRequest _ req := do
+ match route (toString req.line.uri.path) with
+ | some body =>
+ Response.ok
+ |>.text body
+
+ | none =>
+ Response.new
+ |>.status .notFound
+ |>.text "not found"
+
+/-- Nothing outside the table is reachable. -/
+theorem route_closed (p : String) :
+ route p ≠ none → p = "/" ∨ p = "/health" := byp:String⊢ route p ≠ none → p = "/" ∨ p = "/health"
+ grind [route]All goals completed! 🐙Lean InfoView
+
+Click a tactic to see its goal.
+
+FOR MATHEMATICIANS
+Formalize mathematics. Verify every step.
+Define it, prove it, and let Lean check every step. With Mathlib, you build on an expansive library of formalized mathematics instead of starting from zero.
+
+Automate routine steps
+Use more powerful tactics to combine many elementary steps into one, so you spend less time on routine reasoning.
+
+Real-time feedback as you write
+Lean's Infoview shows your current goal and hypotheses live, updating with every tactic so you always know what's left to prove.Get StartedRead: Theorem Proving in Lean
+
+Infinitude.lean
+
+InfinitudeOfPrimes.lean
+
+import Mathlib.Data.Nat.Factorial.Basic
+import Mathlib.Data.Nat.Prime.Defs
+
+namespace Nat
+/-- Euclid's theorem on the infinitude of primes.
+Here given in the form:
+ for every `n`,
+ there exists a prime number `p ≥ n`. -/
+theorem exists_infinite_primes (n : ℕ) :
+ ∃ p, n ≤ p ∧ Prime p := byn:ℕ⊢ ∃ p, n ≤ p ∧ Prime p
+ let p := minFac (factorial n + 1)n:ℕp:ℕ := (n ! + 1).minFac⊢ ∃ p, n ≤ p ∧ Prime p
+ have f1 : factorial n + 1 ≠ 1 :=
+ ne_of_gt <| succ_lt_succ <| factorial_pos _n:ℕp:ℕ := (n ! + 1).minFacf1:n ! + 1 ≠ 1⊢ ∃ p, n ≤ p ∧ Prime p
+ have pp : Prime p := minFac_prime f1n:ℕp:ℕ := (n ! + 1).minFacf1:n ! + 1 ≠ 1pp:Prime p⊢ ∃ p, n ≤ p ∧ Prime p
+ have np : n ≤ p :=
+ le_of_not_ge fun h =>
+ have h₁ : p ∣ factorial n :=
+ dvd_factorial (minFac_pos _) h
+ have h₂ : p ∣ 1 :=
+ (Nat.dvd_add_iff_right h₁).2 (minFac_dvd _)
+ pp.not_dvd_one h₂n:ℕp:ℕ := (n ! + 1).minFacf1:n ! + 1 ≠ 1pp:Prime pnp:n ≤ p⊢ ∃ p, n ≤ p ∧ Prime p
+ exact ⟨p, np, pp⟩All goals completed! 🐙Lean InfoView
+
+Click a tactic to see its goal.
+
+LEAN FRO
+The Organization Behind Lean
+Lean FRO supports the people, systems, documentation, automation, and community work that help Lean grow from a research tool into durable public infrastructure.
+
+A focused mission
+The Lean Focused Research Organization envisions a future where Lean drives innovation and progress across formal mathematics, software and hardware verification, and software development.Read the roadmap →
+
+OCTOBER 2026
+OpenAI announces a Lean-verified refutation of the Exponential Time Hypothesis and results on the Kakeya and Stein restriction conjectures, covered by New Scientist; Axiom releases the first complete Lean formalization of the Classification of Finite Simple Groups; &Truth launches out of stealth with $70M in seed funding for Lean-based software verification, covered by The New York Times; Google DeepMind's Gemini 4 Argon and Anthropic's Claude design efficient quantum circuits, with key components verified in Lean; Google DeepMind publishes a Gemini-based agentic pipeline for the Busy Beaver problem, integrating formal theorem proving in Lean
+
+SEPTEMBER 2026
+Anthropic announces Lean formalization of Fermat's Last Theorem; OpenAI's GPT-6 Astra helped establish a stronger prime gap bound of 186, with Lean formalization
+
+AUGUST 2026
+OpenAI provides Lean certificates and announces progress on 10 research-level mathematical problems; Anthropic announces new results related to the Riemann zeta function and provides Lean formalizations that pass Comparator validation; Lean FRO publishes Year 4 Part 1 Roadmap; International Business Times interviews Chris Hsu: 'How One Programming Language Rewrote Mathematics and Why Software Is Next'; Kim Morrison launches Palomar, a Registry of Lean-Verified Mathematics
+See more→
+
+SPONSORS
+Sponsors and Partners
+Lean FRO gratefully acknowledges support from Alex Gerko, Founder and CEO of XTX Markets, as well as from the following organizations.
+
+Start building with Lean
+From formalizing frontier mathematics to verifying production software, Lean gives you the tools to know your work is correct.
+Get Started
+
+Get Started
+Install
+Learn
+Community
+Playground
+Reservoir
+Documentation
+Language reference
+Lean API
+Use cases
+FAQ
+Cite Lean
+Resources
+VS Code extension
+Loogle!
+Verso
+Mathlib
+CSLib
+FRO
+Vision
+Team
+Roadmap
+Founder's Blog
+Policies
+Privacy Policy
+Terms of Use
+Lean Trademark Policy
+
+© 2026 Lean FRO. All rights reserved.
+

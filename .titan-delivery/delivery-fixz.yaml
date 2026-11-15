@@ -1,0 +1,54 @@
+name: Fix tests fixz
+goal: |-
+  Fix exactly these gate failures, changing nothing else. The output of a titan run for task 15.3 (open calls) was merged into a tree where other runs changed the same files, and the merge dropped parts. `bun run typecheck` reports:
+  ### bun run typecheck
+  packages/knowledge/src/open-call.ts(2,15): error TS2724: '"@titan/types"' has no exported member named 'OpenCallPick'. Did you mean 'OpenCall'?
+  packages/knowledge/src/open-call.ts(2,47): error TS2724: '"@titan/types"' has no exported member named 'PersonaRegisterEntry'. Did you mean 'PersonaHistoryEntry'?
+  packages/types/src/contracts/runner.ts(4,15): error TS2305: Module '"../persona-lifecycle.ts"' has no exported member 'OpenCallPick'.
+  packages/workflow/src/features.ts(7,60): error TS2339: Property 'Call' does not exist on type 'typeof PendingFeature'.
+  testing/factories/open-call.ts(11,8): error TS2724: '"@titan/types"' has no exported member named 'PersonaRegisterEntry'. Did you mean 'PersonaHistoryEntry'?
+  testing/factories/open-call.ts(12,3): error TS2724: '"@titan/types"' has no exported member named 'PersonaRegisterEntrySchema'. Did you mean 'PersonaHistoryEntrySchema'?
+  testing/factories/open-call.ts(52,14): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+    Type 'undefined' is not assignable to type 'string'.
+  `bun run lint` reports the same missing exports. The run's finished version had these changes, apply exactly these:
+  1. packages/types/src/persona-lifecycle.ts: add, after the PersonaHistoryEntry type (the current file imports from ./persona-history.ts to avoid an import cycle; PersonaSchema is imported from ./workflow.ts there, check that import does not create a cycle with ./workflow.ts importing ./persona-history.ts; if it does, import PersonaSchema the same way the file already does):
+  export const PersonaRegisterEntrySchema = z.object({ name: z.string().min(1), version: z.number().int().positive(), state: z.enum(PersonaState), survived: z.number().int().nonnegative(), refuted: z.number().int().nonnegative(), persona: PersonaSchema });
+  export type PersonaRegisterEntry = z.infer<typeof PersonaRegisterEntrySchema>;
+  export const OpenCallPickSchema = z.object({ entry: PersonaRegisterEntrySchema, rule: z.string().min(1) });
+  export type OpenCallPick = z.infer<typeof OpenCallPickSchema>;
+  Make sure PersonaState is imported from @titan/constants there and that both names and schemas are exported from packages/types/src/index.ts.
+  2. packages/workflow/src/features.ts: remove the line `if (WorkflowField.Call in step.do) return PendingFeature.Call;` and remove WorkflowField from the import if it is unused afterwards (the open call is now supported; PendingFeature.Call no longer exists in packages/constants/src/workflow-features.ts).
+  3. Fix the type error at testing/factories/open-call.ts(52,14) (an argument of type string | undefined passed where string is needed): read the line and narrow it.
+  Then Grep for other uses of PendingFeature.Call in packages and testing and fix them the same way. No comments. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixz
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixzd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

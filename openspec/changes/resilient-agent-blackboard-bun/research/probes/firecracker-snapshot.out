@@ -1,0 +1,7 @@
+heartbeats before snapshot: 89
+snapshot create: 535 ms; mem file 268435456 bytes
+restore 1: http 204; process start -> load+resume returned 15 ms; -> first guest heartbeat after restore 34 ms
+restore 2: http 204; process start -> load+resume returned 14 ms; -> first guest heartbeat after restore 30 ms
+restore 3: http 204; process start -> load+resume returned 13 ms; -> first guest heartbeat after restore 28 ms
+restore 4: http 204; process start -> load+resume returned 12 ms; -> first guest heartbeat after restore 27 ms
+restore 5: http 204; process start -> load+resume returned 14 ms; -> first guest heartbeat after restore 29 ms

@@ -1,0 +1,3 @@
+[test]
+preload = ["./test/no-network.ts"]
+coverageThreshold = 0.9

@@ -1,0 +1,31 @@
+$ bun test test/langgraph.test.ts
+bun test v1.3.10 (30e609e0)
+
+test/langgraph.test.ts:
+memory: runs {
+  a: 1,
+  b: 2,
+} log [ "a", "b" ]
+107 |         return opts[p] || p;
+108 |       })
+109 |     );
+110 |     tries.push(n);
+111 |     try {
+112 |       b = opts.path ? requireFunc.resolve(n) : requireFunc(n);
+                                                     ^
+error: 'better-sqlite3' is not yet supported in Bun.
+Track the status in https://github.com/oven-sh/bun/issues/4290
+In the meantime, you could try bun:sqlite which has a similar API.
+ code: "ERR_DLOPEN_FAILED"
+
+      at bindings (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/swprobe/node_modules/bindings/bindings.js:112:48)
+      at new Database (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/swprobe/node_modules/better-sqlite3/lib/database.js:48:29)
+      at fromConnString (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/swprobe/node_modules/@langchain/langgraph-checkpoint-sqlite/dist/index.js:90:26)
+      at async <anonymous> (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/swprobe/test/langgraph.test.ts:36:38)
+(fail) sqlite: a crash in step b resumes at b, and step a does not run again [12.00ms]
+interrupt: paused = true | code before interrupt ran 2 times | log [ "answer=yes" ]
+
+ 2 pass
+ 1 fail
+ 6 expect() calls
+Ran 3 tests across 1 file. [320.00ms]

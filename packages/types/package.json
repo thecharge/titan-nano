@@ -1,0 +1,25 @@
+{
+  "name": "@titan/types",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./native-tools": "./src/native-tool-api.ts",
+    "./agents": "./src/agents.ts",
+    "./codex-turn": "./src/codex-turn.ts",
+    "./agent-host": "./src/agent-host.ts",
+    "./workspace": "./src/workspace.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/constants": "workspace:*",
+    "zod": "catalog:",
+    "@titan/messages": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

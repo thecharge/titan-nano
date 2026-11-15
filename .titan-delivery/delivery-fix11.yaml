@@ -1,0 +1,35 @@
+name: Fix gates 10
+goal: >-
+  Fix exactly these `bun run lint` errors, changing nothing else, keeping behavior and all tests (100 percent function coverage). Rules: no inline strings or template text (use packages/constants or packages/messages, existing enums if any: Grep first), no local type aliases or inline object types (use Zod schemas in packages/types), no string literal types (use enums in packages/constants). Errors: testing/factories/persona-lifecycle.ts line 73 col 52: Template literals are preferred over string concatenation. -- code: return `${offers.length} ${offers.map((offer) => offer.kind + ":" + offer.names.join(PersonaRule.PairSeparator)).join(",")}`; || apps/cli/src/commands/install.ts line 54 col 55: String literal type. Declare an enum in packages/constants and use it instead of a literal or a union of literals. -- code: async function registerCodex(services: CommandContext["services"]): Promise<string> { || apps/cli/src/guide.ts line 11 col 39: Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package. -- code: const root = resolve(import.meta.dir, "../../.."); || apps/cli/src/guide.ts line 28 col 92: Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package. -- code: return [guide, guideSchemaSection(schemaText()), guideExamplesHeading, ...examples].join(""); || apps/cli/src/launch.ts line 7 col 12: Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package. -- code: stdin: "ignore", || apps/cli/src/launch.ts line 8 col 13: Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package. -- code: stdout: "ignore", || apps/cli/src/launch.ts line 9 col 13: Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package. -- code: stderr: "ignore", || packages/knowledge/src/persona-lifecycle.ts line 21 col 57: String literal type. Declare an enum in packages/constants and use it instead of a literal or a union of literals. -- code: export function personaId(version: Pick<PersonaVersion, "name" | "version">): string { || packages/knowledge/src/persona-lifecycle.ts line 21 col 66: String literal type. Declare an enum in packages/constants and use it instead of a literal or a union of literals. -- code: export function personaId(version: Pick<PersonaVersion, "name" | "version">): string { || packages/knowledge/src/persona-lifecycle.ts line 126 col 42: Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package. -- code: const content = await readFile(source, "utf8"); || packages/knowledge/src/persona-lifecycle.ts line 129 col 40: Inline template text. Build strings from constants, messages or config values. -- code: const target = join(history, `${name}.${hash(content)}${KnowledgeFile.Yaml}`); || packages/knowledge/src/persona-pick.ts line 4 col 8: Type alias declared outside the types package. Infer types from Zod schemas in packages/types. -- code: export type Random = () => number; Hints: the Bun.spawn options in apps/cli/src/launch.ts: stdin/stdout/stderr need a constant (a SpawnIgnore member in packages/constants); guide.ts line 11 and 28 need constants/messages; testing/factories/persona-lifecycle.ts line 73 needs a template literal instead of concatenation.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fix11
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixed by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

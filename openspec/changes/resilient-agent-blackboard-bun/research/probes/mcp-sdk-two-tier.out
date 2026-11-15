@@ -1,0 +1,7 @@
+tools/list: [ "div" ]
+ok: {"content":[{"type":"text","text":"2"}]}
+tier2: {"content":[{"type":"text","text":"{\"retryable\":true,\"fix\":\"call div with b != 0\"}"}],"isError":true}
+unknown-tool result: {"content":[{"type":"text","text":"MCP error -32602: Tool nope not found"}],"isError":true}
+bad-args result: {"content":[{"type":"text","text":"MCP error -32602: Input validation error: Invalid arguments for tool div: Invalid input: expected number, received string at a\nInvalid input: expected number, received undefined at b"}],"isError":true}
+unknown method thrown: -32601 MCP error -32601: Method not found
+list_changed received: 1 now: [ "div", "added" ]

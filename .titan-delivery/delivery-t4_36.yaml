@@ -1,0 +1,40 @@
+name: Fix tests t4_36
+goal: |-
+  Tool rule that blocks the whole run if broken: every Read, Grep, Write and Edit path must be relative to your working folder, for example packages/knowledge/src/hub.ts. Never use an absolute path and never a path that contains .titan or /dev/null. Finish tasks 4.3 and 4.6 together, changing only what is needed. Tasks: 4.3 "Add meaning search with @huggingface/transformers and sqlite-vec, and the both mode" (scenarios "Meaning search finds a related entry without the same words" and "Word search works without the vector parts") and 4.6 "Put meaning search behind the port Embedder, with @titan/embedder-local as the default, and record the embedder's name in knowledge.db" (scenario "Embedder changed"). Read the specs under openspec/changes/resilient-agent-blackboard-bun/specs/ (knowledge-hub and backend-plugins) for the requirement text.
+  Two earlier attempts were refuted by a skeptic. Fix exactly these points.
+  From 4.3: (1) packages/knowledge/src/meaning-local.ts is the only code using sqlite-vec and @huggingface/transformers; no test touches it and nothing calls localMeaning. Wire it in so a real run uses it, and add a test that loads sqlite-vec for real with bun:sqlite (it works on this machine: vec_version v0.1.9). (2) The two libraries are now installed and in the root catalog (@huggingface/transformers 4.3.2, sqlite-vec 0.1.9) and in packages/embedder-local and packages/knowledge package.json; do not edit package.json files or bun.lock. (3) The scenario "finds a related entry" must be shown with an index and embeddings that the code builds, using the fixed fake embedder from @titan/embedder-fake for offline tests; any test that needs the real model download must be skipped unless an environment variable gates it, as the live gate does in the repo.
+  From 4.6: (4) The knowledge hub must make embeddings only through the port Embedder: meaning search and indexing must call embed(). A grep for .embed( in packages finds no call today. The default embedder must be @titan/embedder-local, and the recorded name in knowledge.db must change when the embedder changes (scenario Embedder changed).
+  Current errors to fix, from bun run typecheck: packages/knowledge/src/meaning-local.ts(24,3) Property name is missing in type { embed } but required in type Embedder; packages/server/src/index.ts(102,5) Argument of type readonly Embedder[] | undefined is not assignable to parameter of type KnowledgeMeaning | undefined; testing/factories/knowledge-meaning.ts(49,9) Property name is missing in type { embed } but required in Embedder. From bun run check:package-policy: @titan/embedder-local/packages/embedder-local/package.json: adapter-direction: @huggingface/transformers (read tooling/scripts for the package policy and packages/constants/src/package-direction.ts and allow this adapter to use that library the way the other adapters are allowed their vendor libraries).
+  Rules: no comments in code; no inline string literals (enums and consts in packages/constants, messages in packages/messages, zod schemas and types in packages/types, no inline object types); no direct Promise.all (use all or settle from @titan/core); tests use unit(factory, cases) with positive and negative cases in testing/; keep 100 percent line and function coverage; do not edit tasks.md or the acceptance map. You have no shell: re-read every changed file, list them, and say plainly what you could not confirm.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: t4_36
+    do:
+      persona: builder
+      task: Deliver as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+limits:
+  max_parallel: 1
+  max_minutes: 60

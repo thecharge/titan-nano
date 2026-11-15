@@ -1,0 +1,1 @@
+{ "name": "@titan/knowledge", "version": "0.0.0", "type": "module", "exports": { ".": "./src/index.ts" }, "dependencies": { "@titan/core": "workspace:*", "sqlite-vec": "0.1.9" } }

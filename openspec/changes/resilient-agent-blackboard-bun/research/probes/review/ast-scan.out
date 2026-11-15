@@ -1,0 +1,3 @@
+Bun 1.3.10
+scan: {"exports":["default","f","k"],"imports":[{"kind":"import-statement","path":"./x"},{"kind":"import-statement","path":"node:fs"}]}
+scanImports: [{"kind":"import-statement","path":"./x"},{"kind":"import-statement","path":"node:fs"},{"kind":"require-call","path":"./y"}]

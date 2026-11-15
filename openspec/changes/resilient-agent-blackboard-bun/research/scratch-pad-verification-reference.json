@@ -1,0 +1,219 @@
+{
+  "reference_head": "5119223001cd13298ea8900481edd47ebaea57e7",
+  "reference_worktree": "dirty; observations include current local edits",
+  "source": "/workspace/scratch-pad/.stack/verify/steps.json",
+  "source_mtime": "2026-11-06T18:24:42.806256+00:00",
+  "fresh_run": false,
+  "steps": [
+    {
+      "step": "openspec",
+      "ok": true,
+      "seconds": 0.066220789
+    },
+    {
+      "step": "biome",
+      "ok": true,
+      "seconds": 0.17921344299999997
+    },
+    {
+      "step": "dprint",
+      "ok": true,
+      "seconds": 0.03782405399999999
+    },
+    {
+      "step": "cspell",
+      "ok": true,
+      "seconds": 1.5127958899999998
+    },
+    {
+      "step": "secret-scan",
+      "ok": true,
+      "seconds": 1.352181577
+    },
+    {
+      "step": "secretlint",
+      "ok": true,
+      "seconds": 0.4912145519999999
+    },
+    {
+      "step": "mermaid",
+      "ok": true,
+      "seconds": 0.766768399
+    },
+    {
+      "step": "workflows",
+      "ok": true,
+      "seconds": 0.05880340999999953
+    },
+    {
+      "step": "structure",
+      "ok": true,
+      "seconds": 3.1068121250000003
+    },
+    {
+      "step": "rules",
+      "ok": true,
+      "seconds": 0.0630893500000002
+    },
+    {
+      "step": "readmes",
+      "ok": true,
+      "seconds": 0.06536049399999956
+    },
+    {
+      "step": "repo",
+      "ok": true,
+      "seconds": 0.06535533399999986
+    },
+    {
+      "step": "typecheck",
+      "ok": true,
+      "seconds": 1.3671284329999989
+    },
+    {
+      "step": "knip",
+      "ok": true,
+      "seconds": 1.3999013059999998
+    },
+    {
+      "step": "audit",
+      "ok": true,
+      "seconds": 0.4635634960000007
+    },
+    {
+      "step": "e2e",
+      "ok": true,
+      "seconds": 444.886940177
+    },
+    {
+      "step": "openapi",
+      "ok": true,
+      "seconds": 0.26586540300003253
+    },
+    {
+      "step": "migrations",
+      "ok": true,
+      "seconds": 0.2515739370000083
+    },
+    {
+      "step": "kb",
+      "ok": true,
+      "seconds": 20.489748561999992
+    },
+    {
+      "step": "sdk",
+      "ok": true,
+      "seconds": 0.7448411020000348
+    },
+    {
+      "step": "sdk-pack",
+      "ok": true,
+      "seconds": 0.7935366110000177
+    },
+    {
+      "step": "tiers",
+      "ok": true,
+      "seconds": 0.068159437000053
+    },
+    {
+      "step": "docs-scope",
+      "ok": true,
+      "seconds": 0.06353128500003367
+    },
+    {
+      "step": "plain-language",
+      "ok": true,
+      "seconds": 0.07290800599998329
+    },
+    {
+      "step": "schemas",
+      "ok": true,
+      "seconds": 0.07989577100001043
+    },
+    {
+      "step": "error-cases",
+      "ok": true,
+      "seconds": 0.1628792619999731
+    },
+    {
+      "step": "interfaces",
+      "ok": true,
+      "seconds": 0.6551503190000075
+    },
+    {
+      "step": "url-literals",
+      "ok": true,
+      "seconds": 0.10396399699995527
+    },
+    {
+      "step": "concrete-docs",
+      "ok": true,
+      "seconds": 0.0573773570000194
+    },
+    {
+      "step": "infra-files",
+      "ok": true,
+      "seconds": 0.06642371499998262
+    },
+    {
+      "step": "coverage",
+      "ok": true,
+      "seconds": 92.81945848999999
+    },
+    {
+      "step": "testing-area",
+      "ok": true,
+      "seconds": 0.07262689299997874
+    },
+    {
+      "step": "unit-cases",
+      "ok": true,
+      "seconds": 0.5616087289999705
+    },
+    {
+      "step": "agent-knowledge",
+      "ok": true,
+      "seconds": 0.061080696000019086
+    },
+    {
+      "step": "skill-packages",
+      "ok": true,
+      "seconds": 0.12187027200008743
+    },
+    {
+      "step": "skills-fresh",
+      "ok": true,
+      "seconds": 0.07294837999995799
+    },
+    {
+      "step": "async-functions",
+      "ok": true,
+      "seconds": 0.840761135000037
+    },
+    {
+      "step": "promise-all",
+      "ok": true,
+      "seconds": 1.5656750100000063
+    },
+    {
+      "step": "package-graph",
+      "ok": true,
+      "seconds": 0.14992505000007805
+    },
+    {
+      "step": "untracked",
+      "ok": true,
+      "seconds": 0.07113584300002548
+    }
+  ],
+  "inspected_files": {
+    "package.json": "43dfcd86788ee38d5697fadb87f200acc31bd128246fbf44d1b4a735780f3285",
+    "lefthook.yml": "6acb735b8800e7c89a8d2e963cccf279554d20646842f5da5f7a97a91aa992d4",
+    "tooling/scripts/verify.ts": "fcd6ed86dc5dc3e3418ece3d2b01b1ca2e8a70b2ac7042d12e4550430f0db661",
+    "tooling/scripts/run-tier.ts": "d95b7a0789f06b7f7fa6e7856aadca7d5da8ffc74e1f263289dfcf5f967c7b59",
+    "tooling/scripts/build-docs.ts": "e6158fa6e5f6ebc500a96e09a2e0efe75943bacb411f7a6ec429978b6d4a0d12",
+    "tooling/scripts/run-coverage.ts": "389dde5d7d7496d3d8ad90b53e9995d1e10f6e4a21b7114202de400da9e49d74",
+    "tooling/scripts/check-package-graph.ts": "896172b9aa387e439f7192f3a34a3cb50cecdff93e3396a5256cd0e28e79ceb6",
+    "tsconfig.base.json": "12de1b5a40616abc3066d78b2c42955011d3e20e933f9bc6f32e1dc9042b4769"
+  }
+}

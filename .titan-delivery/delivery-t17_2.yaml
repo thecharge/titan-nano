@@ -1,0 +1,38 @@
+name: Fix tests t17_2
+goal: |-
+  Deliver task 17.2 Write the split width learner with groups of 4. Done when the scenario "Width that does better is picked more" passes.
+  This is task 17.2 of the change resilient-agent-blackboard-bun, delivered exactly as written. Requirements and scenarios are in the specs under openspec/changes/resilient-agent-blackboard-bun/specs/ (Grep the scenario names given above in that folder to find the requirement text; read the whole requirement and every scenario named) and the acceptance rows for this task are in openspec/changes/resilient-agent-blackboard-bun/research/acceptance-map.tsv (Grep for the tab-separated task number). Decisions are in openspec/changes/resilient-agent-blackboard-bun/design.md.
+  First find what already exists in the repo for this task (Grep packages, apps, testing for the key words of the task and the scenario names) and deliver only what is missing against each sentence of the requirement and each named scenario; do not rewrite working code. Each named scenario needs a test that can fail, written with unit(factory, cases) with positive and negative cases in testing/ (cases, factories, integration or unit as the neighbours do), offline, with fakes, temporary folders only, no live vendor calls, no network.
+  Rules: no comments in code; no inline string literals (enums and consts in packages/constants, messages in packages/messages, zod schemas and types in packages/types, no inline object types); no direct Promise.all (use all or settle from @titan/core); no sync fs in fixtures; tests flat under testing/; keep 100 percent line and function coverage (every branch you add has a test; do not add code nothing can reach); do not edit tasks.md or the acceptance map. You have no shell: after editing, re-read every changed file, list them in your summary, state which named scenarios have a test, and say plainly which part you could not confirm.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: t17_2
+    do:
+      persona: builder
+      task: Deliver task 17.2 as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+limits:
+  max_parallel: 1
+  max_minutes: 60

@@ -1,0 +1,36 @@
+name: Fix tests t12_2
+goal: |-
+  Deliver task 12.2 of the change resilient-agent-blackboard-bun exactly as written: "Write `titan install --harness claude|codex|antigravity`, with the plug-in folder, the skill and `titan mcp`. Done when the scenarios 'Install into a project', 'Install for Codex', 'Someone else's file is there' and 'Skill header' pass." Requirements are in openspec/changes/resilient-agent-blackboard-bun/specs/main-agent-guide/spec.md (read lines 30-125: the requirement 'titan plugs into each agent tool as a skill and a tool server', its four scenarios, the requirement that the skill is named titan and is started with /titan in Claude Code and Antigravity and $titan in Codex, and the requirement 'Installed preview skills are usable documents') and in specs/titan-server/spec.md for titan mcp. The goal of the whole product is that titan is an extension tool to the main agent: the agent tool must find the skill `titan`, read the guide, and use the tools of `titan mcp`.
+  Read first: apps/cli/src/commands/install.ts (77 lines exist now), the guide command and text (Grep 'guide' in apps/cli/src and packages), existing install tests (Grep 'install' in testing/), and packages/constants and packages/messages for existing install names. Find what already works and what is missing against each sentence of the spec for claude, codex and antigravity (the antigravity path is in research/guide-formats.md if it exists, otherwise follow the spec text and say what you could not confirm). Implement what is missing: the Claude Code plug-in folder (.claude-plugin/plugin.json and skills/titan/SKILL.md with header name: titan and a description), the Codex skill at .agents/skills/titan/SKILL.md with the same body and the mcp registration command `codex mcp add titan -- titan mcp` (run through an injectable runner so tests never call the real tool), refusal to overwrite a file not written by titan without --force, and the skill body that tells the main agent to use titan mcp tools when present. Write the four named scenarios as tests using unit(factory, cases) with positive and negative cases in testing/ (cases, factories, integration or unit as the existing install tests do), offline and with temporary folders only. No live vendor calls. Rules: no comments, no inline string literals (constants package), messages in packages/messages, schemas/types in packages/types, no direct Promise.all, 100 percent line and function coverage, tests flat in testing/. You have no shell: after editing, re-read every changed file and list them in your summary, and state plainly which scenarios you covered and which part you could not confirm.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit, Bash]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: t12_2
+    do:
+      persona: builder
+      task: Deliver task 12.2 as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that each of the four named scenarios has a test that can fail, that the skill header has name titan, that nothing not written by titan is overwritten without force, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 60

@@ -1,0 +1,18 @@
+     21 lint/suspicious/noExplicitAny
+     12 format
+      1 lint/style/noNonNullAssertion
+
+--- after biome check --write (safe fixes only) ---
+      1 lint/style/noNonNullAssertion
+     21 lint/suspicious/noExplicitAny
+Checked 12 files in 3ms. No fixes applied.
+Found 22 warnings.
+
+$ biome ci test/no-network.ts   (this file has only warnings)
+Checked 1 file in 3ms. No fixes applied.
+Found 20 warnings.
+exit code: 0
+$ biome ci --error-on-warnings test/no-network.ts
+Checked 1 file in 4ms. No fixes applied.
+Found 20 warnings.
+exit code: 1

@@ -1,0 +1,10 @@
+import { createMCPClient } from "@ai-sdk/mcp";
+import { Experimental_StdioMCPTransport } from "@ai-sdk/mcp/mcp-stdio";
+const t0 = performance.now();
+const c = await createMCPClient({ transport: new Experimental_StdioMCPTransport({ command: "bun", args: ["toolserver.ts"] }) });
+const tools = await c.tools();
+console.log("tools:", Object.keys(tools));
+const r = await (tools.kb_search as any).execute({ question: "time zones" }, { toolCallId: "1", messages: [] });
+console.log("result:", JSON.stringify(r.content));
+console.log("ms", Math.round(performance.now() - t0));
+await c.close();

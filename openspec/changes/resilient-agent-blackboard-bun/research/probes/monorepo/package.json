@@ -1,0 +1,1 @@
+{ "name": "titan-probe", "private": true, "workspaces": ["apps/*", "packages/*"] }

@@ -1,0 +1,53 @@
+# @titan/backend-claude
+
+## Responsibilities
+
+Owns the Claude Code SDK adapter, native continuation and translation into Titan events and usage. It applies the invocation workspace tool policy.
+
+## Public contract
+
+`ClaudeBackend` implements the backend port. Start and resume construct sessions; send streams SDK events, validates usage and rejects denied tools. Cancel and close abort the query. Tool callbacks reject paths outside the invocation workspace. The root and every existing path component must be unlinked. Inside, outside and dangling symlinks are refused; parent components are rejected before normalization. New paths beneath ordinary directories remain available. Direct targets cannot name runtime or Git metadata, harness state, dependencies, generated outputs or environment credentials at any depth. Snapshot and artifact path admission share the same central component schema. A file used as a directory is denied, and unexpected filesystem errors fail the invocation. Read, Write and Edit require file_path. Glob and Grep use their search path; unrelated file_path fields cannot override it. Glob patterns and Grep glob filters must be relative and pass the central restricted-pattern schema. Sessions copy the requested tool list and pass it unchanged to the SDK; an empty list disables built-in tools. Both callbacks deny unlisted tools. The supported tools are Read, Glob, Grep, Write, Edit and Bash. Read-only phases refuse Write, Edit and Bash. Writable Bash calls pass command-text checks. Unknown tools are refused before the SDK query.
+
+When an invocation carries a file scope, both permission callbacks limit Write and Edit to its declared paths and descendants. A read claim grants no file writes. Sessions copy the scope before starting or resuming, so later caller mutations cannot expand it. Existing workspace and protected-path checks still apply. Shell operation enforcement and automatic scope expansion remain pending.
+
+Existing Write and Edit targets must be regular files with exactly one hard link. Both callbacks refuse a shared inode before allowing an SDK file operation. Read and Grep retain access to ordinary hard-linked files. Path checks observe current metadata. A concurrent replacement can still race a later SDK operation.
+
+## Verification
+
+Run offline adapter contract tests, including denied tools and malformed usage. Caller and session cancellation are checked before SDK invocation and after streamed event handling. Pinned Claude Agent SDK 0.3.319 process tests use a versioned executable stub for initialization, required arguments, start and resume, fragmented output, broken streams, nonzero exits and cancellation. Cases assert one invocation, correct output and usage, no fallback timeout and observed child exit. Installed offline recovery covers checker continuation after graceful and forced daemon restart, including exhausted allowances. Live native continuation and permission behavior remain unverified. Shared path cases cover malformed inputs, conflicting fields, escaping patterns and outside symlinks.
+
+## Limits
+
+Filesystem path checks use asynchronous operations. Tool policy is an adapter guard, not a complete process sandbox. Permission and live continuation behavior remain experimental.
+
+Parallel transport cases share one backend instance, hold the survivor process active through peer cancellation, and check separate response markers, continuation arguments and process exit. Both workspace orderings are covered. These are SDK process contracts, not installed workflow restart acceptance.
+
+A session retains its learned native identifier across messages. Stateful transport stubs check a second turn on the same handle and continuation through a new handle, plus missing or mismatched saved state. The tests verify synthetic persisted state; vendor conversation restoration still needs live compatibility evidence.
+
+Owner-provided launch options select a local executable. Configured files are checked before start and resume; missing programs cannot silently fall back to another installation.
+
+An observed native identifier cannot replace a learned or resumed identifier. A mismatch raises session_unavailable before its event reaches the durable sink. Real SDK process fixtures exercise replacement initialization and results on the same and restored handles, then retry the original identity. Engine fixtures require the preserved checker session and candidate, one quality attempt, no refutations and no artifact publication. These fixtures remain synthetic native-state evidence.
+
+Native recursive Glob/Grep traversal still needs a managed-tool or verified native exclusion boundary; the direct-target guard does not prove exclusion of every file discovered by a broad search.
+
+Unbound Claude invocations explicitly pass an empty MCP server map and strictMcpConfig: true, alongside empty settingSources. This selects the pinned SDK's --strict-mcp-config argument and requests that project, user, plugin and on-disk agent MCP registrations be ignored. Shared policy cases assert those options and refuse two inherited MCP tool names through both permission callbacks. The executable stub requires the strict flag on starts and resumes. This proves SDK option and process argument mapping; it does not prove a live Claude installation's inherited plugin behavior or a complete operating-system sandbox. Explicit persona tool server registration remains unfinished.
+
+Claude usage records are cumulative within a native session. Titan retains raw records and adds only increases in each measure within a phase and quality attempt. Codex records remain additive per turn. Backend selection uses the frozen persona, configuration default and run fallback in that order. New quality attempts retain their independent totals. An observed counter drop keeps the highest known subtotal and makes only that measure incomplete; a later report cannot restore completeness after a missing value. Interrupted starts remain unreported even when a later cumulative result includes their usage. Native USD cost is an SDK estimate, not a billing receipt. Hidden counter resets without an observed drop cannot be reconstructed from these records.
+
+Claude system/api_retry events now enter Titan recovery when their fields are valid and their cause matches their HTTP status: rate_limit with 429, or overloaded/server_error with a server-error status. Native delay is retained alongside the configured backoff; values above 2,147,483,647 milliseconds are refused before scheduling. The frozen recovery.max_retries allowance limits physical continuations. The same phase, native session, files and quality attempt remain in use; completed peers stay complete. Unknown causes, billing errors, contradictory statuses and malformed delays block without automatic retry or a quality refutation. Ordinary rate_limit_event notices do not replace a successful final result. Native retries without final usage records remain explicit unreported starts. Codex errors still lack a verified structured classification and block for diagnosis and explicit resume.
+
+## Test ownership
+
+Transport registrations live in testing/integration/claude-transport.test.ts. Shared cases and factories live under testing/cases and testing/factories. They import this package's public API. This product manifest carries no test framework or factory dependency; the testing aggregation owns native SDK fixtures.
+
+## Query lifetime
+
+Send cleanup, cancellation and explicit close share active-query cleanup. A successful SDK close clears the reference; repeated session cleanup does not close a finished query again. A throwing SDK closer leaves that query available for explicit cleanup. Later turns retain the native session identifier while using a fresh query. Injected unit cases check these boundaries, while the native transport and installed process suites continue to check child termination with vendor stubs.
+
+## Native tool binding
+
+An optional volatile execution binding is separate from the agent specification. It selects the bundled tool command and strict host connection. The adapter requires a configuration-owned environment factory and keeps the credential out of command arguments. Focused native binding and readiness cases live in testing/integration/native-runtime-binding.test.ts, native-runtime-readiness.test.ts and native-binding-contract.test.ts. They use pinned SDKs with versioned vendor stubs and actual local MCP processes. Automatic runner registration, checkpoint guarding, audit and installed native acceptance remain open.
+
+The pinned SDK's top-level assistant credits_required code, paired with billing_error or rate_limit, raises quota_exhausted after retaining its native event. The stopped phase blocks without automatic recovery or a fabricated reset date. Other ready branches retain capacity. Explicit resume retains the same native session and spends only the remaining recovery allowance. A nested tool message has its own scope. Ordinary notices and malformed credit fields retain the final-result contract. Direct event cases and installed native worker and checker cases verify these boundaries. Vendor compatibility still requires live evidence.
+
+Session admission copies the complete invocation specification. Later caller edits cannot change its working directory, role, model, tools, output schema or turn limit. Both mandatory permission callbacks refuse cancelled or closed sessions and aborted requests. File checks recheck cancellation after asynchronous inspection.

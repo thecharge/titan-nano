@@ -1,0 +1,31 @@
+$ bun test --coverage   (bunfig: coverageThreshold = 0.9)
+--------------------------|---------|---------|-------------------
+All files                 |   98.33 |  100.00 |
+ src/api-backend.ts       |  100.00 |  100.00 | 
+ src/fake-backend.ts      |  100.00 |  100.00 | 
+ src/wilson.ts            |  100.00 |  100.00 | 
+ test/backend-contract.ts |  100.00 |  100.00 | 
+ test/no-network.ts       |   91.67 |  100.00 | 
+--------------------------|---------|---------|-------------------
+
+ 21 pass
+ 2 skip
+ 0 fail
+ 28 expect() calls
+Ran 23 tests across 5 files. [246.00ms]
+exit code: 0
+
+--- add an untested function to src/wilson.ts ---
+ src/api-backend.ts       |  100.00 |  100.00 | 
+ src/fake-backend.ts      |  100.00 |  100.00 | 
+ src/wilson.ts            |   50.00 |   66.67 | 10-12
+ test/backend-contract.ts |  100.00 |  100.00 | 
+ test/no-network.ts       |   91.67 |  100.00 | 
+--------------------------|---------|---------|-------------------
+
+ 21 pass
+ 2 skip
+ 0 fail
+ 28 expect() calls
+Ran 23 tests across 5 files. [184.00ms]
+exit code: 1

@@ -1,0 +1,97 @@
+L01 VERIFIED      ok   1 quote(s) >= 40 chars
+L02 CONTRADICTED  ok   1 quote(s) >= 40 chars
+L03 PARTIAL       ok   2 quote(s) >= 40 chars
+L04 VERIFIED      ok   2 quote(s) >= 40 chars
+L05 PARTIAL       ok   3 quote(s) >= 40 chars
+L06 VERIFIED      ok   1 quote(s) >= 40 chars
+L07 VERIFIED      ok   2 quote(s) >= 40 chars
+L08 NOT FOUND     ok   2 quote(s) >= 40 chars
+L09 PARTIAL       ok   2 quote(s) >= 40 chars
+L10 VERIFIED      ok   2 quote(s) >= 40 chars
+L11 PARTIAL       ok   1 quote(s) >= 40 chars
+L12 PARTIAL       ok   3 quote(s) >= 40 chars
+L13 VERIFIED      ok   2 quote(s) >= 40 chars
+L14 NOT FOUND     ok   1 quote(s) >= 40 chars
+L15 UNVERIFIABLE  ok   UNVERIFIABLE, error page quoted
+L16 UNVERIFIABLE  ok   1 quote(s) >= 40 chars
+L17 VERIFIED      ok   inherits L07,L62
+L18 VERIFIED      ok   inherits L13
+L19 VERIFIED      ok   1 quote(s) >= 40 chars
+L20 PARTIAL       ok   1 quote(s) >= 40 chars
+L21 VERIFIED      ok   1 quote(s) >= 40 chars
+L22 VERIFIED      ok   1 quote(s) >= 40 chars
+L23 PARTIAL       ok   1 quote(s) >= 40 chars
+L24 VERIFIED      ok   1 quote(s) >= 40 chars
+L25 VERIFIED      ok   2 quote(s) >= 40 chars
+L26 VERIFIED      ok   1 quote(s) >= 40 chars
+L27 VERIFIED      ok   1 quote(s) >= 40 chars
+L28 PARTIAL       ok   1 quote(s) >= 40 chars
+L29 VERIFIED      ok   inherits L03
+L30 VERIFIED      ok   1 quote(s) >= 40 chars
+L31 VERIFIED      ok   3 quote(s) >= 40 chars
+L32 VERIFIED      ok   1 quote(s) >= 40 chars
+L33 VERIFIED      ok   2 quote(s) >= 40 chars
+L34 VERIFIED      ok   1 quote(s) >= 40 chars
+L35 VERIFIED      ok   1 quote(s) >= 40 chars
+L36 VERIFIED      ok   1 quote(s) >= 40 chars
+L37 VERIFIED      ok   1 quote(s) >= 40 chars
+L38 MISATTRIBUTED ok   3 quote(s) >= 40 chars
+L39 VERIFIED      ok   1 quote(s) >= 40 chars
+L40 VERIFIED      ok   1 quote(s) >= 40 chars
+L41 VERIFIED      ok   1 quote(s) >= 40 chars
+L42 VERIFIED      ok   1 quote(s) >= 40 chars
+L43 VERIFIED      ok   inherits L03
+L44 MISATTRIBUTED ok   3 quote(s) >= 40 chars
+L45 PARTIAL       ok   1 quote(s) >= 40 chars
+L46 VERIFIED      ok   1 quote(s) >= 40 chars
+L47 UNVERIFIABLE  ok   UNVERIFIABLE, error page quoted
+L48 PARTIAL       ok   2 quote(s) >= 40 chars
+L49 VERIFIED      ok   1 quote(s) >= 40 chars
+L50 PARTIAL       ok   1 quote(s) >= 40 chars
+L51 VERIFIED      ok   3 quote(s) >= 40 chars
+L52 UNVERIFIABLE  ok   UNVERIFIABLE, error page quoted
+L53 MISATTRIBUTED ok   2 quote(s) >= 40 chars
+L54 VERIFIED      ok   2 quote(s) >= 40 chars
+L55 VERIFIED      ok   3 quote(s) >= 40 chars
+L56 VERIFIED      ok   2 quote(s) >= 40 chars
+L57 PARTIAL       ok   1 quote(s) >= 40 chars
+L58 PARTIAL       ok   1 quote(s) >= 40 chars
+L59 VERIFIED      ok   2 quote(s) >= 40 chars
+L60 VERIFIED      ok   1 quote(s) >= 40 chars
+L61 VERIFIED      ok   1 quote(s) >= 40 chars
+L62 PARTIAL       ok   2 quote(s) >= 40 chars
+L63 PARTIAL       ok   4 quote(s) >= 40 chars
+L64 VERIFIED      ok   1 quote(s) >= 40 chars
+L65 MISATTRIBUTED ok   1 quote(s) >= 40 chars
+L66 PARTIAL       ok   4 quote(s) >= 40 chars
+L67 VERIFIED      ok   2 quote(s) >= 40 chars
+L68 VERIFIED      ok   1 quote(s) >= 40 chars
+L69 UNVERIFIABLE  ok   UNVERIFIABLE, error page quoted
+L70 VERIFIED      ok   1 quote(s) >= 40 chars
+L71 PARTIAL       ok   1 quote(s) >= 40 chars
+L72 MISATTRIBUTED ok   1 quote(s) >= 40 chars
+L73 VERIFIED      ok   1 quote(s) >= 40 chars
+L74 VERIFIED      ok   1 quote(s) >= 40 chars
+L75 NOT FOUND     ok   1 quote(s) >= 40 chars
+L76 VERIFIED      ok   2 quote(s) >= 40 chars
+L77 NOT FOUND     ok   3 quote(s) >= 40 chars
+L78 VERIFIED      ok   inherits L77
+L79 UNVERIFIABLE  ok   UNVERIFIABLE, error page quoted
+L80 VERIFIED      ok   inherits L12
+L81 CONTRADICTED  ok   1 quote(s) >= 40 chars
+L82 VERIFIED      ok   1 quote(s) >= 40 chars
+L83 CONTRADICTED  ok   4 quote(s) >= 40 chars
+L84 PARTIAL       ok   2 quote(s) >= 40 chars
+L85 NOT FOUND     ok   NOT FOUND (no source passage exists)
+L86 PARTIAL       ok   3 quote(s) >= 40 chars
+L87 VERIFIED      ok   1 quote(s) >= 40 chars
+L88 VERIFIED      ok   4 quote(s) >= 40 chars
+L89 PARTIAL       ok   4 quote(s) >= 40 chars
+L90 MISATTRIBUTED ok   1 quote(s) >= 40 chars
+L91 VERIFIED      ok   1 quote(s) >= 40 chars
+L92 PARTIAL       ok   1 quote(s) >= 40 chars
+L93 CONTRADICTED  ok   3 quote(s) >= 40 chars
+L94 PARTIAL       ok   1 quote(s) >= 40 chars
+
+primary verdicts: VERIFIED 51, PARTIAL 22, CONTRADICTED 4, MISATTRIBUTED 6, UNVERIFIABLE 6, NOT FOUND 5
+94 entries, 0 failing

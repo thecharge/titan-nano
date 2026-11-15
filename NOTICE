@@ -1,0 +1,13 @@
+Titan Nano
+Copyright 2025-2026 thecharge and Titan Nano contributors
+
+Titan Nano is licensed under the Apache License, Version 2.0.
+See LICENSE for the complete terms.
+
+Third-party software retains its own copyright and license terms.
+THIRD_PARTY_NOTICES retains runtime dependency notices. External agent
+programs and models remain subject to their providers' terms.
+Quoted research material retains its original attribution and rights.
+
+Titan includes local changes to the Apache-2.0 Codex SDK launch configuration.
+The source repository retains those changes under patches/.

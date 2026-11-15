@@ -1,0 +1,22 @@
+$ ./dist/embed (bun build --compile of embed.ts, @huggingface/transformers)
+5386 |     help.push("- Run Node.js without using the --no-addons flag");
+5387 |   }
+5388 |   if (isWindows && /The specified procedure could not be found/.test(messages)) {
+5389 |     help.push("- Using the canvas package on Windows?", "    See https://sharp.pixelplumbing.com/install#canvas-and-windows", "- Check for outdated versions of sharp in the dependency tree:", "    npm ls sharp");
+5390 |   }
+5391 |   throw new Error(help.join(`
+               ^
+error: Could not load the "sharp" module using the linux-x64 runtime
+Possible solutions:
+- Ensure optional dependencies can be installed:
+    npm install --include=optional sharp
+- Ensure your package manager supports multi-platform installation:
+    See https://sharp.pixelplumbing.com/install#cross-platform
+- Add platform-specific dependencies:
+    npm install --os=linux --cpu=x64 sharp
+- Consult the installation documentation:
+    See https://sharp.pixelplumbing.com/install
+      at /$bunfs/root/embed:5391:9
+
+Bun v1.3.10 (Linux x64)
+exit 1

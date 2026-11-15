@@ -1,0 +1,38 @@
+name: Fix tests fixc2
+goal: |-
+  Fix exactly these two lint failures, changing nothing else. `bunx biome check packages testing apps` reports:
+  1. packages/knowledge/src/policy-alarms.ts:33:28 "String literal type. Declare an enum in packages/constants and use it instead of a literal or a union of literals." at `let serial: PolicyAlarms["serial"];` (line 33). Replace the indexed access type with an exported type from packages/types (for example a named type `SerialAlarm` inferred from a Zod schema in packages/types/src/policy-alarms.ts; read that file and use or add the schema for the serial alarm field, and use the same for the sibling alarm variable if the function declares one the same way).
+  2. packages/knowledge/src/policy.ts:27:36 "Inline object type. Define a Zod schema in packages/types and use its inferred type." at `export function policyKind(policy: { kind: string } | undefined): string` (line 27). Use the existing policy type from packages/types/src/policy.ts (Grep for the schema that has a kind field, for example Policy or PolicyFile) or add a small schema there, exported from the barrel, and use the inferred type in the signature.
+  Keep behaviour identical. Typecheck must stay clean. No comments, no inline string literals. You have no shell: re-read the changed files and list them.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixc2
+    do:
+      persona: builder
+      task: Fix the two lint failures as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that both signatures use schema types from packages/types and behaviour is unchanged.
+limits:
+  max_parallel: 1
+  max_minutes: 60

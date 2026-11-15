@@ -1,0 +1,73 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!!openspec",
+      "!!.agent",
+      "!!.claude",
+      "!!.codex",
+      "!!node_modules",
+      "!!dist",
+      "!!coverage",
+      "!!.titan"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always"
+    }
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "noFloatingPromises": "error"
+      },
+      "preset": "recommended",
+      "suspicious": {
+        "noImportCycles": "error"
+      }
+    },
+    "domains": {
+      "project": "all"
+    }
+  },
+  "plugins": [
+    {
+      "path": "./tooling/biome/no-inline-strings.grit",
+      "includes": [
+        "apps/*/src/**",
+        "packages/*/src/**",
+        "tooling/scripts/**",
+        "!packages/constants/**",
+        "!packages/messages/**"
+      ]
+    },
+    {
+      "path": "./tooling/biome/no-local-types.grit",
+      "includes": [
+        "apps/*/src/**",
+        "packages/*/src/**",
+        "tooling/scripts/**",
+        "testing/**",
+        "!packages/types/**"
+      ]
+    },
+    {
+      "path": "./tooling/biome/no-string-literal-types.grit",
+      "includes": ["apps/*/src/**", "packages/*/src/**", "tooling/scripts/**", "testing/**"]
+    }
+  ]
+}

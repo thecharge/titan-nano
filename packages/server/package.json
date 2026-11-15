@@ -1,0 +1,54 @@
+{
+  "name": "@titan/server",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mcp": "./src/mcp.ts",
+    "./client": "./src/client.ts",
+    "./dashboard": "./src/dashboard.ts",
+    "./dashboard-client": "./src/dashboard-client.ts",
+    "./dashboard-session": "./src/dashboard-session.ts",
+    "./dashboard-source": "./src/dashboard-source.ts",
+    "./dashboard-app": "./src/dashboard/app.ts",
+    "./event-stream": "./src/event-stream.ts",
+    "./run-numbers": "./src/run-numbers.ts",
+    "./requests": "./src/request-client.ts",
+    "./request-pages": "./src/request-listing.ts",
+    "./listing": "./src/listing.ts",
+    "./knowledge": "./src/knowledge-client.ts",
+    "./native-tool-client": "./src/native-tool-client.ts",
+    "./native-tools": "./src/native-tools.ts",
+    "./native-executions": "./src/native-executions.ts",
+    "./native-tool-bridge": "./src/native-tool-bridge.ts",
+    "./admission": "./src/admission.ts",
+    "./maintenance": "./src/maintenance.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/process": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/config": "workspace:*",
+    "@titan/workflow": "workspace:*",
+    "@titan/runner": "workspace:*",
+    "@modelcontextprotocol/sdk": "catalog:",
+    "zod": "catalog:",
+    "@titan/constants": "workspace:*",
+    "@titan/errors": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/board": "workspace:*",
+    "@titan/store": "workspace:*",
+    "@titan/workspace": "workspace:*",
+    "@titan/streams": "workspace:*",
+    "@titan/artifacts": "workspace:*",
+    "@titan/logger": "workspace:*",
+    "@titan/knowledge": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

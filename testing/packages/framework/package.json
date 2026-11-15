@@ -1,0 +1,16 @@
+{
+  "name": "@titan/test-framework",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./files": "./src/files.ts",
+    "./live": "./src/live.ts"
+  },
+  "dependencies": {
+    "@titan/constants": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/types": "workspace:*"
+  }
+}

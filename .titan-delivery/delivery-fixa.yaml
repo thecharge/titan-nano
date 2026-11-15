@@ -1,0 +1,35 @@
+name: Fix tests fixa
+goal: >-
+  Fix exactly the failing tests below without removing any test or weakening it: decide from the OpenSpec scenario text (Grep its name in openspec/changes/resilient-agent-blackboard-bun/specs) and the code whether the product code or the test expectation is wrong, and fix that one. Cause: several tasks were delivered in parallel and their changes now clash. Keep 100 percent function and line coverage, no comments, no inline strings, no local type aliases, no string literal types. You have no shell; read the failing factory and the code it calls. Failing output: falsifierTask 'worker task has refutations and no result' and falsifierIsolation 'worker prompt carries refutations not seen by falsifiers' and 'worker is not resumed when only the falsifier is retried': the received task object has an extra key `steps` that the expected key list does not have (testing/cases for falsifier-task and falsifier-isolation; the worker prompt now carries a step list per task 15.7). survivesOnSecondAttempt 'second task carries the evidence and the step passes': expected `passed|2|true` received `failed|3|true`; neverSurvives: expected `failed|3|true` received `failed|3|false` (testing/factories/step-retry.ts and testing/cases/step-retry.ts, task 10.3).
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixa
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixed by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

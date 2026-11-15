@@ -1,0 +1,22 @@
+name: Review and improve a small module
+goal: Fix a clearly demonstrated bug. Keep the change small and explain the checks and remaining risks.
+personas:
+  developer:
+    description: Makes a focused code change in an isolated working tree.
+    role: Read the project, find a concrete bug, and fix it. Write a short review note in REVIEW.md. Do not change the original checkout or publish anything.
+    tools: [Read, Glob, Grep, Write, Edit]
+    outputs:
+      summary: { type: string }
+  skeptic:
+    description: Tries to refute the proposed fix.
+    role: Inspect the candidate files and worker answer. Seek a concrete regression, missing case, or unsupported claim. Return survived only when your stated checks found no refutation. Do not edit files.
+    tools: [Read, Glob, Grep]
+steps:
+  - id: fix
+    do: { persona: developer, task: Find and fix one reproducible bug. }
+    falsify:
+      - {
+          persona: skeptic,
+          task: Try to refute the proposed fix with a concrete input or counterexample.,
+        }
+limits: { max_parallel: 2, max_minutes: 10 }

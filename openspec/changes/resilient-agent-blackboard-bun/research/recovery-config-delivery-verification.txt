@@ -1,0 +1,44 @@
+Recovery, configuration and delivery artifact verification
+Review date: 2026-11-07
+Base commit: aff964dc164b22615095320c617f7e90eadf1ce9
+Scope: specification artifacts and checker fixtures only; no product tests or live agent calls ran.
+
+$ python3 -I scripts/check-specs.py
+exit_code=0
+
+29 file(s) checked, 0 finding(s) {}
+26 capabilities, 286 requirements, 495 scenarios, 256 tasks; 0 errors
+Specification check only; no product tests ran.
+
+
+$ python3 -I scripts/test-check-specs.py
+exit_code=0
+
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 1.543s
+
+OK
+
+$ python3 -I scripts/check-plain.py openspec/changes/resilient-agent-blackboard-bun/research/recovery-config-delivery-review.md
+exit_code=0
+
+1 file(s) checked, 0 finding(s) {}
+
+
+$ openspec validate --all --strict
+exit_code=0
+✓ change/resilient-agent-blackboard-bun
+Totals: 1 passed, 0 failed (1 items)
+- Validating...
+
+$ git diff --check
+exit_code=0
+
+
+
+Scenario preservation: retained 428 of 428 prior identities; added 67.
+Acceptance map: 495 rows, all pending.
+Implementation tasks: 256 open, none marked complete.
+Historical quotation-source gaps remain open as described in end-to-end-review.md.
+Product readiness, packed installation, live session restoration and platform compatibility remain untested.

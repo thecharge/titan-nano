@@ -1,0 +1,12 @@
+checkpoint 0 files: .gitignore tracked.txt user-untracked.txt 
+user status unchanged: yes
+user index unchanged: yes
+user HEAD unchanged: yes
+worktree inside .git created: yes
+user status after worktree add:  M tracked.txt;?? user-untracked.txt;
+checkpoint 1 adds: A	agent-new.txt M	tracked.txt 
+restore to cp1 diff: '' untracked: ''
+clean-tree snapshot still yields a sha: 40 chars
+hook marker files: 0
+user tree still:  M tracked.txt;?? user-untracked.txt;
+user .env intact: secret

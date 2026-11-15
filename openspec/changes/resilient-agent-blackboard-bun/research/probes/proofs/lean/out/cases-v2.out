@@ -1,0 +1,44 @@
+=== case good
+plain lean exit=0 ms=301
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=2 ms=33
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake check` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+lake comparator exit=2 ms=33
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake comparator` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+=== case sorry
+plain lean exit=0 ms=201
+  | /tmp/plain.lean:5:8: warning: declaration uses `sorry`
+  | 'sumTo_formula' depends on axioms: [sorryAx]
+lake check exit=2 ms=34
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake check` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+lake comparator exit=2 ms=33
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake comparator` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+=== case weakened
+plain lean exit=0 ms=145
+  | 'sumTo_formula' does not depend on any axioms
+lake check exit=2 ms=30
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake check` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+lake comparator exit=2 ms=30
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake comparator` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+=== case redefined
+plain lean exit=0 ms=515
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=2 ms=36
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake check` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+lake comparator exit=2 ms=30
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake comparator` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+=== case axiom
+plain lean exit=0 ms=173
+  | 'sumTo_formula' depends on axioms: [trust_me]
+lake check exit=2 ms=32
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake check` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+lake comparator exit=2 ms=34
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake comparator` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+=== case native
+plain lean exit=0 ms=376
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+  | 'sumTo_100' depends on axioms: [sumTo_100._native.native_decide.ax_1_1]
+lake check exit=2 ms=44
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake check` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.
+lake comparator exit=2 ms=32
+  | error: '/tmp/w/proj' has no `lake-manifest.json`, and `lake comparator` resolves dependencies inside a sandbox that cannot write to the project directory. Run `lake build` there first.

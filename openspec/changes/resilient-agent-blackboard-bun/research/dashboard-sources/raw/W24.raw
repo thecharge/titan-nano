@@ -1,0 +1,1260 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Security in the Jupyter Server &#8212; Jupyter Server  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'operators/security';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuring Logging" href="configuring-logging.html" />
+    <link rel="prev" title="Running a public Jupyter Server" href="public-server.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.22" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  <script async type="text/javascript" src="/_/static/javascript/readthedocs-addons.js"></script><meta name="readthedocs-project-slug" content="jupyter-server" /><meta name="readthedocs-version-slug" content="latest" /><meta name="readthedocs-resolver-filename" content="/operators/security.html" /><meta name="readthedocs-http-status" content="200" /></head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/jupyter_server_logo.svg" class="logo__image only-light" alt="Jupyter Server  documentation - Home"/>
+    <img src="../_static/jupyter_server_logo.svg" class="logo__image only-dark pst-js-only" alt="Jupyter Server  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../users/index.html">
+    Users
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Operators
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developers/index.html">
+    Developers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributors/index.html">
+    Contributors
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../other/index.html">
+    Other
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jupyter-server/jupyter_server" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../users/index.html">
+    Users
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Operators
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developers/index.html">
+    Developers
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributors/index.html">
+    Contributors
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../other/index.html">
+    Other
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jupyter-server/jupyter_server" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Operators</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="multiple-extensions.html">Managing multiple extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuring-extensions.html">Configuring Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrate-from-nbserver.html">Migrating from Notebook Server</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="public-server.html">Running a public Jupyter Server</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Security in the Jupyter Server</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="configuring-logging.html">Configuring Logging</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Documentation for Operators</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Security in the Jupyter Server</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="security-in-the-jupyter-server">
+<span id="server-security"></span><h1>Security in the Jupyter Server<a class="headerlink" href="#security-in-the-jupyter-server" title="Link to this heading">#</a></h1>
+<p>Since access to the Jupyter Server means access to running arbitrary code,
+it is important to restrict access to the server.
+For this reason, Jupyter Server uses a token-based authentication that is <strong>on by default</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you enable a password for your server,
+token authentication is not enabled by default.</p>
+</div>
+<p>When token authentication is enabled, the server uses a token to authenticate requests.
+This token can be provided to login to the server in three ways:</p>
+<ul>
+<li><p>in the <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> header, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Authorization</span><span class="p">:</span> <span class="n">token</span> <span class="n">abcdef</span><span class="o">...</span>
+</pre></div>
+</div>
+</li>
+<li><p>In a URL parameter, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>https://my-server/tree/?token=abcdef...
+</pre></div>
+</div>
+</li>
+<li><p>In the password field of the login form that will be shown to you if you are not logged in.</p></li>
+</ul>
+<p>When you start a Jupyter server with token authentication enabled (default),
+a token is generated to use for authentication.
+This token is logged to the terminal, so that you can copy/paste the URL into your browser:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[I 11:59:16.597 ServerApp] The Jupyter Server is running at:
+[I 11:59:16.597 ServerApp]
+http://localhost:8888/?token=c8de56fa4deed24899803e93c227592aef6538f93025fe01
+
+[I 11:59:16.597 ServerApp]
+http://127.0.0.1:8888/?token=c8de56fa4deed24899803e93c227592aef6538f93025fe01
+
+[I 11:59:16.597 ServerApp]
+    To access the server, open this file in a browser:
+    file:///Users/username/Library/Jupyter/runtime/jpserver-46320-open.html
+Or copy and paste one of these URLs:
+    http://localhost:8888/?token=c8de56fa4deed24899803e93c227592aef6538f93025fe01
+    http://127.0.0.1:8888/?token=c8de56fa4deed24899803e93c227592aef6538f93025fe01
+</pre></div>
+</div>
+<p>Copy either of the HTTP URLs and paste it into your browser to see the server running with a
+message - “A Jupyter Server is running.” If you are using the file link,
+opening it in your browser should automatically redirect you to the Jupyter server launch page,
+including the authentication token.  In case it doesn’t redirect automatically, you’ll
+find an HTTP link on the page; clicking this link will take you to the Jupyter server landing page.</p>
+<p>At any later time, you can see the tokens and URLs for all of your running servers with <strong class="command">jupyter server list</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ jupyter server list
+Currently running servers:
+http://localhost:8888/?token=abc... :: /home/you/notebooks
+https://0.0.0.0:9999/?token=123... :: /tmp/public
+http://localhost:8889/ :: /tmp/has-password
+</pre></div>
+</div>
+<p>For servers with token-authentication enabled, the URL in the above listing will include the token,
+so you can copy and paste that URL into your browser to login.
+If a server has no token (e.g. it has a password or has authentication disabled),
+the URL will not include the token argument.
+Once you have visited this URL,
+a cookie will be set in your browser and you won’t need to use the token again,
+unless you switch browsers, clear your cookies, or start a Jupyter server on a new port.</p>
+<section id="alternatives-to-token-authentication">
+<h2>Alternatives to token authentication<a class="headerlink" href="#alternatives-to-token-authentication" title="Link to this heading">#</a></h2>
+<p>If a generated token doesn’t work well for you,
+you can set a password for your server.
+<strong class="command">jupyter server password</strong> will prompt you for a password,
+and store the hashed password in your <code class="file docutils literal notranslate"><span class="pre">jupyter_server_config.json</span></code>.</p>
+<p>It is possible to disable authentication altogether by setting the token and password to empty strings,
+but this is <strong>NOT RECOMMENDED</strong>, unless authentication or access restrictions are handled at a different layer in your web application:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">ServerApp</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="s2">""</span>
+<span class="n">c</span><span class="o">.</span><span class="n">ServerApp</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="s2">""</span>
+</pre></div>
+</div>
+</section>
+<section id="authentication-and-authorization">
+<h2>Authentication and Authorization<a class="headerlink" href="#authentication-and-authorization" title="Link to this heading">#</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0.</span></p>
+</div>
+<p>There are two steps to deciding whether to allow a given request to be happen.</p>
+<p>The first step is “Authentication” (identifying who is making the request).
+This is handled by the <a class="reference internal" href="#jupyter_server.auth.IdentityProvider" title="jupyter_server.auth.IdentityProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">jupyter_server.auth.IdentityProvider</span></code></a>.</p>
+<p>Whether a given user is allowed to take a specific action is called “Authorization”,
+and is handled separately, by an <a class="reference internal" href="#jupyter_server.auth.Authorizer" title="jupyter_server.auth.Authorizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Authorizer</span></code></a>.</p>
+<p>These two classes may work together,
+as the information returned by the IdentityProvider is given to the Authorizer when it makes its decisions.</p>
+<p>Authentication always takes precedence because if no user is authenticated,
+no authorization checks need to be made,
+as all requests requiring <em>authorization</em> must first complete <em>authentication</em>.</p>
+<section id="identity-providers">
+<h3>Identity Providers<a class="headerlink" href="#identity-providers" title="Link to this heading">#</a></h3>
+<p>The <a class="reference internal" href="#jupyter_server.auth.IdentityProvider" title="jupyter_server.auth.IdentityProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">jupyter_server.auth.IdentityProvider</span></code></a> class is responsible for the “authentication” step,
+identifying the user making the request,
+and constructing information about them.</p>
+<p>It principally implements two methods.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="jupyter_server.auth.IdentityProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jupyter_server.auth.</span></span><span class="sig-name descname"><span class="pre">IdentityProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jupyter_server.auth.IdentityProvider" title="Link to this definition">#</a></dt>
+<dd><p>Interface for providing identity management and authentication.</p>
+<p>Two principle methods:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#jupyter_server.auth.IdentityProvider.get_user" title="jupyter_server.auth.IdentityProvider.get_user"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_user()</span></code></a> returns a <a class="reference internal" href="#jupyter_server.auth.User" title="jupyter_server.auth.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a> object
+for successful authentication, or None for no-identity-found.</p></li>
+<li><p><a class="reference internal" href="#jupyter_server.auth.IdentityProvider.identity_model" title="jupyter_server.auth.IdentityProvider.identity_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">identity_model()</span></code></a> turns a <a class="reference internal" href="#jupyter_server.auth.User" title="jupyter_server.auth.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a> into a JSONable dict.
+The default is to use <code class="xref py py-meth docutils literal notranslate"><span class="pre">dataclasses.asdict()</span></code>,
+and usually shouldn’t need override.</p></li>
+</ul>
+<p>Additional methods can customize authentication.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jupyter_server.auth.IdentityProvider.get_user">
+<span class="sig-name descname"><span class="pre">get_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jupyter_server.auth.IdentityProvider.get_user" title="Link to this definition">#</a></dt>
+<dd><p>Get the authenticated user for a request</p>
+<p>Must return a <a class="reference internal" href="#jupyter_server.auth.User" title="jupyter_server.auth.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">jupyter_server.auth.User</span></code></a>,
+though it may be a subclass.</p>
+<p>Return None if the request is not authenticated.</p>
+<p>_may_ be a coroutine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="../api/jupyter_server.auth.html#jupyter_server.auth.identity.User" title="jupyter_server.auth.identity.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Awaitable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Awaitable</span></code></a>[<a class="reference internal" href="../api/jupyter_server.auth.html#jupyter_server.auth.identity.User" title="jupyter_server.auth.identity.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jupyter_server.auth.IdentityProvider.identity_model">
+<span class="sig-name descname"><span class="pre">identity_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jupyter_server.auth.IdentityProvider.identity_model" title="Link to this definition">#</a></dt>
+<dd><p>Return a User as an Identity model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p>The first is <a class="reference internal" href="#jupyter_server.auth.IdentityProvider.get_user" title="jupyter_server.auth.IdentityProvider.get_user"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jupyter_server.auth.IdentityProvider.get_user()</span></code></a>.
+This method is given a RequestHandler, and is responsible for deciding whether there is an authenticated user making the request.
+If the request is authenticated, it should return a <a class="reference internal" href="#jupyter_server.auth.User" title="jupyter_server.auth.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">jupyter_server.auth.User</span></code></a> object representing the authenticated user.
+It should return None if the request is not authenticated.</p>
+<p>The default implementation accepts token or password authentication.</p>
+<p>This User object will be available as <code class="docutils literal notranslate"><span class="pre">self.current_user</span></code> in any request handler.
+Request methods decorated with tornado’s <code class="docutils literal notranslate"><span class="pre">&#64;web.authenticated</span></code> decorator
+will only be allowed if this method returns something.</p>
+<p>The User object will be a Python <code class="xref py py-class docutils literal notranslate"><span class="pre">dataclasses.dataclass</span></code> - <code class="docutils literal notranslate"><span class="pre">jupyter_server.auth.User</span></code>:</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="jupyter_server.auth.User">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jupyter_server.auth.</span></span><span class="sig-name descname"><span class="pre">User</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avatar_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jupyter_server.auth.User" title="Link to this definition">#</a></dt>
+<dd><p>Object representing a User</p>
+<p>This or a subclass should be returned from IdentityProvider.get_user</p>
+</dd></dl>
+
+<p>A custom IdentityProvider <em>may</em> return a custom subclass.</p>
+<p>The next method an identity provider has is <a class="reference internal" href="#jupyter_server.auth.IdentityProvider.identity_model" title="jupyter_server.auth.IdentityProvider.identity_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">identity_model()</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">identity_model(user)</span></code> is responsible for transforming the user object returned from <code class="docutils literal notranslate"><span class="pre">.get_user()</span></code>
+into a standard identity model dictionary,
+for use in the <code class="docutils literal notranslate"><span class="pre">/api/me</span></code> endpoint.</p>
+<p>If your user object is a simple username string or a dict with a <code class="docutils literal notranslate"><span class="pre">username</span></code> field,
+you may not need to implement this method, as the default implementation will suffice.</p>
+<p>Any required fields missing from the dict returned by this method will be filled-out with defaults.
+Only <code class="docutils literal notranslate"><span class="pre">username</span></code> is strictly required, if that is all the information the identity provider has available.</p>
+<p>Missing will be derived according to:</p>
+<ul class="simple">
+<li><p>if <code class="docutils literal notranslate"><span class="pre">name</span></code> is missing, use <code class="docutils literal notranslate"><span class="pre">username</span></code></p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">display_name</span></code> is missing, use <code class="docutils literal notranslate"><span class="pre">name</span></code></p></li>
+</ul>
+<p>Other required fields will be filled with <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<section id="identity-model">
+<h4>Identity Model<a class="headerlink" href="#identity-model" title="Link to this heading">#</a></h4>
+<p>The identity model is the model accessed at <code class="docutils literal notranslate"><span class="pre">/api/me</span></code>, and describes the currently authenticated user.</p>
+<p>It has the following fields:</p>
+<dl class="simple">
+<dt>username</dt><dd><p>(string)
+Unique string identifying the user.
+Must be non-empty.</p>
+</dd>
+<dt>name</dt><dd><p>(string)
+For-humans name of the user.
+May be the same as <code class="docutils literal notranslate"><span class="pre">username</span></code> in systems where only usernames are available.</p>
+</dd>
+<dt>display_name</dt><dd><p>(string)
+Alternate rendering of name for display, such as a nickname.
+Often the same as <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+</dd>
+<dt>initials</dt><dd><p>(string or null)
+Short string of initials.
+Initials should not be derived automatically due to localization issues.
+May be <code class="docutils literal notranslate"><span class="pre">null</span></code> if unavailable.</p>
+</dd>
+<dt>avatar_url</dt><dd><p>(string or null)
+URL of an avatar image to be used for the user.
+May be <code class="docutils literal notranslate"><span class="pre">null</span></code> if unavailable.</p>
+</dd>
+<dt>color</dt><dd><p>(string or null)
+A CSS color string to use as a preferred color,
+such as for collaboration cursors.
+May be <code class="docutils literal notranslate"><span class="pre">null</span></code> if unavailable.</p>
+</dd>
+</dl>
+<p>The default implementation of the identity provider is stateless, meaning it doesn’t store user information
+on the server side. Instead, it utilizes session cookies to generate and store random user information on the
+client side.</p>
+<p>When a user logs in or authenticates, the server generates a session cookie that is stored on the client side.
+This session cookie is used to keep track of the identity model between requests. If the client does not
+support session cookies or fails to send the cookie in subsequent requests, the server will treat each request
+as coming from a new anonymous user and generate a new set of random user information for each request.</p>
+<p>To ensure proper functionality of the identity model and to maintain user context between requests, it’s
+important for clients to support session cookies and send it in subsequent requests. Failure to do so may
+result in the server generating a new anonymous user for each request, leading to loss of user context.</p>
+</section>
+</section>
+<section id="authorization">
+<h3>Authorization<a class="headerlink" href="#authorization" title="Link to this heading">#</a></h3>
+<p>Authorization is the second step in allowing an action,
+after a user has been <em>authenticated</em> by the IdentityProvider.</p>
+<p>Authorization in Jupyter Server serves to provide finer grained control of access to its
+API resources. With authentication, requests are accepted if the current user is known by
+the server. Thus it can restrain access to specific users, but there is no way to give allowed
+users more or less permissions. Jupyter Server provides a thin and extensible authorization layer
+which checks if the current user is authorized to make a specific request.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="jupyter_server.auth.Authorizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jupyter_server.auth.</span></span><span class="sig-name descname"><span class="pre">Authorizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jupyter_server.auth.Authorizer" title="Link to this definition">#</a></dt>
+<dd><p>Base class for authorizing access to resources
+in the Jupyter Server.</p>
+<p>All authorizers used in Jupyter Server
+should inherit from this base class and, at the very minimum,
+implement an <code class="docutils literal notranslate"><span class="pre">is_authorized</span></code> method with the
+same signature as in this base class.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">is_authorized</span></code> method is called by the <code class="docutils literal notranslate"><span class="pre">&#64;authorized</span></code> decorator
+in JupyterHandler. If it returns True, the incoming request
+to the server is accepted; if it returns False, the server
+returns a 403 (Forbidden) error code.</p>
+<p>The authorization check will only be applied to requests
+that have already been authenticated.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="jupyter_server.auth.Authorizer.is_authorized">
+<span class="sig-name descname"><span class="pre">is_authorized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jupyter_server.auth.Authorizer.is_authorized" title="Link to this definition">#</a></dt>
+<dd><p>A method to determine if <code class="docutils literal notranslate"><span class="pre">user</span></code> is authorized to perform <code class="docutils literal notranslate"><span class="pre">action</span></code>
+(read, write, or execute) on the <code class="docutils literal notranslate"><span class="pre">resource</span></code> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<a class="reference internal" href="#jupyter_server.auth.User" title="jupyter_server.auth.User"><em>jupyter_server.auth.User</em></a>) – An object representing the authenticated user,
+as returned by <a class="reference internal" href="#jupyter_server.auth.IdentityProvider.get_user" title="jupyter_server.auth.IdentityProvider.get_user"><code class="xref py py-meth docutils literal notranslate"><span class="pre">jupyter_server.auth.IdentityProvider.get_user()</span></code></a>.</p></li>
+<li><p><strong>action</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – the category of action for the current request: read, write, or execute.</p></li>
+<li><p><strong>resource</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – the type of resource (i.e. contents, kernels, files, etc.) the user is requesting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if user authorized to make request; False, otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p>This is done by calling a <code class="docutils literal notranslate"><span class="pre">is_authorized(handler,</span> <span class="pre">user,</span> <span class="pre">action,</span> <span class="pre">resource)</span></code> method before each
+request handler. Each request is labeled as either a “read”, “write”, or “execute” <code class="docutils literal notranslate"><span class="pre">action</span></code>:</p>
+<ul class="simple">
+<li><p>“read” wraps all <code class="docutils literal notranslate"><span class="pre">GET</span></code> and <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> requests.
+In general, read permissions grants access to read but not modify anything about the given resource.</p></li>
+<li><p>“write” wraps all <code class="docutils literal notranslate"><span class="pre">POST</span></code>, <code class="docutils literal notranslate"><span class="pre">PUT</span></code>, <code class="docutils literal notranslate"><span class="pre">PATCH</span></code>, and <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> requests.
+In general, write permissions grants access to modify the given resource.</p></li>
+<li><p>“execute” wraps all requests to ZMQ/Websocket channels (terminals and kernels).
+Execute is a special permission that usually corresponds to arbitrary execution,
+such as via a kernel or terminal.
+These permissions should generally be considered sufficient to perform actions equivalent
+to ~all other permissions via other means.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">resource</span></code> being accessed refers to the resource name in the Jupyter Server’s API endpoints.
+In most cases, this is the field after <code class="docutils literal notranslate"><span class="pre">/api/</span></code>.
+For instance, values for <code class="docutils literal notranslate"><span class="pre">resource</span></code> in the endpoints provided by the base Jupyter Server package,
+and the corresponding permissions:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>resource</p></th>
+<th class="head"><p>read</p></th>
+<th class="head"><p>write</p></th>
+<th class="head"><p>execute</p></th>
+<th class="head"><p>endpoints</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>resource name</em></p></td>
+<td><p><em>what can you do with read permissions?</em></p></td>
+<td><p><em>what can you do with write permissions?</em></p></td>
+<td><p><em>what can you do with execute permissions, if anything?</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/...</span></code> <em>what endpoints are governed by this resource?</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>api</p></td>
+<td><p>read server status (last activity, number of kernels, etc.), OpenAPI specification</p></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/status</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/spec.yaml</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>csp</p></td>
+<td></td>
+<td><p>report content-security-policy violations</p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/security/csp-report</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>config</p></td>
+<td><p>read frontend configuration, such as for notebook extensions</p></td>
+<td><p>modify frontend configuration</p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/config</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>contents</p></td>
+<td><p>read files</p></td>
+<td><p>modify files (create, modify, delete)</p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/contents</span></code>, <code class="docutils literal notranslate"><span class="pre">/view</span></code>, <code class="docutils literal notranslate"><span class="pre">/files</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>kernels</p></td>
+<td><p>list kernels, get status of kernels</p></td>
+<td><p>start, stop, and restart kernels</p></td>
+<td><p>Connect to kernel websockets, send/recv kernel messages.
+<strong>This generally means arbitrary code execution,
+and should usually be considered equivalent to having all other permissions.</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/kernels</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>kernelspecs</p></td>
+<td><p>read, list information about available kernels</p></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/kernelspecs</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>nbconvert</p></td>
+<td><p>render notebooks to other formats via nbconvert.
+<strong>Note: depending on server-side configuration,
+this *could* involve execution.</strong></p></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/nbconvert</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>server</p></td>
+<td></td>
+<td><p>Shutdown the server</p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/shutdown</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>sessions</p></td>
+<td><p>list current sessions (association of documents to kernels)</p></td>
+<td><p>create, modify, and delete existing sessions,
+which includes starting, stopping, and deleting kernels.</p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/sessions</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>terminals</p></td>
+<td><p>list running terminals and their last activity</p></td>
+<td><p>start new terminals, stop running terminals</p></td>
+<td><p>Connect to terminal websockets, execute code in a shell.
+<strong>This generally means arbitrary code execution,
+and should usually be considered equivalent to having all other permissions.</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/api/terminals</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Extensions may define their own resources.
+Extension resources should start with <code class="docutils literal notranslate"><span class="pre">extension_name:</span></code> to avoid namespace conflicts.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">is_authorized(...)</span></code> returns <code class="docutils literal notranslate"><span class="pre">True</span></code>, the request is made; otherwise, a
+<code class="docutils literal notranslate"><span class="pre">HTTPError(403)</span></code> (403 means “Forbidden”) error is raised, and the request is blocked.</p>
+<p>By default, authorization is turned off—i.e. <code class="docutils literal notranslate"><span class="pre">is_authorized()</span></code> always returns <code class="docutils literal notranslate"><span class="pre">True</span></code> and
+all authenticated users are allowed to make all types of requests. To turn-on authorization, pass
+a class that inherits from <code class="docutils literal notranslate"><span class="pre">Authorizer</span></code> to the <code class="docutils literal notranslate"><span class="pre">ServerApp.authorizer_class</span></code>
+parameter, implementing a <code class="docutils literal notranslate"><span class="pre">is_authorized()</span></code> method with your desired authorization logic, as
+follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">jupyter_server.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authorizer</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyAuthorizationManager</span><span class="p">(</span><span class="n">Authorizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Class for authorizing access to resources in the Jupyter Server.</span>
+
+<span class="sd">    All authorizers used in Jupyter Server should inherit from</span>
+<span class="sd">    AuthorizationManager and, at the very minimum, override and implement</span>
+<span class="sd">    an `is_authorized` method with the following signature.</span>
+
+<span class="sd">    The `is_authorized` method is called by the `@authorized` decorator in</span>
+<span class="sd">    JupyterHandler. If it returns True, the incoming request to the server</span>
+<span class="sd">    is accepted; if it returns False, the server returns a 403 (Forbidden) error code.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_authorized</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">JupyterHandler</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resource</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A method to determine if `user` is authorized to perform `action`</span>
+<span class="sd">        (read, write, or execute) on the `resource` type.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ------------</span>
+<span class="sd">        user : usually a dict or string</span>
+<span class="sd">            A truthy model representing the authenticated user.</span>
+<span class="sd">            A username string by default,</span>
+<span class="sd">            but usually a dict when integrating with an auth provider.</span>
+
+<span class="sd">        action : str</span>
+<span class="sd">            the category of action for the current request: read, write, or execute.</span>
+
+<span class="sd">        resource : str</span>
+<span class="sd">            the type of resource (i.e. contents, kernels, files, etc.) the user is requesting.</span>
+
+<span class="sd">        Returns True if user authorized to make request; otherwise, returns False.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># implement your authorization logic here</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">is_authorized()</span></code> method will automatically be called whenever a handler is decorated with
+<code class="docutils literal notranslate"><span class="pre">&#64;authorized</span></code> (from <code class="docutils literal notranslate"><span class="pre">jupyter_server.auth</span></code>), similarly to the
+<code class="docutils literal notranslate"><span class="pre">&#64;authenticated</span></code> decorator for authentication (from <code class="docutils literal notranslate"><span class="pre">tornado.web</span></code>).</p>
+</section>
+</section>
+<section id="kernel-transport-encryption">
+<h2>Kernel transport encryption<a class="headerlink" href="#kernel-transport-encryption" title="Link to this heading">#</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.20.</span></p>
+</div>
+<p>By default, ZMQ sockets used to communicate with kernels (shell, IOPub, stdin,
+control, heartbeat) are bound to TCP ports with no transport-level encryption.
+Any process on the same host that can reach those ports can connect and read
+messages, including all IOPub output.</p>
+<p><a class="reference external" href="https://rfc.zeromq.org/spec/26/">CurveZMQ</a> adds elliptic-curve
+encryption and authentication directly at the ZMQ transport layer.
+When enabled, the <code class="docutils literal notranslate"><span class="pre">KernelManager</span></code> generates a keypair, writes the keys into
+the kernel’s connection file, and configures all sockets as a CurveZMQ server.
+Clients must present the correct server public key to connect; unauthenticated
+connections are silently dropped before any data is delivered.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>CurveZMQ is only available when pyzmq was compiled against a libzmq that
+includes libsodium. You can verify this with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">"import zmq; print(zmq.has('curve'))"</span>
+</pre></div>
+</div>
+<p>If this prints <code class="docutils literal notranslate"><span class="pre">False</span></code>, the <code class="docutils literal notranslate"><span class="pre">transport_encryption</span></code> setting has no
+effect and attempts to set it to <code class="docutils literal notranslate"><span class="pre">'auto'</span></code> or <code class="docutils literal notranslate"><span class="pre">'required'</span></code> will raise
+a configuration error.</p>
+</div>
+<section id="the-transport-encryption-setting">
+<h3>The <code class="docutils literal notranslate"><span class="pre">transport_encryption</span></code> setting<a class="headerlink" href="#the-transport-encryption-setting" title="Link to this heading">#</a></h3>
+<p>Transport encryption is controlled by the <code class="docutils literal notranslate"><span class="pre">KernelManager.transport_encryption</span></code>
+traitlet, which accepts three values:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'disabled'</span></code> (default)</dt><dd><p>No CurveZMQ keys are generated. All kernel sockets are unencrypted.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">'auto'</span></code></dt><dd><p>Keys are generated <strong>only when the kernelspec declares support</strong> via
+<code class="docutils literal notranslate"><span class="pre">metadata.supported_encryption:</span> <span class="pre">['curve']</span></code>. Kernelspecs that do not
+declare this field are started without encryption, so the setting is safe
+to enable globally without breaking existing kernels.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">'required'</span></code></dt><dd><p>Keys are always generated. Startup fails with a <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> if the
+kernelspec does not declare <code class="docutils literal notranslate"><span class="pre">metadata.supported_encryption:</span> <span class="pre">['curve']</span></code>,
+so kernels that have not been updated to handle the connection-file keys
+are never started unencrypted.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">transport_encryption</span></code> applies to both the <code class="docutils literal notranslate"><span class="pre">tcp</span></code> and <code class="docutils literal notranslate"><span class="pre">ipc</span></code>
+transports. IPC sockets also rely on filesystem permissions for access
+control, but CurveZMQ can be layered on top for defense in depth.</p>
+</div>
+<p>To enable encryption globally for all kernels that support it, add the
+following to your <code class="file docutils literal notranslate"><span class="pre">jupyter_server_config.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">KernelManager</span><span class="o">.</span><span class="n">transport_encryption</span> <span class="o">=</span> <span class="s2">"auto"</span>
+</pre></div>
+</div>
+<p>To enforce encryption and prevent unencrypted kernels from starting:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">KernelManager</span><span class="o">.</span><span class="n">transport_encryption</span> <span class="o">=</span> <span class="s2">"required"</span>
+</pre></div>
+</div>
+</section>
+<section id="kernelspec-requirements">
+<h3>Kernelspec requirements<a class="headerlink" href="#kernelspec-requirements" title="Link to this heading">#</a></h3>
+<p>A kernel must declare CurveZMQ support in its <code class="file docutils literal notranslate"><span class="pre">kernel.json</span></code> before the
+<code class="docutils literal notranslate"><span class="pre">KernelManager</span></code> will provision keys for it:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"argv"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-m"</span><span class="p">,</span><span class="w"> </span><span class="s2">"ipykernel_launcher"</span><span class="p">,</span><span class="w"> </span><span class="s2">"-f"</span><span class="p">,</span><span class="w"> </span><span class="s2">"{connection_file}"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"display_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Python 3"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"language"</span><span class="p">:</span><span class="w"> </span><span class="s2">"python"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"supported_encryption"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"curve"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">transport_encryption</span></code> is <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>, kernelspecs without this field are
+started normally without encryption. When it is <code class="docutils literal notranslate"><span class="pre">'required'</span></code>, their startup
+is refused.</p>
+<p>The kernel itself must read <code class="docutils literal notranslate"><span class="pre">curve_publickey</span></code> and <code class="docutils literal notranslate"><span class="pre">curve_secretkey</span></code> from
+the connection file and apply them to its ZMQ sockets. Kernels based on
+ipykernel 7.3 do this automatically when the fields are present.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When updating a previously installed kernel to a version that supports encryption
+you may need to re-install the kernelspec or manually add the <code class="docutils literal notranslate"><span class="pre">supported_encryption</span></code>
+metadata field. If you subsequently decide to downgrade, you will need to
+remove this field as otherwise the kernel will silently fail to connect.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="security-in-notebook-documents">
+<h1>Security in notebook documents<a class="headerlink" href="#security-in-notebook-documents" title="Link to this heading">#</a></h1>
+<p>As Jupyter Server become more popular for sharing and collaboration,
+the potential for malicious people to attempt to exploit the notebook
+for their nefarious purposes increases. IPython 2.0 introduced a
+security model to prevent execution of untrusted code without explicit
+user input.</p>
+<section id="the-problem">
+<h2>The problem<a class="headerlink" href="#the-problem" title="Link to this heading">#</a></h2>
+<p>The whole point of Jupyter is arbitrary code execution. We have no
+desire to limit what can be done with a notebook, which would negatively
+impact its utility.</p>
+<p>Unlike other programs, a Jupyter notebook document includes output.
+Unlike other documents, that output exists in a context that can execute
+code (via Javascript).</p>
+<p>The security problem we need to solve is that no code should execute
+just because a user has <strong>opened</strong> a notebook that <strong>they did not
+write</strong>. Like any other program, once a user decides to execute code in
+a notebook, it is considered trusted, and should be allowed to do
+anything.</p>
+</section>
+<section id="our-security-model">
+<h2>Our security model<a class="headerlink" href="#our-security-model" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Untrusted HTML is always sanitized</p></li>
+<li><p>Untrusted Javascript is never executed</p></li>
+<li><p>HTML and Javascript in Markdown cells are never trusted</p></li>
+<li><p><strong>Outputs</strong> generated by the user are trusted</p></li>
+<li><p>Any other HTML or Javascript (in Markdown cells, output generated by
+others) is never trusted</p></li>
+<li><p>The central question of trust is “Did the current user do this?”</p></li>
+</ul>
+</section>
+<section id="the-details-of-trust">
+<h2>The details of trust<a class="headerlink" href="#the-details-of-trust" title="Link to this heading">#</a></h2>
+<p>When a notebook is executed and saved, a signature is computed from a
+digest of the notebook’s contents plus a secret key. This is stored in a
+database, writable only by the current user. By default, this is located at:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/.</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">jupyter</span><span class="o">/</span><span class="n">nbsignatures</span><span class="o">.</span><span class="n">db</span>  <span class="c1"># Linux</span>
+<span class="o">~/</span><span class="n">Library</span><span class="o">/</span><span class="n">Jupyter</span><span class="o">/</span><span class="n">nbsignatures</span><span class="o">.</span><span class="n">db</span>       <span class="c1"># OS X</span>
+<span class="o">%</span><span class="n">APPDATA</span><span class="o">%/</span><span class="n">jupyter</span><span class="o">/</span><span class="n">nbsignatures</span><span class="o">.</span><span class="n">db</span>       <span class="c1"># Windows</span>
+</pre></div>
+</div>
+<p>Each signature represents a series of outputs which were produced by code the
+current user executed, and are therefore trusted.</p>
+<p>When you open a notebook, the server computes its signature, and checks if it’s
+in the database. If a match is found, HTML and Javascript
+output in the notebook will be trusted at load, otherwise it will be
+untrusted.</p>
+<p>Any output generated during an interactive session is trusted.</p>
+<section id="updating-trust">
+<h3>Updating trust<a class="headerlink" href="#updating-trust" title="Link to this heading">#</a></h3>
+<p>A notebook’s trust is updated when the notebook is saved. If there are
+any untrusted outputs still in the notebook, the notebook will not be
+trusted, and no signature will be stored. If all untrusted outputs have
+been removed (either via <code class="docutils literal notranslate"><span class="pre">Clear</span> <span class="pre">Output</span></code> or re-execution), then the
+notebook will become trusted.</p>
+<p>While trust is updated per output, this is only for the duration of a
+single session. A newly loaded notebook file is either trusted or not in its
+entirety.</p>
+</section>
+<section id="explicit-trust">
+<h3>Explicit trust<a class="headerlink" href="#explicit-trust" title="Link to this heading">#</a></h3>
+<p>Sometimes re-executing a notebook to generate trusted output is not an
+option, either because dependencies are unavailable, or it would take a
+long time. Users can explicitly trust a notebook in two ways:</p>
+<ul>
+<li><p>At the command-line, with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">jupyter</span> <span class="n">trust</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">notebook</span><span class="o">.</span><span class="n">ipynb</span>
+</pre></div>
+</div>
+</li>
+<li><p>After loading the untrusted notebook, with <code class="docutils literal notranslate"><span class="pre">File</span> <span class="pre">/</span> <span class="pre">Trust</span> <span class="pre">Notebook</span></code></p></li>
+</ul>
+<p>These two methods simply load the notebook, compute a new signature, and add
+that signature to the user’s database.</p>
+</section>
+</section>
+<section id="content-security-policy-for-nbconvert">
+<h2>Content-Security-Policy for nbconvert<a class="headerlink" href="#content-security-policy-for-nbconvert" title="Link to this heading">#</a></h2>
+<p>When notebooks are rendered via nbconvert (<code class="docutils literal notranslate"><span class="pre">/nbconvert/</span></code> endpoints),
+the server adds a <code class="docutils literal notranslate"><span class="pre">sandbox</span> <span class="pre">allow-scripts</span></code> directive to the
+<code class="docutils literal notranslate"><span class="pre">Content-Security-Policy</span></code> header by default. This confines any
+JavaScript in the rendered output to a unique origin, preventing it
+from interacting with the Jupyter server.</p>
+<p>This behavior is controlled by <a class="reference internal" href="../api/jupyter_server.html#jupyter_server.serverapp.ServerApp.nbconvert_csp_sandbox" title="jupyter_server.serverapp.ServerApp.nbconvert_csp_sandbox"><code class="xref py py-attr docutils literal notranslate"><span class="pre">nbconvert_csp_sandbox</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># jupyter_server_config.py</span>
+<span class="n">c</span><span class="o">.</span><span class="n">ServerApp</span><span class="o">.</span><span class="n">nbconvert_csp_sandbox</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># default</span>
+</pre></div>
+</div>
+</section>
+<section id="reporting-security-issues">
+<h2>Reporting security issues<a class="headerlink" href="#reporting-security-issues" title="Link to this heading">#</a></h2>
+<p>If you find a security vulnerability in Jupyter, either a failure of the
+code to properly implement the model described here, or a failure of the
+model itself, please report it to <a class="reference external" href="mailto:security&#37;&#52;&#48;ipython&#46;org">security<span>&#64;</span>ipython<span>&#46;</span>org</a>.</p>
+</section>
+<section id="affected-use-cases">
+<h2>Affected use cases<a class="headerlink" href="#affected-use-cases" title="Link to this heading">#</a></h2>
+<p>Some use cases that work in Jupyter 1.0 became less convenient in
+2.0 as a result of the security changes. We do our best to minimize
+these annoyances, but security is always at odds with convenience.</p>
+<section id="javascript-and-css-in-markdown-cells">
+<h3>Javascript and CSS in Markdown cells<a class="headerlink" href="#javascript-and-css-in-markdown-cells" title="Link to this heading">#</a></h3>
+<p>While never officially supported, it had become common practice to put
+hidden Javascript or CSS styling in Markdown cells, so that they would
+not be visible on the page. Since Markdown cells are now sanitized (by
+<a class="reference external" href="https://developers.google.com/caja">Google Caja</a>), all Javascript
+(including click event handlers, etc.) and CSS will be stripped.</p>
+<p>We plan to provide a mechanism for notebook themes, but in the meantime
+styling the notebook can only be done via either <code class="docutils literal notranslate"><span class="pre">custom.css</span></code> or CSS
+in HTML output. The latter only have an effect if the notebook is
+trusted, because otherwise the output will be sanitized just like
+Markdown.</p>
+</section>
+<section id="collaboration">
+<h3>Collaboration<a class="headerlink" href="#collaboration" title="Link to this heading">#</a></h3>
+<p>When collaborating on a notebook, people probably want to see the
+outputs produced by their colleagues’ most recent executions. Since each
+collaborator’s key will differ, this will result in each share starting
+in an untrusted state. There are three basic approaches to this:</p>
+<ul class="simple">
+<li><p>re-run notebooks when you get them (not always viable)</p></li>
+<li><p>explicitly trust notebooks via <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">trust</span></code> or the notebook menu
+(annoying, but easy)</p></li>
+<li><p>share a notebook signatures database, and use configuration dedicated to the
+collaboration while working on the project.</p></li>
+</ul>
+<p>To share a signatures database among users, you can configure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">NotebookNotary</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="s2">"/path/to/signature_dir"</span>
+</pre></div>
+</div>
+<p>to specify a non-default path to the SQLite database (of notebook hashes,
+essentially).</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="public-server.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Running a public Jupyter Server</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="configuring-logging.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Configuring Logging</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Security in the Jupyter Server</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternatives-to-token-authentication">Alternatives to token authentication</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authentication-and-authorization">Authentication and Authorization</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-providers">Identity Providers</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter_server.auth.IdentityProvider"><code class="docutils literal notranslate"><span class="pre">IdentityProvider</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter_server.auth.IdentityProvider.get_user"><code class="docutils literal notranslate"><span class="pre">IdentityProvider.get_user()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter_server.auth.IdentityProvider.identity_model"><code class="docutils literal notranslate"><span class="pre">IdentityProvider.identity_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter_server.auth.User"><code class="docutils literal notranslate"><span class="pre">User</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#identity-model">Identity Model</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#authorization">Authorization</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter_server.auth.Authorizer"><code class="docutils literal notranslate"><span class="pre">Authorizer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter_server.auth.Authorizer.is_authorized"><code class="docutils literal notranslate"><span class="pre">Authorizer.is_authorized()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kernel-transport-encryption">Kernel transport encryption</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-transport-encryption-setting">The <code class="docutils literal notranslate"><span class="pre">transport_encryption</span></code> setting</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kernelspec-requirements">Kernelspec requirements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#security-in-notebook-documents">Security in notebook documents</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-problem">The problem</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#our-security-model">Our security model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-details-of-trust">The details of trust</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-trust">Updating trust</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explicit-trust">Explicit trust</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#content-security-policy-for-nbconvert">Content-Security-Policy for nbconvert</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reporting-security-issues">Reporting security issues</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#affected-use-cases">Affected use cases</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#javascript-and-css-in-markdown-cells">Javascript and CSS in Markdown cells</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#collaboration">Collaboration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/jupyter-server/jupyter_server/edit/main/docs/source/operators/security.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/operators/security.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2020, Jupyter Team, https://jupyter.org.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.19.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

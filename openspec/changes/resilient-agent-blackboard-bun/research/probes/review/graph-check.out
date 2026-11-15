@@ -1,0 +1,18 @@
+declared edges: 32; implied edges checked: 14; missing from design.md graph: 14
+  MISSING convergence -> board   (design.md:150 ErrorFn takes BoardView; convergence spec:4-8 counts datoms; spec:23 retracts patch datoms)
+  MISSING capability -> board   (capability-isolation spec:21 policy engine writes a `policy/denied` datom)
+  MISSING mcp-gateway -> board   (mcp-tool-discovery spec:27 gateway writes a `tool/revoked` datom)
+  MISSING sandbox -> capability   (sandboxed-execution spec:34 + tasks.md:53 sandbox output tagged untrusted and routed through Q)
+  MISSING sandbox -> board   (contracts spec:26 / sandboxed spec:40 `run/result` datom written)
+  MISSING personas -> board   (dynamic-persona-factory spec:12 persona/* datoms written to board)
+  MISSING context -> capability   (capability-isolation spec:5 P context limited to cap.source user|trusted-tool; context builds P prompts (design.md:112))
+  MISSING decide -> convergence   (decision-protocols spec:38 gate requires E(s) not increased)
+  MISSING decide -> falsify   (decision-protocols spec:35-36 gate reads refutation budget + survival)
+  MISSING falsify -> personas   (falsification-engine spec:5 'Ask the Refuter persona for checks')
+  MISSING falsify -> capability   (sandbox output must go through Q (sandboxed spec:34); falsify consumes check output)
+  MISSING safe-state -> convergence   (safe-state spec:20 writes last E(s))
+  MISSING mcp-gateway -> sandbox   (mcp-tool-discovery spec:40 agent-written MCP servers started in tier B and listed through the gateway)
+  MISSING mcp-gateway -> safe-state   (createPullRequest (tasks.md:68) must push the checkpointed branch owned by safe-state (D15))
+cycles in declared+implied graph: 0
+fan-out control-shell: 12 | fan-in board: 11 | fan-in capability: 5
+proposed graph: 11 packages, 38 edges, cycles: 0

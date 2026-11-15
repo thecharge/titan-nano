@@ -1,0 +1,977 @@
+capability	requirement	scenario	task	stage	test_level	status
+harness-adapters	Codex developer instructions belong to each session	New and resumed Codex roles reach native configuration	6.4	local	integration	implemented
+harness-adapters	Codex developer instructions belong to each session	Codex role characters cannot become configuration	6.4	local	integration	implemented
+harness-adapters	Codex developer instructions belong to each session	Codex peer cancellation retains its own role	6.4	local	integration	implemented
+harness-adapters	Codex developer instructions belong to each session	Reversed Codex roles retain their bindings	6.4	local	integration	implemented
+approvals	Every request kind has an approval level	Default level for a tool	16.1	local	integration	implemented
+approvals	Only the person can lower a level	Paid compute cannot become automatic	22.12	full	integration	pending
+approvals	Initial plans and added work use the same approval rules	Initial tool server needs approval	22.10	local	integration	pending
+approvals	Initial plans and added work use the same approval rules	Workflow file tries to lower a level	16.1	local	integration	implemented
+approvals	Initial plans and added work use the same approval rules	Config tries to lower a fixed level	16.1	local	integration	implemented
+approvals	The main agent can pass a request up to the person	Main agent asks the person	16.2	local	integration	implemented
+approvals	Human-level requests require the person token	Main agent answers for the person	16.2	local	integration	implemented
+approvals	Only the first answer counts	Two answers at the same time	16.3	local	integration	implemented
+approvals	Waiting for an answer ends the agent's turn	Tool returns while the request waits	16.4	local	integration	implemented
+approvals	Every decision goes on the board	Automatic decision	16.5	local	integration	implemented
+approvals	The person approves locked statements by default	Lock request with its text	24.2	full	integration	implemented
+approvals	Approval names the exact operation	Approved command changes	25.10	local	integration	pending
+approvals	A scoped tool approval can cover repeated bundled starts	Bundled server starts for a second worker	25.23	local	integration	pending
+approvals	A scoped tool approval can cover repeated bundled starts	Workflow names an unapproved plug-in	25.23	local	integration	pending
+backend-plugins	A plug-in package adds backends and embedders	New vendor from a plug-in	6.12	full	contract	pending
+backend-plugins	Plug-ins are named, never found by themselves	Plug-in installed in the project	6.12	full	end-to-end	pending
+backend-plugins	Plug-ins are named, never found by themselves	Plug-in not installed	6.12	full	end-to-end	pending
+backend-plugins	Plug-ins must match the version of the port	Plug-in for an older port	6.12	full	contract	pending
+backend-plugins	A backend id is used only once	Two plug-ins with the same backend	6.12	full	contract	pending
+backend-plugins	The meaning search uses an embedder port	Embedder changed	4.6	full	contract	implemented
+backend-plugins	The core does not depend on any adapter	Wrong dependency	2.4	foundation	contract	implemented
+backend-plugins	Import approval has a preflight path	Approve a plug-in before validation continues	25.23	local	contract	pending
+backend-selection	Six backends	Same step on a model API	6.7	full	integration	pending
+backend-selection	Each persona can have its own backend	Mixed backends in one run	6.8	full	integration	pending
+backend-selection	Each persona can have its own backend	Flag overrides the file	6.8	full	integration	pending
+backend-selection	List the backends that are ready	Only the Claude SDK and one key	6.8	full	integration	pending
+backend-selection	List the backends that are ready	Run with a backend that is not ready	6.8	full	integration	pending
+backend-selection	API keys are never stored	Key not in the record	6.9	full	end-to-end	pending
+backend-selection	A persona on a model API gets tool servers only	Model API persona uses the hub	6.7	full	integration	pending
+backend-selection	A persona on a model API gets tool servers only	Model API persona with Bash	6.8	full	integration	pending
+backend-selection	Other programs can control titan	JSON run output has one object	22.14	local	end-to-end	implemented
+backend-selection	Other programs can control titan	A program runs a workflow	13.1	local	integration	implemented
+backend-selection	Other programs can control titan	A program uses the HTTP API	13.2	local	integration	implemented
+backend-selection	A task that holds a key is never sent	Key value in a task	21.5	full	integration	pending
+backend-selection	Secrets are checked before records are persisted	Key in the workflow source	25.14	local	integration	pending
+backend-selection	Secrets are checked before records are persisted	Backend answer echoes a key	25.14	local	integration	pending
+dev-standards	One command runs the complete offline check	All steps pass	2.12	foundation	integration	implemented
+dev-standards	One command runs the complete offline check	A failing step stops the check	2.12	foundation	integration	implemented
+dev-standards	One command runs the complete offline check	Documentation-only change skips the suite	2.12	foundation	integration	implemented
+dev-standards	Specification-only commits have a runnable check	Check on a specification-only checkout	2.9	foundation	integration	implemented
+dev-standards	A release proves installation and use	Packed package misses a helper	22.17	foundation	integration	pending
+dev-standards	TypeScript runs in strict mode	Unchecked index	2.5	foundation	integration	implemented
+dev-standards	TypeScript runs in strict mode	A package turns strict off	2.5	foundation	integration	implemented
+dev-standards	Biome formats and lints the code	A promise with no await	2.6	foundation	integration	implemented
+dev-standards	Biome formats and lints the code	An import cycle	2.6	foundation	integration	implemented
+dev-standards	Work goes to main in small, checked commits	A push that breaks a test	2.13	foundation	integration	implemented
+dev-standards	Work goes to main in small, checked commits	GitHub Actions requires explicit authorization	2.13	foundation	integration	implemented
+dev-standards	Commit subjects follow Conventional Commits	Subject in the old form	2.10	foundation	integration	implemented
+dev-standards	Commit subjects follow Conventional Commits	Subject in the new form	2.10	foundation	integration	implemented
+dev-standards	Versions follow SemVer	A breaking port change	20.12	full	integration	pending
+dev-standards	Each design decision is written down	A new dependency	2.14	foundation	integration	implemented
+dev-standards	No key is ever written to the repository or the record	Key value in a record file	20.11	full	end-to-end	pending
+dev-standards	Delivery stages have separate evidence gates	Preview presented as a full release	25.18	release	end-to-end	pending
+dev-standards	Effectiveness claims need a fixed comparison	Reward rises but correctness falls	25.16	release	integration	pending
+harness-adapters	One interface for every agent tool	Same call, any adapter	6.1	foundation	contract	pending
+harness-adapters	One interface for every agent tool	Adapter for another version of the port	6.1	foundation	contract	pending
+harness-adapters	Each adapter states what it can do	Codex adapter flags	6.1	foundation	contract	pending
+harness-adapters	Sessions can be cancelled and closed	Cancel a running fake session	22.20	local	contract	pending
+harness-adapters	Every agent starts with a fresh context	Falsifier does not see the worker's session	10.2	local	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude persona with two tools	6.3	adapter	contract	pending
+harness-adapters	A persona's tools and skills reach its agent	Field an agent tool cannot apply	6.6	adapter	contract	pending
+harness-adapters	An agent's session can continue	Answer reaches the same session	6.3	adapter	contract	pending
+harness-adapters	Claude adapter uses the Claude Agent SDK	Live Claude agent	6.3	adapter	live	pending
+harness-adapters	Codex adapter uses the Codex SDK	Codex persona with a tool server	6.4	adapter	contract	pending
+harness-adapters	Codex adapter uses the Codex SDK	Live Codex agent	6.4	adapter	live	pending
+harness-adapters	Codex adapter uses the Codex SDK	Folder is not a Git repository	6.4	adapter	contract	pending
+harness-adapters	Antigravity adapter uses the Antigravity SDK through a Python helper	Live Antigravity agent	6.5	adapter	live	pending
+harness-adapters	Antigravity adapter uses the Antigravity SDK through a Python helper	Python package missing	6.5	adapter	contract	pending
+harness-adapters	Answers that break the schema are not used	Agent answers with the wrong shape twice	6.2	foundation	contract	pending
+harness-adapters	The fake adapter makes tests repeatable	Scripted answers	6.1	local	end-to-end	implemented
+harness-adapters	SDK bindings are verified against pinned primary sources	Researched SDK option is unavailable	25.19	adapter	contract	pending
+harness-detection	Detect the agent tool from the environment	Started from Claude Code	7.1	adapter	integration	pending
+harness-detection	Detect the agent tool from the environment	Started from Codex	7.1	adapter	integration	pending
+harness-detection	Detect the agent tool from the environment	Started from Antigravity	7.1	adapter	integration	pending
+harness-detection	The flag wins over detection	Flag and environment disagree	7.1	adapter	integration	pending
+harness-detection	The workflow file can name the agent tool	Workflow file names Antigravity	7.1	adapter	integration	pending
+harness-detection	Stop with a clear message when no agent tool is found	Run from a plain shell	7.1	adapter	integration	pending
+harness-detection	Show what was detected	Doctor inside Claude Code	7.2	adapter	end-to-end	implemented
+harness-detection	The detected agent tool gives the default backend	No backend set anywhere	7.1	adapter	integration	pending
+harness-detection	Ambiguous detection needs an explicit choice	Two harness variables	25.19	adapter	integration	pending
+harness-detection	Ambiguous detection needs an explicit choice	Explicit API backend in a plain shell	25.19	adapter	integration	pending
+hive-collaboration	The board drives the work	A step starts when its input survives	15.1	full	integration	implemented
+hive-collaboration	Any agent can add steps	A planner adds three steps	15.2	full	integration	implemented
+hive-collaboration	Any agent can add steps	Added step without a falsifier	25.1	foundation	integration	pending
+hive-collaboration	Any agent can add steps	Steps from a refuted result are dropped	15.2	full	integration	implemented
+hive-collaboration	A step can be an open call	Open call answered from the register	15.3	full	integration	implemented
+hive-collaboration	A step can be an open call	No persona fits the call	15.3	full	integration	implemented
+hive-collaboration	A step can split its work into parts	Width set in the file	15.4	full	integration	implemented
+hive-collaboration	Many runs share one server	Two runs at once	15.5	full	integration	implemented
+hive-collaboration	Limits stop a runaway hive	Helper can run with one place	15.1	full	integration	pending
+hive-collaboration	Limits stop a runaway hive	Split cannot bypass the work limit	15.1	full	integration	pending
+hive-collaboration	Limits stop a runaway hive	Circular help request	15.1	full	integration	pending
+hive-collaboration	Limits stop a runaway hive	Runaway agent	15.6	full	integration	implemented
+hive-collaboration	Each worker sees the plan of its run	Worker prompt holds the step list	15.7	full	integration	implemented
+hive-collaboration	A run that makes no progress gets a new plan	Repeated results start a new plan	21.1	full	integration	pending
+hive-collaboration	A run that makes no progress gets a new plan	Steady progress never starts a new plan	21.1	full	integration	pending
+hive-collaboration	Split parts produce one ordered output	Parts finish out of order	25.5	local	integration	pending
+hive-collaboration	Split parts produce one ordered output	Empty split	25.5	local	integration	pending
+hive-collaboration	All requested work has a finite allowance	Helpers exhaust the work allowance	25.6	full	integration	pending
+hive-collaboration	All requested work has a finite allowance	Losing candidate adds steps	25.6	full	integration	pending
+knowledge-hub	The knowledge hub is a folder of readable files	Add a fact	4.1	full	integration	implemented
+knowledge-hub	The hub has a readable index	Index after an add	4.1	full	integration	implemented
+knowledge-hub	Search by words, by meaning, or both	Word search shows why it matched	4.2	full	integration	implemented
+knowledge-hub	Search by words, by meaning, or both	Meaning search finds a related entry without the same words	4.3	full	integration	implemented
+knowledge-hub	Search by words, by meaning, or both	Word search works without the vector parts	4.3	full	integration	implemented
+knowledge-hub	Every search result is readable	Result fields	4.2	full	integration	implemented
+knowledge-hub	The search index can be rebuilt from the files	Index file deleted	4.4	full	integration	implemented
+knowledge-hub	Entries can be read, changed and deleted, and old versions stay	Update keeps the old version	4.1	full	integration	implemented
+knowledge-hub	The swarm can use the hub during a run	Refuted attempt cannot publish on a later success	4.1	full	integration	implemented
+knowledge-hub	The swarm can use the hub during a run	Losing candidate cannot publish	4.1	full	integration	implemented
+knowledge-hub	The swarm can use the hub during a run	Hub delete cannot bypass persona approval	22.4	full	integration	pending
+knowledge-hub	The swarm can use the hub during a run	Refuted step's fact is undone	9.6	local	integration	implemented
+knowledge-hub	The swarm can use the hub during a run	Surviving step's fact is kept	9.6	local	integration	implemented
+knowledge-hub	Changes from many processes at once are not lost	Crash between file and index changes	4.1	full	integration	pending
+knowledge-hub	Changes from many processes at once are not lost	Pending change conflicts with a newer entry	4.1	full	integration	pending
+knowledge-hub	Changes from many processes at once are not lost	Eight writers at once	4.5	full	end-to-end	implemented
+knowledge-hub	Plan entries can be rebuilt and searched	Plan survives reindexing	22.3	full	integration	pending
+knowledge-hub	Publication conflicts are visible in the run outcome	One of two pending entries conflicts	25.12	full	integration	pending
+knowledge-hub	Publication conflicts are visible in the run outcome	Attempt reads its own update	25.12	full	integration	pending
+main-agent-guide	The guide tells the main agent how to design and run a workflow	Guide lists the steps	12.1	adapter	end-to-end	implemented
+main-agent-guide	The guide holds the file format and the examples	Schema in the guide matches titan schema	12.1	adapter	end-to-end	implemented
+main-agent-guide	titan plugs into each agent tool as a skill and a tool server	Install into a project	12.2	adapter	end-to-end	implemented
+main-agent-guide	titan plugs into each agent tool as a skill and a tool server	Install for Codex	12.2	adapter	end-to-end	implemented
+main-agent-guide	titan plugs into each agent tool as a skill and a tool server	Someone else's file is there	12.2	adapter	integration	implemented
+main-agent-guide	The person can start titan by name	Skill header	12.2	adapter	integration	implemented
+main-agent-guide	The main agent can design and run a workflow from a problem alone	Live main agent in Claude Code	19.4	full	live	pending
+main-agent-guide	The guide says when not to split work	Guide warns about sequential work	21.4	full	end-to-end	pending
+main-agent-guide	The guide asks for proof checks where a claim can be proven	Guide text on proof checks	24.12	full	end-to-end	pending
+persona-board	Every message goes onto the board	Board after a run with a question	9.1	local	integration	implemented
+persona-board	Every message goes onto the board	Parallel steps write at the same time	9.1	local	integration	implemented
+persona-board	Agents send requests in their answer	Unknown request kind	9.1	local	integration	implemented
+persona-board	A persona can ask another persona	Answer reaches the asking agent	9.2	local	integration	implemented
+persona-board	Each agent sees only the messages meant for it	Falsifier does not see board questions	9.3	local	integration	implemented
+persona-board	Requests to the main agent pause only the step that asked	Persona asks for a tool	9.4	local	integration	implemented
+persona-board	The main agent answers requests and resumes	Tool given and run resumed	9.5	local	end-to-end	implemented
+persona-board	The main agent answers requests and resumes	Request denied	9.5	local	integration	implemented
+persona-board	The main agent answers requests and resumes	Request accepted as sent	9.7	local	integration	implemented
+persona-board	The main agent answers requests and resumes	Resume with an open request	9.5	local	end-to-end	implemented
+persona-lifecycle	Each persona version has measures	Measures after a run	5.4	full	end-to-end	implemented
+persona-lifecycle	A persona moves through six states	A good persona becomes proven	5.5	full	integration	implemented
+persona-lifecycle	A persona moves through six states	Not enough results yet	5.5	full	integration	implemented
+persona-lifecycle	A persona moves through six states	A weak persona needs an update	5.5	full	integration	implemented
+persona-lifecycle	Wilson calculations have fixed numerical tests	Wilson bound examples	20.5	foundation	unit	implemented
+persona-lifecycle	Wilson calculations have fixed numerical tests	Wilson bound property	20.5	foundation	unit	implemented
+persona-lifecycle	An update runs next to the old version	Old and new versions both picked	5.6	full	unit	pending
+persona-lifecycle	Retired and deleted personas are not picked	Search leaves out a retired persona	5.6	full	integration	implemented
+persona-lifecycle	A delete needs the person and keeps the file	Person approves a delete	5.6	full	integration	pending
+persona-lifecycle	Near duplicates are offered as a merge	Two skeptics	5.7	full	unit	implemented
+persona-lifecycle	Persona pick follows its results and adapts to change	More than ten matching versions	22.5	full	unit	implemented
+persona-lifecycle	Persona pick follows its results and adapts to change	Persona that got better is found	5.8	full	integration	implemented
+persona-lifecycle	Persona pick follows its results and adapts to change	Floor for a slightly worse persona	5.8	full	integration	implemented
+persona-lifecycle	Persona measures count proof answers	Proof counts after a run	24.11	full	unit	pending
+persona-registry	Every persona is saved in the register	New persona from a run	5.1	full	integration	implemented
+persona-registry	Every persona is saved in the register	Other home folder	5.1	full	integration	implemented
+persona-registry	The main agent searches the register first	Find a skeptic	5.2	full	integration	implemented
+persona-registry	A persona can be reused, mutated or created	Mutate a judge	5.1	full	integration	implemented
+persona-registry	A persona can be reused, mutated or created	Unknown version	5.1	full	integration	implemented
+persona-registry	A persona's history is updated after each run	History after a run	5.3	full	integration	implemented
+persona-registry	Run history is replay-safe	Two runs create a persona version	25.12	full	integration	pending
+persona-registry	Run history is replay-safe	Replay does not increase persona uses	25.12	full	integration	pending
+run-dashboard	titan serve shows a dashboard of runs	The page loads only from titan	23.1	full	end-to-end	implemented
+run-dashboard	A person logs in to the dashboard with a one-time code	Login and a second try with the same code	23.2	full	integration	implemented
+run-dashboard	A person logs in to the dashboard with a one-time code	No cookie	23.2	full	integration	implemented
+run-dashboard	A person logs in to the dashboard with a one-time code	Call from another site	23.2	full	integration	implemented
+run-dashboard	The dashboard lists past and running runs	A past run and a running run	23.3	full	integration	implemented
+run-dashboard	The dashboard lists past and running runs	Cost not reported	23.3	full	integration	implemented
+run-dashboard	The dashboard shows the steps of a run	A refuted attempt and a proof	23.4	full	integration	implemented
+run-dashboard	The dashboard updates while a run goes on	A new event during a run	23.5	full	integration	implemented
+run-dashboard	The dashboard updates while a run goes on	Connect again after a break	23.5	full	integration	implemented
+run-dashboard	The dashboard only reads	A change through the dashboard	23.6	full	end-to-end	implemented
+run-dashboard	The dashboard only reads	The cookie on an API route that answers a request	23.6	full	integration	implemented
+run-dashboard	The guide shows how to view spans in a trace viewer	Jaeger example in the guide	23.8	full	end-to-end	pending
+run-dashboard	Untrusted record text is shown as text	Evidence contains browser code	25.11	full	integration	pending
+run-dashboard	Untrusted record text is shown as text	One backend omits cost	25.11	full	integration	pending
+runpod-backends	Two RunPod backends from one plug-in	Backend listed when the plug-in is loaded	18.1	full	integration	pending
+runpod-backends	The RunPod key comes only from the environment	Key not set	18.1	full	integration	pending
+runpod-backends	The RunPod key comes only from the environment	Key not in the record	6.9	full	end-to-end	pending
+runpod-backends	A vLLM persona gets tools only through tool servers	Model without tool calls	18.2	full	integration	pending
+runpod-backends	A worker on RunPod uses no local tool servers	Local tool server on a worker	18.2	full	integration	pending
+runpod-backends	A run that uses RunPod lasts at most 1 hour	Limit above one hour	18.3	full	integration	pending
+runpod-backends	RunPod jobs receive the remaining deadline and cancellation	Short jobs inside the hour	18.3	full	integration	pending
+runpod-backends	RunPod jobs receive the remaining deadline and cancellation	A 2-hour job is stopped	18.3	full	integration	pending
+runpod-backends	RunPod jobs receive the remaining deadline and cancellation	Open jobs are cancelled at the deadline	18.3	full	integration	pending
+runpod-backends	RunPod jobs receive the remaining deadline and cancellation	Too little time left	18.3	full	integration	pending
+runpod-backends	A run that reaches its time limit ends as timed out	Restart cannot reset the hour	22.11	full	integration	pending
+runpod-backends	A run that reaches its time limit ends as timed out	Result after a timeout	18.4	full	integration	pending
+runpod-backends	The person approves paid compute	Paid compute request	18.5	full	integration	pending
+runpod-backends	The person approves paid compute	Cancel call fails	22.12	full	integration	pending
+runpod-backends	A remote worker uses a hub snapshot	Remote worker changes the hub	22.13	full	integration	pending
+runpod-backends	vLLM requests obey the paid run boundary	vLLM reaches its deadline	25.20	full	integration	pending
+self-improving-loop	An improver writes a new workflow file after a run	Improver gets the record	11.1	full	end-to-end	implemented
+self-improving-loop	A new workflow file must pass three checks	Improver removes a falsifier	11.2	full	integration	implemented
+self-improving-loop	A new workflow file must pass three checks	New file is better	11.2	full	integration	implemented
+self-improving-loop	A new workflow file must pass three checks	New file does worse	11.2	full	integration	implemented
+self-improving-loop	The improver cannot add shell commands	Improver adds a script	11.2	full	integration	implemented
+self-improving-loop	The main agent's file is never overwritten	Second improvement	11.3	full	integration	implemented
+self-improving-loop	The loop runs a set number of rounds	Two rounds, second keeps nothing	11.4	full	integration	implemented
+self-improving-loop	Lessons can be added to personas	Lesson from a refutation	11.5	full	integration	implemented
+self-improving-loop	Lessons reach the next design	Lessons before a new design	11.6	full	integration	implemented
+self-improving-loop	The improve loop and the policy learn from the same run	Improver sees the reward	11.8	full	integration	pending
+self-improving-loop	The improve loop can be started on its own	Improve an earlier run	11.7	full	integration	implemented
+self-improving-loop	The loop cannot grant itself more work	Improver adds a proof script	25.7	full	integration	pending
+self-improving-loop	The loop cannot grant itself more work	Improver removes a proof check	25.7	full	integration	pending
+self-improving-loop	The loop cannot grant itself more work	Evaluation cannot nest the loop	25.6	full	integration	pending
+self-improving-loop	The loop cannot grant itself more work	No time left for improvement	25.6	full	integration	pending
+self-improving-loop	Improvement has an execution phase and a final accounting phase	Improvement overhead is counted once	25.24	full	integration	pending
+self-training-orchestration	titan keeps a policy for each kind of goal	Kind from the workflow file	17.1	full	unit	pending
+self-training-orchestration	A reward for each run	Reward in the run record	17.1	full	end-to-end	pending
+self-training-orchestration	A reward for each run	Empty run has a finite reward	22.21	full	unit	pending
+self-training-orchestration	A reward for each run	Restart cannot learn twice from one run	22.21	full	unit	pending
+self-training-orchestration	The person sets the price of time and of agents	Weights in the workflow file	17.1	full	unit	pending
+self-training-orchestration	The policy learns the split width	Width that does better is picked more	17.2	full	unit	pending
+self-training-orchestration	An alarm for serial collapse	Policy collapsed to one agent	17.3	full	unit	pending
+self-training-orchestration	An alarm for empty agents	Too many agents for the parts	17.3	full	unit	pending
+self-training-orchestration	Choices that worked leave trails that fade	Trail fades	17.4	full	unit	pending
+self-training-orchestration	Good plans are offered to the main agent	Plans before a new design	17.5	full	unit	implemented
+self-training-orchestration	The learned policy stays inside the rules	Policy cannot go over the parallel limit	17.6	full	unit	pending
+self-training-orchestration	The policy can be read and explained	Show a policy	17.6	full	unit	pending
+self-training-orchestration	Traces can be written for training a model elsewhere	Export traces	17.7	full	unit	pending
+self-training-orchestration	The reward counts proofs	Reward with a check that is not proven	24.11	full	unit	pending
+self-training-orchestration	The reward counts proofs	A run without checks	24.11	full	unit	pending
+self-training-orchestration	Learning uses a defined update and one owner	First policy result	25.13	full	unit	pending
+self-training-orchestration	Learning uses a defined update and one owner	Concurrent policy updates	25.13	full	unit	pending
+self-training-orchestration	Reward measurements have one denominator	Goal fails despite surviving steps	25.13	full	unit	pending
+self-training-orchestration	Alarm adjustments are explicit and bounded	Parallel limit prevents width above one	25.13	full	unit	pending
+step-falsification	Every result is falsified before it counts	All falsifiers fail to refute	10.1	local	integration	implemented
+step-falsification	Every result is falsified before it counts	One falsifier refutes	10.1	local	integration	implemented
+step-falsification	Falsifiers give a verdict with evidence	Refuted without evidence	10.1	local	integration	implemented
+step-falsification	Falsifiers do not see the worker's reasoning	Falsifier task content	10.2	local	integration	implemented
+step-falsification	A refuted result is tried again with the evidence	Survives on the second attempt	10.3	local	integration	implemented
+step-falsification	A refuted result is tried again with the evidence	Never survives	10.3	local	integration	implemented
+step-falsification	Several candidates compete and the best survivor wins	Three candidates, two survive	10.4	local	integration	implemented
+step-falsification	Several candidates compete and the best survivor wins	One candidate survives	10.4	local	integration	implemented
+step-falsification	Several candidates compete and the best survivor wins	No candidate survives	10.4	local	integration	implemented
+step-falsification	The judge answers with a choice and a reason	Judge picks B	10.4	local	integration	implemented
+step-falsification	A refutation can name its failure kind	Failure kinds in the result	21.2	full	integration	pending
+step-falsification	A refutation can name its failure kind	Unknown failure kind	21.2	full	integration	pending
+step-falsification	Candidates can run on different backends	Three candidates on two backends	21.3	full	integration	pending
+step-falsification	Proof checks run before the falsifier agents	A failed proof saves the falsifier agent	24.8	full	integration	pending
+test-strategy	The default test run never reaches a real API	Keys set, no real call	2.7	foundation	integration	implemented
+test-strategy	A guard file blocks the network, other programs and keys	A vendor API is blocked	2.7	foundation	integration	implemented
+test-strategy	A guard file blocks the network, other programs and keys	node:https is blocked	2.7	foundation	integration	implemented
+test-strategy	A guard file blocks the network, other programs and keys	The real agent program is blocked	2.7	foundation	integration	implemented
+test-strategy	A guard file blocks the network, other programs and keys	A shell cannot get around the list	2.7	foundation	integration	implemented
+test-strategy	A guard file blocks the network, other programs and keys	Local server allowed	20.7	full	integration	pending
+test-strategy	A guard file blocks the network, other programs and keys	Fake agent program allowed	2.7	foundation	integration	implemented
+test-strategy	Live tests run only when a person turns them on	No live variable	2.8	foundation	end-to-end	implemented
+test-strategy	Live tests run only when a person turns them on	Live variable without its key	2.8	foundation	live	implemented
+test-strategy	Each outside service has a tested fake	Unscripted call to the fake backend	20.2	foundation	end-to-end	implemented
+test-strategy	Each outside service has a tested fake	Same text, same vector	20.1	foundation	integration	pending
+test-strategy	Each port has one contract test for the fake and for the real service	Contract on the fake and on the mock model	20.4	foundation	integration	pending
+test-strategy	Each port has one contract test for the fake and for the real service	Contract on the live service	20.4	foundation	live	pending
+test-strategy	Unit tests check the rules with numbers	Wilson bound examples	20.5	foundation	integration	implemented
+test-strategy	Unit tests check the rules with numbers	Wilson bound property	20.5	foundation	integration	implemented
+test-strategy	Integration tests join the real parts of titan with fakes	A hive run with fakes	20.7	full	integration	pending
+test-strategy	Integration tests join the real parts of titan with fakes	The person's folder is not touched	20.7	full	integration	pending
+test-strategy	Each scenario is a test case with the same name	A scenario with no test	20.7	full	integration	pending
+test-strategy	Each scenario is a test case with the same name	A test for a scenario that does not exist	20.7	full	integration	pending
+test-strategy	End-to-end tests run titan as a person or a program would	A failing scenario publishes nothing	19.2	full	integration	pending
+test-strategy	Coverage and mutation bars show that the tests check the code	Coverage under the bar	2.11	foundation	integration	implemented
+test-strategy	Coverage and mutation bars show that the tests check the code	Mutation report	20.8	full	integration	pending
+test-strategy	A live agent test starts clean and runs three times	Live result with two of three	20.10	full	live	pending
+test-strategy	Default isolation includes child processes	Child Bun tries the network	25.17	foundation	integration	implemented
+test-strategy	Default isolation includes child processes	Git hook tries the network	25.17	foundation	integration	implemented
+test-strategy	Live enablement is scoped to its test group	Live flag with default tests	25.17	foundation	live	pending
+test-strategy	Staged builds expose all unbuilt scenarios	Pending scenario on a full release	25.18	release	end-to-end	pending
+test-strategy	Staged builds expose all unbuilt scenarios	Completed task has no executable test	25.18	release	integration	pending
+titan-server	titan serve runs a local server	Server starts	14.1	local	integration	implemented
+titan-server	titan serve runs a local server	Failed startup can be retried	14.1	local	integration	implemented
+titan-server	titan serve runs a local server	Repeated shutdown preserves the next owner	14.1	local	integration	implemented
+titan-server	The server refuses calls without a token or from a web page	No token	14.1	local	integration	implemented
+titan-server	The server refuses calls without a token or from a web page	Foreign web page	14.1	local	end-to-end	implemented
+titan-server	The server has routes for runs, events, requests and steps	Start a run over HTTP	14.2	local	integration	implemented
+titan-server	A client that reconnects gets the events it missed	Reconnect during a run	14.2	local	integration	implemented
+titan-server	The board is the truth	Restart from a different folder	14.1	local	integration	implemented
+titan-server	The board is the truth	Torn last board line	14.1	local	integration	implemented
+titan-server	The board is the truth	Two servers for one home	14.1	local	integration	implemented
+titan-server	Recovery does not repeat an uncertain external action	Crash after an external action	22.10	local	integration	pending
+titan-server	Recovery does not repeat an uncertain external action	Server restarts during a run	14.3	local	integration	implemented
+titan-server	The command-line tool is a client of the server	No server running	14.4	local	end-to-end	implemented
+titan-server	titan mcp gives agent tools a way in	Main agent starts a run from its tool	14.5	local	integration	implemented
+titan-server	The server shows an agent card	Card without a token	21.7	full	integration	pending
+titan-server	The server serves the dashboard routes with a cookie	Token rules stay on the API	14.1	local	integration	implemented
+titan-server	The server serves the dashboard routes with a cookie	The cookie on a dashboard route	14.1	local	end-to-end	implemented
+titan-server	Every client uses the same home and project context	Two projects use one server	25.10	local	integration	pending
+titan-server	Events are delivered from a durable cursor	Event arrives during reconnect	25.10	local	integration	pending
+titan-server	Events are delivered from a durable cursor	Future event cursor	25.10	local	integration	pending
+tool-servers	Every agent gets titan's own tool server	Agent searches the hub during its turn	6.10	full	contract	pending
+tool-servers	Every agent gets titan's own tool server	Tool server knows the step	6.10	full	contract	pending
+tool-servers	A persona can list more tool servers	Same tool server on two backends	6.11	full	contract	pending
+tool-servers	A persona can list more tool servers	Name already used	6.11	full	contract	pending
+tool-servers	Calls to titan's tool server are logged on the board	Search logged	6.10	full	contract	pending
+tool-servers	A tool server that does not start stops the step	Command not found	6.11	full	contract	pending
+tool-servers	Tool authority comes from the session scope	Candidate forges another attempt id	25.22	local	contract	pending
+tool-servers	Tool authority comes from the session scope	Judge tries to change the hub	25.22	local	contract	pending
+verified-checks	A goal or a step can have proof checks	A step with a Lean check	25.1	foundation	integration	pending
+verified-checks	A goal or a step can have proof checks	A check of an unknown kind	24.1	full	integration	pending
+verified-checks	Each check answers proven, refuted or not proven	Not proven gives a new attempt	24.8	full	integration	pending
+verified-checks	Lean checks use lake comparator	The five cheats of the probe	24.3	full	integration	implemented
+verified-checks	Lean checks use lake comparator	A real proof	24.3	full	integration	implemented
+verified-checks	Lean checks run sealed off	Lean check on macOS	24.4	full	integration	implemented
+verified-checks	Lean checks run sealed off	A check that runs too long	24.3	full	integration	implemented
+verified-checks	SMT checks read the answer word of z3	Three answers with exit code 0	24.6	full	integration	pending
+verified-checks	SMT checks read the answer word of z3	An agent tries to add an assertion	25.9	full	integration	pending
+verified-checks	SMT checks find assumptions that contradict	Contradicting assumptions	24.6	full	integration	pending
+verified-checks	Script checks give a fixed answer	A script that changes its answer	24.7	full	integration	implemented
+verified-checks	The statement is locked before the work starts	The locked file is changed during a run	24.2	full	integration	implemented
+verified-checks	The statement is locked before the work starts	The statement waits for approval	24.2	full	integration	implemented
+verified-checks	Definitions are copied from the locked statement	Task text of a Lean step	24.12	full	integration	pending
+verified-checks	The run record holds every check answer	Counts in result.md	25.8	full	integration	pending
+verified-checks	Anyone can check a proof again	Recheck of a finished run	25.8	full	end-to-end	pending
+verified-checks	Recheck detects changed evidence	Recheck input changed	25.8	full	end-to-end	pending
+verified-checks	Script checks compare answers from the same files	First script execution edits a file	25.8	full	integration	pending
+verified-checks	SMT values have a declared shape	Assumptions cannot be checked	25.9	full	integration	pending
+verified-checks	Proof inputs and checker availability are explicit	Missing Lean solution	24.1	full	integration	pending
+verified-checks	Proof inputs and checker availability are explicit	Goal statement waits for approval	24.2	full	integration	implemented
+verified-checks	Proof inputs and checker availability are explicit	Checker not installed	24.1	full	end-to-end	pending
+workflow-file	The workflow file is YAML checked against a schema	Missing goal	3.4	foundation	integration	implemented
+workflow-file	The file states the goal	Goal reaches every agent	3.1	foundation	unit	pending
+workflow-file	The workflow file is written by the main agent	Person only describes the problem	19.4	foundation	unit	pending
+workflow-file	The file defines the personas	Unknown persona	3.2	foundation	unit	implemented
+workflow-file	Each step defines what to do	Open call and split	3.6	foundation	unit	implemented
+workflow-file	Each step defines what to do	Script step	3.1	foundation	unit	implemented
+workflow-file	Each step defines what to do	Two steps with the same id	3.1	foundation	unit	implemented
+workflow-file	Each step defines how to falsify it	Aliases cannot falsify the same persona	3.1	foundation	unit	implemented
+workflow-file	Each step defines how to falsify it	Invalid limits fail before work starts	3.1	foundation	unit	pending
+workflow-file	Each step defines how to falsify it	Empty candidate backend list	3.1	foundation	unit	implemented
+workflow-file	Each step defines how to falsify it	Worker checks itself	3.2	foundation	unit	implemented
+workflow-file	Each step defines how to falsify it	Step without falsification	25.1	foundation	unit	implemented
+workflow-file	The file states which steps run in parallel and which in sequence	Nested groups	3.1	foundation	unit	implemented
+workflow-file	Steps name the earlier outputs they need	Input from a step in the same parallel group	3.3	foundation	unit	implemented
+workflow-file	Steps name the earlier outputs they need	Formats do not match	3.3	foundation	unit	implemented
+workflow-file	The file sets limits on the work	Run limits in the file	3.6	foundation	unit	pending
+workflow-file	The file sets limits on the work	Defaults apply	3.1	foundation	unit	pending
+workflow-file	The file is the starting plan	Plan after added steps	3.6	foundation	unit	pending
+workflow-file	The file can name its kind of goal and raise approval levels	Unknown policy field	3.6	foundation	unit	implemented
+workflow-file	A step with several candidates names a judge	Candidates without a judge	3.1	foundation	unit	implemented
+workflow-file	Example files cover different kinds of problems	All examples pass the check	3.5	foundation	unit	implemented
+workflow-file	The file can set proof checks on the goal and on steps	A Lean entry without theorems	24.1	foundation	unit	pending
+workflow-file	The file can set proof checks on the goal and on steps	A goal check	24.1	foundation	unit	pending
+workflow-file	Names and paths stay within their stores	Step id escapes the run folder	25.2	foundation	unit	pending
+workflow-file	Names and paths stay within their stores	Statement symlink escapes the project	25.2	foundation	unit	pending
+workflow-file	Names and paths stay within their stores	Misspelled field	25.2	foundation	unit	pending
+workflow-run	Run the groups in the stated order	Parallel steps overlap	8.1	local	integration	implemented
+workflow-run	Run the groups in the stated order	Sequential steps do not overlap	8.1	local	integration	implemented
+workflow-run	Only surviving results move on	Outputs flow through inputs	8.2	local	integration	implemented
+workflow-run	A failed step stops its branch	One parallel branch fails	8.3	local	integration	implemented
+workflow-run	Every run writes a run record	Record after a passing run	8.4	local	end-to-end	implemented
+workflow-run	A stopped run can continue	Resume after a crash	8.5	local	end-to-end	implemented
+workflow-run	Steps added during a run are run like the others	Added step in the record	8.7	local	end-to-end	pending
+workflow-run	Show the cost before a run	Dry run cannot bound an unknown split	22.15	local	integration	pending
+workflow-run	Show the cost before a run	Dry run of a step with candidates	8.6	local	integration	implemented
+workflow-run	Candidates negotiate shared live files	Two candidates edit the same file	22.8	local	integration	pending
+workflow-run	titan trace writes the run as spans	Spans of a run with a tool call	21.6	full	integration	pending
+workflow-run	titan can send spans to a trace viewer	Spans reach a fake receiver	23.7	full	integration	pending
+workflow-run	titan can send spans to a trace viewer	The receiver is down	23.7	full	integration	pending
+workflow-run	Spans hold no prompt or answer text by default	Default spans hold no task text	23.7	full	integration	pending
+workflow-run	The final result and goal failure are explicit	Goal check fails after all steps pass	25.3	local	integration	pending
+workflow-run	Cancellation is durable and repeatable	Late result after cancellation	25.4	local	integration	pending
+workflow-run	Resume preserves accounting and completed evidence	Interrupted final attempt	25.4	local	integration	implemented
+workflow-run	Resume preserves accounting and completed evidence	Duplicate resume	25.4	local	end-to-end	implemented
+workflow-run	Parallel files merge only without conflicts	Parallel kept files conflict	25.5	local	integration	pending
+workflow-run	Parallel files merge only without conflicts	Sequential file changes use the later result	25.5	local	integration	pending
+hive-collaboration	Runs share capacity without sharing an execution lock	Three workflows genuinely overlap	26.3	local	integration	pending
+hive-collaboration	Runs share capacity without sharing an execution lock	All roles share the server cap	26.3	local	integration	pending
+hive-collaboration	Runs share capacity without sharing an execution lock	Waiting run releases shared capacity	26.3	local	integration	pending
+hive-collaboration	Ready runs receive fair admission	Busy run cannot monopolize newly free slots	26.3	local	integration	pending
+hive-collaboration	Ready runs receive fair admission	Restart preserves queued turns	26.3	local	integration	pending
+titan-server	Run submission identifies its caller and retry	One harness submits two workflows	26.1	local	integration	pending
+titan-server	Run submission identifies its caller and retry	Lost submission response	26.1	local	integration	implemented
+titan-server	Run submission identifies its caller and retry	Submission id reused with changed input	26.1	local	integration	implemented
+titan-server	Concurrent clients converge on one server	Two clients start an absent server	26.2	local	integration	pending
+titan-server	Concurrent clients converge on one server	One invalid workflow among valid submissions	26.2	local	integration	pending
+harness-detection	Detection belongs to each submitting client	Codex submits to a Claude-started server	26.1	local	integration	pending
+harness-detection	Detection belongs to each submitting client	Daemon restarts in another harness	26.1	local	integration	pending
+harness-adapters	Sessions remain independent across runs	Same adapter runs two conversations	26.4	adapter	contract	pending
+harness-adapters	Sessions remain independent across runs	Cancel one of two adapter sessions	26.4	adapter	contract	pending
+workflow-run	Projects can host independent concurrent runs	Two runs edit the same project path	26.4	local	integration	pending
+workflow-run	Projects can host independent concurrent runs	Cleanup while another run is active	26.4	local	integration	pending
+persona-board	Messages carry complete run and session identity	Identical step names in different runs	26.5	local	integration	pending
+persona-board	Messages carry complete run and session identity	Two watches reconnect	26.5	local	integration	pending
+approvals	Answers and approvals cannot leak across runs	Approval for an identical second run	26.5	local	integration	pending
+approvals	Answers and approvals cannot leak across runs	Request id paired with the wrong run	26.5	local	integration	implemented
+backend-selection	Run and request lists support explicit origin filters	Requests filtered to one harness session	26.6	local	integration	pending
+backend-selection	Run and request lists support explicit origin filters	Unfiltered list spans harnesses	26.6	local	integration	pending
+tool-servers	Main-agent tools keep multiple run handles	One connection manages three runs	26.6	local	integration	pending
+main-agent-guide	The guide teaches concurrent workflow ownership	Guide demonstrates both concurrency paths	26.6	local	integration	pending
+run-dashboard	The overview makes concurrent work visible	See two harnesses and several workflows	26.7	full	end-to-end	pending
+run-dashboard	The overview makes concurrent work visible	Overview changes without opening a run	26.7	full	end-to-end	pending
+run-dashboard	The overview makes concurrent work visible	Switch between live run pages	26.7	full	end-to-end	pending
+workflow-run	Queue and trace records explain shared capacity	One run waits behind another	26.7	local	integration	pending
+knowledge-hub	Concurrent runs share only committed knowledge	Another run publishes during a search	26.8	full	integration	pending
+knowledge-hub	Concurrent runs share only committed knowledge	Persona updated while another run uses it	26.8	full	integration	pending
+test-strategy	Concurrency tests must defeat serial implementations	Serial scheduler fails the overlap test	26.9	local	end-to-end	pending
+test-strategy	Concurrency tests must defeat serial implementations	Swapped callback fails the isolation test	26.9	local	end-to-end	pending
+hive-collaboration	Runs share capacity without sharing an execution lock	Simultaneous admissions reserve one slot	26.3	local	integration	pending
+hive-collaboration	Ready runs receive fair admission	Queued run reaches its deadline	26.3	local	integration	pending
+harness-adapters	Sessions remain independent across runs	One backend is saturated	26.4	adapter	contract	pending
+dev-standards	Local hooks run bounded checks without rebuilding the product	Ordinary push does not run the full pipeline	27.1	foundation	integration	pending
+dev-standards	Local hooks run bounded checks without rebuilding the product	Staged content differs from the working file	27.1	foundation	integration	pending
+dev-standards	Local hooks run bounded checks without rebuilding the product	Local checker is missing	27.1	foundation	integration	pending
+dev-standards	Affected checks include downstream users and uncertain changes	Shared contract changes downstream behavior	27.2	foundation	integration	pending
+dev-standards	Affected checks include downstream users and uncertain changes	Earlier outgoing commit is missed by a head-only diff	27.2	foundation	integration	pending
+dev-standards	Affected checks include downstream users and uncertain changes	Deleted dependency edge hides a consumer	27.2	foundation	integration	pending
+dev-standards	Affected checks include downstream users and uncertain changes	New branch has no usable comparison base	27.2	foundation	integration	pending
+dev-standards	Affected checks include downstream users and uncertain changes	Documentation edit stays small	27.2	foundation	integration	implemented
+dev-standards	Reused check results match their complete inputs	Fixture changes after a passing check	27.3	foundation	integration	pending
+dev-standards	Reused check results match their complete inputs	Working copy passes but staged snapshot fails	27.3	foundation	integration	pending
+dev-standards	Reused check results match their complete inputs	Interrupted test leaves an old receipt	27.3	foundation	integration	pending
+dev-standards	Check speed is measured without dropping required work	Fast push omits a required check	27.4	foundation	integration	pending
+dev-standards	Check speed is measured without dropping required work	A slow check is visible	27.4	foundation	integration	pending
+dev-standards	Engineering rules match the reference project	Malformed vendor data enters a typed path	27.5	foundation	integration	pending
+dev-standards	Engineering rules match the reference project	A pure calculation has a rationale comment	27.5	foundation	integration	pending
+dev-standards	Packages expose one checked dependency direction	Deep import bypasses a public contract	27.6	foundation	integration	pending
+dev-standards	Packages expose one checked dependency direction	Manifest cycle spans packages	27.6	foundation	integration	pending
+dev-standards	Packages expose one checked dependency direction	Product code imports a test fixture	27.6	foundation	integration	pending
+dev-standards	Packages expose one checked dependency direction	Later-stage package is not created yet	27.6	foundation	integration	pending
+test-strategy	Test tiers have one home and independent lifecycles	Parallel tests do not share a home	27.7	foundation	integration	pending
+test-strategy	Test tiers have one home and independent lifecycles	Unit test starts a server	27.7	foundation	integration	pending
+test-strategy	Test tiers have one home and independent lifecycles	Global mock leaks into another file	27.7	foundation	integration	pending
+test-strategy	Vendor stubs exercise the actual adapters	Adapter drops a required request field	27.8	adapter	contract	pending
+test-strategy	Vendor stubs exercise the actual adapters	Vendor stream stops before completion	27.8	adapter	contract	pending
+test-strategy	Vendor stubs exercise the actual adapters	Cancellation reaches a fake vendor process	27.8	adapter	contract	pending
+test-strategy	Vendor stubs exercise the actual adapters	Unexpected vendor call cannot succeed	27.8	adapter	contract	pending
+test-strategy	Documentation has its own small checks	Passing tests leave documentation unchanged	27.9	local	integration	pending
+test-strategy	Documentation has its own small checks	Documented command no longer exists	27.9	local	integration	pending
+test-strategy	Documentation has its own small checks	Invalid example is caught without vendors	27.9	local	integration	pending
+test-strategy	The complete gate verifies all required scope once	New source is never imported by tests	27.10	foundation	integration	pending
+test-strategy	The complete gate verifies all required scope once	Full check silently omits end-to-end files	27.10	foundation	integration	pending
+test-strategy	The complete gate verifies all required scope once	Documentation build is added to pre-push	27.10	foundation	integration	pending
+dev-standards	Affected checks include downstream users and uncertain changes	Unstaged fix cannot certify a pushed commit	27.2	foundation	integration	pending
+cli-control	Identifiers and selectors have consistent meanings	Repeated workflow gets separate runs	30.1	foundation	contract	pending
+cli-control	Identifiers and selectors have consistent meanings	Ambiguous run prefix	30.1	foundation	contract	pending
+cli-control	Identifiers and selectors have consistent meanings	Mutating command without target	30.1	foundation	contract	pending
+cli-control	Run controls expose the whole lifecycle	Detach and inspect a run	30.2	local	integration	implemented
+cli-control	Run controls expose the whole lifecycle	Pause one parallel workflow	30.2	local	integration	pending
+cli-control	Run controls expose the whole lifecycle	Observer interrupt leaves work running	30.2	local	end-to-end	implemented
+cli-control	Output and errors have stable machine contracts	Lost detached acknowledgment	30.3	local	contract	implemented
+cli-control	Output and errors have stable machine contracts	Blocked run is not failed output	30.3	local	contract	implemented
+cli-control	Output and errors have stable machine contracts	Paged event history	30.3	local	contract	implemented
+cli-control	Help covers valid combinations and remote parity	Conflicting invocation before execution	30.4	foundation	contract	pending
+cli-control	Help covers valid combinations and remote parity	HTTP and MCP recovery parity	30.4	foundation	contract	pending
+cli-control	Artifacts can be inspected exported and deliberately applied	Deliver a document outside Git	30.5	local	integration	pending
+cli-control	Artifacts can be inspected exported and deliberately applied	Target changed before apply	30.5	local	integration	pending
+cli-control	Artifacts can be inspected exported and deliberately applied	Unsafe artifact path	30.5	local	integration	pending
+configuration	One package owns setting definitions and schemas	Changed setting reaches every surface	29.1	foundation	unit	pending
+configuration	One package owns setting definitions and schemas	Conflicting local default	29.1	foundation	unit	pending
+configuration	Files and overrides have a declared precedence	File and workflow override	29.2	foundation	unit	pending
+configuration	Files and overrides have a declared precedence	Invalid config cannot start work	29.2	foundation	unit	pending
+configuration	Defaults and ownership of limits are published	Workflow cannot override owner ceiling	29.3	foundation	unit	pending
+configuration	Defaults and ownership of limits are published	Workflow cannot enable prompt tracing	29.3	foundation	unit	pending
+configuration	Defaults and ownership of limits are published	Large plan has an explicit allowance	29.3	foundation	unit	pending
+configuration	Runs freeze their effective configuration	Edited config during a pause	29.4	local	integration	pending
+configuration	Runs freeze their effective configuration	Approved extra recovery allowance	29.4	local	integration	pending
+configuration	Configuration tools explain and safely change settings	Concurrent config writers	29.6	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Inspect a blocked run config	29.5	local	integration	pending
+distribution	Release packages install independently of the monorepo	Install without workspace links	31.1	local	integration	pending
+distribution	Release packages install independently of the monorepo	Missing transitive package	31.1	local	integration	pending
+distribution	Release packages install independently of the monorepo	Secret in package files	31.1	local	integration	pending
+distribution	Environment and optional capabilities are explicit	Minimal environment first use	31.2	local	integration	pending
+distribution	Environment and optional capabilities are explicit	Unsupported native dependency	31.2	local	integration	pending
+distribution	A first working version has an executable acceptance path	Installed preview survives restart	31.3	local	end-to-end	pending
+distribution	A first working version has an executable acceptance path	Real adapter readiness needs evidence	31.3	local	end-to-end	pending
+distribution	Code documents research and operations have distinct completion evidence	Remote operation response is lost	31.4	local	end-to-end	pending
+distribution	Code documents research and operations have distinct completion evidence	Research report has uncertainty	31.4	local	end-to-end	pending
+distribution	Titan can develop itself without changing its active runtime	Titan edits Titan	31.5	release	end-to-end	pending
+distribution	Titan can develop itself without changing its active runtime	New version cannot read checkpoint	31.5	release	end-to-end	implemented
+harness-adapters	Session restoration capabilities are explicit and tested	Native session has disappeared	28.4	adapter	contract	pending
+harness-adapters	Session restoration capabilities are explicit and tested	Authorized reconstructed agent	28.4	adapter	contract	pending
+persona-lifecycle	Operational outcomes do not train quality measures	Outage does not retire a persona	28.8	full	integration	pending
+run-dashboard	Recovery and dependency progress are visible	Rate limit in the dashboard	30.7	full	integration	pending
+self-training-orchestration	Incomplete runs are ineligible for quality learning	Provider outage cannot teach poor quality	28.8	full	integration	pending
+self-training-orchestration	Incomplete runs are ineligible for quality learning	Recovered result updates once	28.8	full	integration	pending
+step-falsification	Checker outages never become candidate refutations	Falsifier rate limit	28.7	local	integration	pending
+step-falsification	Checker outages never become candidate refutations	Proof process was killed	28.7	local	integration	pending
+step-falsification	Checker outages never become candidate refutations	Completed counterexample still rejects	28.7	local	integration	pending
+test-strategy	Recovery falsification covers every phase and installed usage	Recovery mutants are detected	31.6	local	end-to-end	pending
+test-strategy	Recovery falsification covers every phase and installed usage	Crash at publication boundary	31.6	local	end-to-end	pending
+titan-server	Caller environment and recovery controls remain run scoped	Daemon restart loses ephemeral credentials	30.6	local	integration	pending
+titan-server	Caller environment and recovery controls remain run scoped	Caller working folders differ	30.6	local	integration	pending
+workflow-file	Groups and dependency graphs describe the same execution plan	Mixed dependency graph	28.5	local	end-to-end	implemented
+workflow-file	Groups and dependency graphs describe the same execution plan	Dependency cycle before work	28.5	local	end-to-end	implemented
+workflow-file	Groups and dependency graphs describe the same execution plan	Input without a dependency	28.5	local	end-to-end	implemented
+workflow-file	Groups and dependency graphs describe the same execution plan	Two scheduling forms	28.5	local	end-to-end	implemented
+workflow-run	Ready nodes run without group barriers in graph mode	Independent branch passes a recovering node	28.6	local	integration	implemented
+workflow-run	Ready nodes run without group barriers in graph mode	Long mixed plan	28.6	local	integration	implemented
+workflow-run	Ready nodes run without group barriers in graph mode	Rejected ancestor is not a rejected descendant	28.6	local	integration	implemented
+workflow-run	Interruptions are durable recoverable execution states	Rate limit on final result attempt	28.1	local	end-to-end	implemented
+workflow-run	Interruptions are durable recoverable execution states	Unknown agent exit	28.1	local	end-to-end	implemented
+workflow-run	Interruptions are durable recoverable execution states	Hard quota exhaustion	28.1	local	end-to-end	implemented
+workflow-run	Interruptions are durable recoverable execution states	Interruption after a completed answer	28.1	local	end-to-end	implemented
+workflow-run	Checkpoints preserve agent and workflow progress together	Resume edited files and conversation	28.2	local	integration	pending
+workflow-run	Checkpoints preserve agent and workflow progress together	Torn checkpoint manifest	28.2	local	integration	pending
+workflow-run	Checkpoints preserve agent and workflow progress together	Two saved vendor sessions	28.2	local	integration	pending
+workflow-run	Recovery has finite independent allowances and execution ownership	Restart cannot refill retries	28.3	local	integration	pending
+workflow-run	Recovery has finite independent allowances and execution ownership	Stale worker answers after recovery	28.3	local	integration	pending
+workflow-run	Recovery has finite independent allowances and execution ownership	Vendor wait exceeds retry cap	28.3	local	integration	pending
+harness-adapters	Session restoration capabilities are explicit and tested	Old writer still owns required path	28.4	adapter	contract	pending
+dev-standards	Engineering rules match the reference project	Uncapped promise aggregation	32.1	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Capped tasks retain parallel execution	32.2	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Structured reads stop at their byte budget	32.1	local	integration	implemented
+titan-server	The board is the truth	Process death releases writer ownership	14.3	local	end-to-end	implemented
+titan-server	The board is the truth	Ownership metadata is removed while the daemon lives	14.3	local	integration	implemented
+configuration	Files and overrides have a declared precedence	Backend executable belongs to the home owner	29.2	local	integration	implemented
+distribution	A first working version has an executable acceptance path	Installed SDK checker survives daemon restart	31.3	local	end-to-end	implemented
+main-agent-guide	Installed preview skills are usable documents	Installed preview skill contract	32.4	local	end-to-end	implemented
+titan-server	The server has routes for runs, events, requests and steps	JSON event pages stay bounded	14.2	local	integration	implemented
+titan-server	The board is the truth	External state waits for a durable write	14.3	local	integration	implemented
+titan-server	The server has routes for runs, events, requests and steps	One unreadable run leaves other runs visible	14.2	local	integration	implemented
+titan-server	The server has routes for runs, events, requests and steps	Initial background write failure is contained	14.2	local	integration	implemented
+distribution	A first working version has an executable acceptance path	Installed mixed SDK plans retain independent file delivery	31.3	local	end-to-end	implemented
+workflow-run	File snapshots preserve executable intent	Copied scripts remain runnable	28.2	local	integration	implemented
+workflow-run	File snapshots preserve executable intent	Mode-only changes reach dependent steps	28.2	local	integration	implemented
+workflow-run	File snapshots preserve executable intent	Changed execute flag invalidates its source manifest	28.2	local	integration	implemented
+workflow-run	File snapshots preserve executable intent	Parallel executable intents conflict	28.2	local	integration	implemented
+titan-server	The board is the truth	Brief reader contention does not abandon startup	14.1	local	end-to-end	implemented
+workflow-run	Managed native turns fence their working folder	Active native worker survives daemon replacement	28.2	local	end-to-end	implemented
+workflow-run	Managed native turns fence their working folder	Cancellation stops the owned group	28.2	local	end-to-end	implemented
+workflow-run	Managed native turns fence their working folder	Candidate lease refuses another active host	28.2	local	integration	implemented
+workflow-run	Managed native turns fence their working folder	Native events wait for durable acknowledgment	28.2	local	integration	implemented
+configuration	Native host overhead is owner controlled	Owner sets native host budgets	28.2	local	integration	implemented
+configuration	Native host overhead is owner controlled	Invalid or project host settings are refused	28.2	local	integration	implemented
+workflow-run	Managed native turns fence their working folder	Parent disappears before host registration	28.2	local	integration	implemented
+workflow-run	Managed native turns fence their working folder	Native failure diagnostics obey their own budget	28.2	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Synchronous filesystem import is rejected	32.2	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Explicit asynchronous filesystem access remains available	32.2	local	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude invocation keeps an exact tool list	6.3	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude invocation refuses an unsupported permission	6.3	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude permissions are checked before workflow execution	6.6	adapter	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	Effective backend governs Claude tool admission	6.6	adapter	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	CLI binds settings and plan to one workflow document	6.6	adapter	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	MCP check resolves the selected configuration context	6.6	adapter	integration	implemented
+configuration	Workspace snapshots have explicit bounded budgets	Exact snapshot boundary remains usable	29.1	local	integration	implemented
+configuration	Workspace snapshots have explicit bounded budgets	Snapshot excess is refused before delivery	29.1	local	integration	implemented
+configuration	Workspace snapshots have explicit bounded budgets	Snapshot settings use central configuration	29.1	local	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude uses tool-specific paths and safe relative patterns	6.3	adapter	contract	implemented
+harness-adapters	An agent's session can continue	A native resume cannot silently replace the agent	28.4	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude refuses linked and normalized escape paths	6.3	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude distinguishes a new file from invalid filesystem evidence	6.3	adapter	contract	implemented
+dev-standards	Documentation formatting is a required local gate	All documentation grammars are checked without writes	27.5	local	contract	implemented
+dev-standards	Documentation formatting is a required local gate	Formatting policy cannot bypass the gate	27.5	local	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude cannot directly target reserved workspace files	6.3	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Snapshot and artifact paths share reserved-name validation	29.1	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Kept delivery inspection is verified across clients	30.5	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Artifact inspection rejects altered paired evidence	30.5	local	contract	implemented
+dev-standards	Spelling is a required local gate	Maintained spelling errors fail without writes	27.5	local	contract	implemented
+dev-standards	Spelling is a required local gate	Spelling policy cannot bypass the gate	27.5	local	integration	implemented
+test-strategy	Test tiers have one home and independent lifecycles	Isolated cases respect the test runner cap	27.7	foundation	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Kept file pages preserve bytes and targets	30.5	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Artifact response cannot change the selected target	30.5	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Nested artifact commands validate before execution	30.5	local	integration	implemented
+hive-collaboration	Pending agent callbacks have a separate owner budget	Full queue preserves the waiting phase	26.3	local	integration	implemented
+hive-collaboration	Pending agent callbacks have a separate owner budget	Reload preserves the queue-blocked attempt	26.3	local	integration	implemented
+hive-collaboration	Pending agent callbacks have a separate owner budget	Cancelled callback releases the waiting budget	26.3	local	integration	implemented
+hive-collaboration	Pending agent callbacks have a separate owner budget	Project cannot enlarge the pending budget	26.3	local	integration	implemented
+dev-standards	Unused source verification is a blocking command	Maintained unused code cannot be ignored	27.10	foundation	integration	implemented
+dev-standards	Unused source verification is a blocking command	Used workspace source remains valid	27.10	foundation	integration	implemented
+dev-standards	Unused source verification is a blocking command	Unused policy cannot gain silent exemptions	27.10	foundation	integration	implemented
+dev-standards	Unused source verification is a blocking command	A failed unused check blocks the shared gate	27.10	foundation	integration	implemented
+hive-collaboration	Run catalog inspection has bounded caller pages	All clients page and filter indexed callers	26.6	local	integration	implemented
+hive-collaboration	Run catalog inspection has bounded caller pages	Older cursors survive insertion and restart	26.6	local	integration	implemented
+hive-collaboration	Run catalog inspection has bounded caller pages	Invalid selectors and substituted responses fail	26.6	local	integration	implemented
+hive-collaboration	Run catalog inspection has bounded caller pages	Bounded pages preserve unavailable rows	26.6	local	integration	implemented
+cli-control	A selected kept file can be exported for local review	Review copy preserves selected content and commitment	30.5	local	integration	implemented
+cli-control	A selected kept file can be exported for local review	Export refuses occupied or linked destinations	30.5	local	integration	implemented
+cli-control	A selected kept file can be exported for local review	Failed export removes its incomplete copy	30.5	local	integration	implemented
+cli-control	A selected kept file can be exported for local review	CLI selects one exact kept file	30.5	local	integration	implemented
+dev-standards	Package boundary inventory has explicit read budgets	Bounded inventory remains valid and unchanged	27.6	foundation	integration	implemented
+dev-standards	Package boundary inventory has explicit read budgets	Oversized files and aggregate input fail closed	27.6	foundation	integration	implemented
+dev-standards	Package boundary inventory has explicit read budgets	Entry limits and invalid schemas cannot hide source	27.6	foundation	integration	implemented
+dev-standards	Hook workspace discovery and setup reads have explicit limits	Overlapping workspace selection preserves exact budgets	27.6	foundation	integration	implemented
+dev-standards	Hook workspace discovery and setup reads have explicit limits	Workspace discovery refuses excessive or invalid input	27.6	foundation	integration	implemented
+dev-standards	Hook workspace discovery and setup reads have explicit limits	Setup metadata and README reads refuse oversized input	27.6	foundation	integration	implemented
+cli-control	Event pages bind identity and preserve continuity	Event pages identify the requested committed history	30.3	local	integration	implemented
+cli-control	Event pages bind identity and preserve continuity	Substituted and inconsistent event pages fail	30.3	local	integration	implemented
+configuration	CLI setting assignments reuse the run schemas	Registered settings retain schema values and precedence	30.4	local	integration	implemented
+configuration	CLI setting assignments reuse the run schemas	Invalid assignments cannot change owner or duplicate settings	30.4	local	integration	implemented
+configuration	CLI setting assignments reuse the run schemas	Submitted assignments survive persisted inspection	30.4	local	integration	implemented
+workflow-run	Phase task persistence precedes native execution	Ordinary phases close their native handles	28.1	local	integration	implemented
+workflow-run	Phase task persistence precedes native execution	Worker task persistence fails before session creation	28.1	local	integration	implemented
+workflow-run	Phase task persistence precedes native execution	Checker task persistence preserves completed worker	28.1	local	integration	implemented
+dev-standards	Shared JSON encoding bounds expanded data	Supported JSON preserves exact bytes	32.2	local	unit	implemented
+dev-standards	Shared JSON encoding bounds expanded data	Expanded JSON exceeds its byte allowance	32.2	local	unit	implemented
+dev-standards	Shared JSON encoding bounds expanded data	Unsupported JSON data fails explicitly	32.2	local	unit	implemented
+workflow-run	Complete task prompts have a byte budget before execution	Assembled worker and checker prompts fit	28.1	local	integration	implemented
+workflow-run	Complete task prompts have a byte budget before execution	Expanded worker input is excessive	28.1	local	integration	implemented
+workflow-run	Complete task prompts have a byte budget before execution	Checker input and candidate exceed the allowance together	28.1	local	integration	implemented
+workflow-run	Native frame admission precedes execution accounting	Both managed backends admit valid complete turns	28.1	local	integration	implemented
+workflow-run	Native frame admission precedes execution accounting	Excessive start frames launch no host	28.1	local	integration	implemented
+workflow-run	Native frame admission precedes execution accounting	Excessive role data spends no runner execution	28.1	local	integration	implemented
+persona-board	Journal admission bounds serialized records and projections	Valid event data commits and replays	8.4	local	integration	implemented
+persona-board	Journal admission bounds serialized records and projections	Unsupported event data leaves no sequence gap	8.4	local	integration	implemented
+persona-board	Journal admission bounds serialized records and projections	Repeated data exceeds the record allowance	8.4	local	integration	implemented
+persona-board	Journal admission bounds serialized records and projections	Projection formatting cannot expand an admitted state	8.4	local	integration	implemented
+approvals	Durable request history has bounded admission	Request allowance after an answer	16.3	local	integration	implemented
+approvals	Durable request history has bounded admission	Request mutation queue is full	16.3	local	integration	implemented
+approvals	Durable request history has bounded admission	Changed scope in request history	16.3	local	integration	implemented
+approvals	Durable request history has bounded admission	Request append fails before admission	16.3	local	integration	implemented
+approvals	Request creation retries retain identity	Request response is lost after durable append	16.3	local	integration	implemented
+approvals	Request creation retries retain identity	Request id reused for changed scope	16.3	local	integration	implemented
+approvals	Request creation retries retain identity	Same request id in two runs	26.5	local	integration	implemented
+titan-server	Persistent person credential startup fails closed	Credential lifecycle preserves person identity	16.2	local	integration	implemented
+titan-server	Persistent person credential startup fails closed	Unsafe credential files refuse startup	16.2	local	integration	implemented
+titan-server	Persistent person credential startup fails closed	Browser origin cannot use either credential	16.2	local	integration	implemented
+approvals	HTTP decisions use authenticated scoped selectors	Native credentials decide at their permitted level	16.2	local	integration	implemented
+approvals	HTTP decisions use authenticated scoped selectors	HTTP retries and restart preserve one decision	16.2	local	integration	implemented
+approvals	HTTP decisions use authenticated scoped selectors	HTTP answer refuses substituted authority or selectors	16.2	local	integration	implemented
+approvals	HTTP decisions use authenticated scoped selectors	HTTP invalid decisions have explicit statuses	16.2	local	integration	implemented
+approvals	Durable request history has bounded admission	Large admitted request replays after restart	16.3	local	integration	implemented
+approvals	Durable request history has bounded admission	Opening metadata exceeds its remaining bytes	16.3	local	integration	implemented
+approvals	Durable request history has bounded admission	Answer exceeds its remaining record bytes	16.3	local	integration	implemented
+cli-control	Decision commands require observed selectors	Agent and person use distinct decision commands	16.2	local	integration	implemented
+cli-control	Decision commands require observed selectors	Invalid decision arguments fail before access	16.2	local	integration	implemented
+cli-control	Decision commands require observed selectors	Person command cannot repair or replace its credential	16.2	local	integration	implemented
+cli-control	Decision commands require observed selectors	Stale decision and substituted response fail	16.2	local	integration	implemented
+cli-control	Decision commands require observed selectors	Installed commands retain decision semantics	16.2	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Decision events preserve kept delivery	30.5	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Later request cannot rewrite delivery identity	30.5	local	integration	implemented
+cli-control	Artifacts can be inspected exported and deliberately applied	Later event cannot replace commitment	30.5	local	integration	implemented
+approvals	MCP request controls use authenticated decision transport	MCP opens pending requests without granting permission	16.4	local	integration	implemented
+approvals	MCP request controls use authenticated decision transport	MCP retries retain an existing decision	16.4	local	integration	implemented
+approvals	MCP request controls use authenticated decision transport	MCP answers use explicit observed identity	16.4	local	integration	implemented
+approvals	MCP request controls use authenticated decision transport	MCP cannot promote an agent to person authority	16.4	local	integration	implemented
+approvals	MCP request controls use authenticated decision transport	MCP refuses invalid request selectors and answers	16.4	local	integration	implemented
+hive-collaboration	Scoped request inspection has bounded origin pages	All request clients select the same origins	26.6	local	integration	implemented
+hive-collaboration	Scoped request inspection has bounded origin pages	Request pages bound count bytes and scan work	26.6	local	integration	implemented
+hive-collaboration	Scoped request inspection has bounded origin pages	Request cursors survive restart and refuse selection changes	26.6	local	integration	implemented
+hive-collaboration	Scoped request inspection has bounded origin pages	Invalid request pages and source records fail closed	26.6	local	integration	implemented
+approvals	Effective approval policy is frozen into each run	Policy values and sources cross configuration layers	16.1	local	integration	implemented
+approvals	Effective approval policy is frozen into each run	Lower layers cannot undo owner authority	16.1	local	integration	implemented
+approvals	Effective approval policy is frozen into each run	Frozen request policy survives reload	16.1	local	integration	implemented
+approvals	Effective approval policy is frozen into each run	Legacy policy hashes remain unchanged	16.1	local	integration	implemented
+approvals	Escalation preserves one durable pending request	Person decides after durable escalation	16.2	local	integration	implemented
+approvals	Escalation preserves one durable pending request	Escalation and answer have one serialized winner	16.2	local	integration	implemented
+approvals	Escalation preserves one durable pending request	Failed escalation leaves a recoverable decision	16.2	local	integration	implemented
+approvals	Escalation preserves one durable pending request	Escalation audit cannot rewrite history or delivery	16.2	local	integration	implemented
+approvals	Escalation controls share the durable request transition	All escalation surfaces retain one pending scope	16.2	local	integration	implemented
+approvals	Escalation controls share the durable request transition	Invalid escalation controls preserve the selected record	16.2	local	integration	implemented
+approvals	Escalation controls share the durable request transition	A person decides the escalated request after restart	16.2	local	integration	implemented
+approvals	Escalation controls share the durable request transition	Escalation clients reject substituted responses	16.2	local	integration	implemented
+backend-selection	Claude MCP configuration is explicit	Claude SDK receives explicit MCP configuration	6.3	local	contract	implemented
+backend-selection	Claude MCP configuration is explicit	Inherited Claude MCP tools remain denied	6.3	local	contract	implemented
+workflow-run	New interruption diagnostics stay outside quality evidence	A recovered interruption does not enter a later quality prompt	28.8	local	integration	implemented
+workflow-run	New interruption diagnostics stay outside quality evidence	Repeated interruptions do not accumulate quality evidence	28.8	local	integration	implemented
+configuration	Request counts use frozen configured allowances	Request allowance crosses configuration layers	29.3	local	integration	implemented
+configuration	Request counts use frozen configured allowances	Reload cannot enlarge request capacity	29.3	local	integration	implemented
+configuration	Request counts use frozen configured allowances	Legacy request capacity keeps original hashes	29.3	local	integration	implemented
+configuration	The home owner bounds outstanding request mutations	Owner request queue settings are validated	29.3	local	integration	implemented
+configuration	The home owner bounds outstanding request mutations	Independent request operations fit the owner allowance	29.3	local	integration	implemented
+configuration	The home owner bounds outstanding request mutations	A saturated request queue recovers without losing a decision	29.3	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Worker and checker requests retain their origins	16.4	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Stale execution origins cannot open requests	16.4	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Completion races and forged opening history are refused	16.4	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Previous runtimes refuse upgraded request runs	25.21	local	end-to-end	implemented
+approvals	Optional execution origins retain the asking phase	Refused journal admission preserves the live format	25.21	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Failed executions cannot open new requests	16.4	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Recovered executions clear old diagnostics before admission	16.4	local	integration	implemented
+approvals	Optional execution origins retain the asking phase	Historical recovery diagnostics do not invalidate retained requests	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	A structured request releases its asking step	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Answers continue with no recovery allowance	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Unanswered resume starts no turn	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Invalid or excessive batches publish no requests	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Atomic publication survives acknowledgement loss	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Journal refusal restores the pending checkpoint	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Forged request turns fail replay	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Native SDKs carry structured request turns	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Installed request turns survive daemon replacement	16.4	local	end-to-end	implemented
+approvals	Structured request turns retain their asking session	Installed unanswered resumes spend no execution	16.4	local	end-to-end	implemented
+approvals	Structured request turns retain their asking session	Previous runtime refuses pending request turns	16.4	local	end-to-end	implemented
+approvals	Structured request turns retain their asking session	Waiting origins stay closed during continuation admission	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Parallel request turns continue independently	16.4	local	end-to-end	implemented
+approvals	Pending request files are journal projections	Decisions update the complete pending file	9.4	local	integration	implemented
+approvals	Pending request files are journal projections	Request files rebuild without trusting old bytes	9.4	local	integration	implemented
+approvals	Pending request files are journal projections	Failed request publication requires reconciliation	9.4	local	integration	implemented
+approvals	Pending request files are journal projections	Failed projection repair prevents run admission	9.4	local	integration	implemented
+harness-adapters	Default Codex turns disable inherited integrations	Started Codex turn disables integrations	6.4	local	integration	implemented
+harness-adapters	Default Codex turns disable inherited integrations	Resumed Codex turn keeps integrations disabled	6.4	local	integration	implemented
+harness-adapters	Default Codex turns disable inherited integrations	Enabled integration fails the transport contract	6.4	local	integration	implemented
+configuration	The home owner bounds run and submission operations separately	Owner run and submission budgets are validated	29.3	local	integration	implemented
+configuration	The home owner bounds run and submission operations separately	Two run operations admit independent request work	29.3	local	integration	implemented
+configuration	The home owner bounds run and submission operations separately	Saturated run queue retains unchanged durable state	29.3	local	integration	implemented
+configuration	The home owner bounds run and submission operations separately	Separate submission admission supports minimum budgets	29.3	local	integration	implemented
+configuration	The home owner bounds run and submission operations separately	Independent submissions fit two entries	29.3	local	integration	implemented
+titan-server	Submission fingerprints retain workflow file identity	Empty workflow path keeps its retry identity	26.1	local	integration	implemented
+titan-server	Submission fingerprints retain workflow file identity	Absent path cannot replace an empty workflow path	26.1	local	integration	implemented
+titan-server	Opaque caller sessions survive submission and recovery	Caller sessions cross client surfaces	26.1	local	integration	implemented
+titan-server	Opaque caller sessions survive submission and recovery	Caller identity cannot change on retry	26.1	local	integration	implemented
+titan-server	Opaque caller sessions survive submission and recovery	Waiting preserves caller and native identities	26.1	local	integration	implemented
+configuration	The home owner bounds resident runs	Owner residency settings are validated	29.3	local	integration	implemented
+configuration	The home owner bounds resident runs	Small resident boundaries retain queryable runs	29.3	local	integration	implemented
+configuration	The home owner bounds resident runs	Active residents protect their slots	29.3	local	integration	implemented
+titan-server	Caller labels remain consistent throughout a journal	Valid caller and legacy histories remain readable	26.1	local	integration	implemented
+titan-server	Caller labels remain consistent throughout a journal	Changed caller identity is refused before append	26.1	local	integration	implemented
+titan-server	Caller labels remain consistent throughout a journal	Forged caller history cannot be admitted	26.1	local	integration	implemented
+workflow-run	Duplicate resume preserves an active execution	Active worker and checker origins remain valid	25.4	local	integration	implemented
+workflow-run	Duplicate resume preserves an active execution	Duplicate resume preserves a completed peer	25.4	local	integration	implemented
+workflow-run	Duplicate resume preserves an active execution	Native daemon controls retain the active origin	25.4	local	end-to-end	implemented
+harness-adapters	Default Codex turns skip inherited user configuration	Native user configuration is skipped without losing synthetic authentication	6.4	local	integration	implemented
+harness-adapters	Default Codex turns skip inherited user configuration	Fresh and resumed installed turns retain isolation	6.4	local	integration	implemented
+harness-adapters	Default Codex turns skip inherited user configuration	Native distribution versions come from the pinned SDK	6.4	local	integration	implemented
+workflow-run	Committed usage reports preserve every attempt	Refuted attempts remain in totals	25.4	local	integration	implemented
+workflow-run	Committed usage reports preserve every attempt	Interrupted execution remains incomplete	25.4	local	end-to-end	implemented
+workflow-run	Committed usage reports preserve every attempt	Usage transports preserve exact selection	25.4	local	integration	implemented
+workflow-run	Committed usage reports preserve every attempt	Inconsistent usage cannot rewrite history	25.4	local	integration	implemented
+titan-server	Caller session and project navigation use bounded pages	Session pages retain matching runs across restart	26.6	local	integration	implemented
+titan-server	Caller session and project navigation use bounded pages	Project and caller filters intersect	26.6	local	integration	implemented
+titan-server	Caller session and project navigation use bounded pages	Invalid selectors and substituted pages fail	26.6	local	integration	implemented
+titan-server	Caller session and project navigation use bounded pages	Installed filtered navigation retains both protocols	26.6	local	end-to-end	implemented
+workflow-run	Usage aggregation respects native counter scope	Cumulative Claude turns survive reload	25.4	local	integration	implemented
+workflow-run	Usage aggregation respects native counter scope	Codex turn usage remains additive	25.4	local	integration	implemented
+workflow-run	Usage aggregation respects native counter scope	Counter regression cannot claim completeness	25.4	local	integration	implemented
+workflow-run	Usage aggregation respects native counter scope	Quality attempts have independent session totals	25.4	local	integration	implemented
+harness-adapters	Structured Claude retries use the frozen recovery allowance	Rate-limited worker continues the final quality attempt	28.1	local	integration	implemented
+harness-adapters	Structured Claude retries use the frozen recovery allowance	Service retry preserves a completed worker	28.1	local	end-to-end	implemented
+harness-adapters	Structured Claude retries use the frozen recovery allowance	Daemon death cannot refill native retries	28.1	local	end-to-end	implemented
+harness-adapters	Structured Claude retries use the frozen recovery allowance	Unclassified or invalid retries stay blocked	28.1	local	integration	implemented
+harness-adapters	Structured Claude retries use the frozen recovery allowance	Usage notices retain successful results	28.1	local	integration	implemented
+workflow-run	Recovery backoff is visible without holding a node slot	Worker and checker waits retain their checkpoints	28.3	local	integration	implemented
+workflow-run	Recovery backoff is visible without holding a node slot	One node slot serves an independent branch during recovery	28.3	local	integration	implemented
+workflow-run	Recovery backoff is visible without holding a node slot	Recovery never starts before its recorded date	28.3	local	integration	implemented
+workflow-run	Recovery backoff is visible without holding a node slot	Terminal controls interrupt a recovery wait	28.3	local	integration	implemented
+workflow-run	Recovery backoff is visible without holding a node slot	Mixed native branch retains its completed peers during backoff	28.3	local	end-to-end	implemented
+workflow-run	File readers release stream and handle resources	Completed readers keep a constant descriptor count	28.6	local	integration	implemented
+workflow-run	File readers release stream and handle resources	Interrupted readers release the input	28.6	local	integration	implemented
+workflow-run	Workspace assembly bounds concurrent file copies	Small assemblies retain their file contents	32.2	local	integration	implemented
+workflow-run	Workspace assembly bounds concurrent file copies	Assemblies larger than the worker cap finish	32.2	local	integration	implemented
+workflow-run	Workspace assembly bounds concurrent file copies	Changed source drains admitted copies	32.2	local	integration	implemented
+workflow-run	Workspace assembly bounds concurrent file copies	Missing source drains admitted copies	32.2	local	integration	implemented
+titan-server	Operational diagnostics use a bounded asynchronous logger	Lifecycle diagnostics retain their identities	32.3	foundation	integration	implemented
+titan-server	Operational diagnostics use a bounded asynchronous logger	Concurrent diagnostics stay bounded	32.3	foundation	integration	implemented
+titan-server	Operational diagnostics use a bounded asynchronous logger	Sink failure cannot exhaust the runtime	32.3	foundation	integration	implemented
+titan-server	Operational diagnostics use a bounded asynchronous logger	Diagnostic settings and secrets remain protected	32.3	foundation	integration	implemented
+dev-standards	Lint policy cannot silently drop guardrails	Invalid lint policy fails closed	32.1	foundation	integration	implemented
+dev-standards	Lint policy cannot silently drop guardrails	Ownership plugins reject actual source violations	32.1	foundation	integration	implemented
+dev-standards	Lint policy cannot silently drop guardrails	Lint guardrails remain in both hook scopes	32.1	foundation	integration	implemented
+dev-standards	Lint policy cannot silently drop guardrails	Promise and cycle diagnostics are exercised	32.1	foundation	integration	implemented
+dev-standards	Schema ownership rejects unchecked data shapes	Callable contracts remain valid	32.1	foundation	integration	implemented
+dev-standards	Schema ownership rejects unchecked data shapes	Unchecked data shapes fail the command	32.1	foundation	integration	implemented
+dev-standards	Schema ownership rejects unchecked data shapes	Schema inspection is bounded and read only	32.1	foundation	integration	implemented
+dev-standards	Schema ownership rejects unchecked data shapes	Schema ownership remains mandatory in both hook scopes	32.1	foundation	integration	implemented
+dev-standards	Test files keep control flow in shared factories	Flat registration files remain valid	32.1	foundation	integration	implemented
+dev-standards	Test files keep control flow in shared factories	Nested executable control flow fails	32.1	foundation	integration	implemented
+dev-standards	Test files keep control flow in shared factories	All supported Bun test names are inspected	32.1	foundation	integration	implemented
+dev-standards	Test files keep control flow in shared factories	Test inspection fails closed within bounded input	32.1	foundation	integration	implemented
+dev-standards	Test files keep control flow in shared factories	Flat test enforcement remains mandatory in both hook scopes	32.1	foundation	integration	implemented
+dev-standards	Supported TypeScript sources cannot disappear from verification	Every TypeScript suffix reaches the compiler	32.1	foundation	integration	implemented
+dev-standards	Supported TypeScript sources cannot disappear from verification	Workspace include cannot hide its source	32.1	foundation	integration	implemented
+dev-standards	Supported TypeScript sources cannot disappear from verification	Product coverage inventories every TypeScript suffix	27.10	foundation	integration	implemented
+dev-standards	Supported TypeScript sources cannot disappear from verification	Boundary source suffixes retain their read limits	32.1	foundation	integration	implemented
+dev-standards	Supported TypeScript sources cannot disappear from verification	Unused TypeScript sources cannot hide by suffix	27.10	foundation	integration	implemented
+dev-standards	Package direction follows explicit ownership	Valid package directions retain their owners	32.1	foundation	integration	implemented
+dev-standards	Package direction follows explicit ownership	Runtime and development dependencies share direction checks	32.1	foundation	integration	implemented
+dev-standards	Package direction follows explicit ownership	Workspace names cannot grant another owner's role	32.1	foundation	integration	implemented
+dev-standards	Package direction follows explicit ownership	Test support cannot depend upward	32.1	foundation	integration	implemented
+dev-standards	Package direction follows explicit ownership	Package inventory cannot silently narrow	32.1	foundation	integration	implemented
+dev-standards	Package direction follows explicit ownership	Package policy remains mandatory in both hook scopes	32.1	foundation	integration	implemented
+dev-standards	Tests use the declared discovery tiers	Declared tiers and central helpers remain valid	32.1	foundation	integration	implemented
+dev-standards	Tests use the declared discovery tiers	Undiscovered test files fail verification	32.1	foundation	integration	implemented
+dev-standards	Tests use the declared discovery tiers	Product test support cannot remain beside runtime code	32.1	foundation	integration	implemented
+backend-plugins	Claude query cleanup releases finished references	Completed turns release their query	22.20	foundation	unit	implemented
+backend-plugins	Claude query cleanup releases finished references	Failed turns release their query	22.20	foundation	unit	implemented
+backend-plugins	Claude query cleanup releases finished references	Cancellation cleanup does not close a query twice	22.20	foundation	unit	implemented
+backend-plugins	Claude query cleanup releases finished references	Failed SDK close remains available for explicit cleanup	22.20	foundation	unit	implemented
+configuration	Owner backend limits preserve independent admission	Owner chooses independent native limits	26.3	foundation	integration	implemented
+configuration	Owner backend limits preserve independent admission	Invalid or lower-layer backend limits are refused	26.3	foundation	integration	implemented
+configuration	Owner backend limits preserve independent admission	Busy backend leaves the other backend available	26.3	foundation	integration	implemented
+configuration	Owner backend limits preserve independent admission	Waiting backend leaves a run slot available	26.3	foundation	integration	implemented
+configuration	Owner backend limits preserve independent admission	Cancellation and failure release backend reservations	26.3	foundation	integration	implemented
+configuration	Owner backend limits preserve independent admission	Full pending budget still permits a free backend	26.3	foundation	integration	implemented
+knowledge-hub	Private edits use an observed attempt revision	Two writes share one private revision	22.2	full	integration	pending
+knowledge-hub	Private edits use an observed attempt revision	An attempt edits its pending entry twice	22.2	full	integration	pending
+knowledge-hub	Private edits use an observed attempt revision	An attempt cancels its new entry	22.2	full	integration	pending
+knowledge-hub	Private search has one consistent scoped view	A private search replaces final matches	22.2	full	integration	pending
+knowledge-hub	Private search has one consistent scoped view	Publication fails while a private search waits	22.2	full	integration	pending
+knowledge-hub	Private search has one consistent scoped view	Private result metadata reaches the byte limit	22.2	full	integration	pending
+tool-servers	The local owner bounds and revokes native tool authority	A worker tries to replace its bound scope	25.22	local	integration	pending
+tool-servers	The local owner bounds and revokes native tool authority	A checker reaches a missing final file	25.22	local	integration	pending
+tool-servers	The local owner bounds and revokes native tool authority	Revocation drains one admitted call	25.22	local	integration	pending
+tool-servers	The local owner bounds and revokes native tool authority	Queued authority becomes obsolete	25.22	local	integration	pending
+tool-servers	The bundled bridge verifies its owner before serving	A source CLI process serves scoped tools	6.10	local	end-to-end	pending
+tool-servers	The bundled bridge verifies its owner before serving	A bridge receives a substituted execution	6.10	local	end-to-end	pending
+tool-servers	The bundled bridge verifies its owner before serving	A readiness inventory changes	6.10	local	end-to-end	pending
+tool-servers	The bundled bridge verifies its owner before serving	Standard input ends during bridge use	6.10	local	end-to-end	pending
+tool-servers	Native bridge messages and body reads stay bounded	An owner sends an oversized body	6.10	local	integration	pending
+tool-servers	Native bridge messages and body reads stay bounded	An owner stalls after sending headers	6.10	local	integration	pending
+tool-servers	Native bridge messages and body reads stay bounded	JSON expansion exceeds the stdio budget	6.10	local	integration	pending
+tool-servers	Native bridge messages and body reads stay bounded	An owner redirects a credentialed request	6.10	local	integration	pending
+workflow-run	Execution guards apply through file capture	A minted credential appears in file content	25.22	local	integration	pending
+workflow-run	Execution guards apply through file capture	A credential crosses a file chunk boundary	25.22	local	integration	pending
+workflow-run	Execution guards apply through file capture	A credential appears in a relative path	25.22	local	integration	pending
+workflow-run	Execution guards apply through file capture	An additional guard keeps environment protection	25.22	local	integration	pending
+tool-servers	Output failure cannot retain a native bridge send	A frame completes under backpressure	6.10	local	integration	pending
+tool-servers	Output failure cannot retain a native bridge send	An output pipe fails or closes	6.10	local	integration	pending
+tool-servers	Output failure cannot retain a native bridge send	An output write stops making progress	6.10	local	integration	pending
+tool-servers	Output failure cannot retain a native bridge send	A bridge closes with an output write pending	6.10	local	integration	pending
+tool-servers	Native adapters receive volatile execution bindings	Both SDKs use native tools across resume	6.10	local	integration	pending
+tool-servers	Native adapters receive volatile execution bindings	A native binding substitutes execution scope	6.10	local	integration	pending
+tool-servers	Native adapters receive volatile execution bindings	Claude startup never reaches its role inventory	6.10	local	integration	pending
+tool-servers	Native adapters receive volatile execution bindings	Native credentials would enter launch arguments	6.10	local	integration	pending
+tool-servers	Native execution guards last through checkpoint capture	A native worker resumes on the same attempt	6.10	local	integration	pending
+tool-servers	Native execution guards last through checkpoint capture	A credential reaches the checkpoint boundary	6.10	local	integration	pending
+tool-servers	Native execution guards last through checkpoint capture	A native result or diagnostic contains its credential	6.10	local	integration	pending
+tool-servers	Native execution guards last through checkpoint capture	A closed execution sends a late event	6.10	local	integration	pending
+tool-servers	The local service composes automatic native tools	Both native backends use automatic scoped tools	6.10	local	end-to-end	pending
+tool-servers	The local service composes automatic native tools	A scripted native result has no source entry	6.10	local	end-to-end	pending
+tool-servers	The local service composes automatic native tools	A registration rejects invalid connection data	6.10	local	integration	pending
+tool-servers	The local service composes automatic native tools	An installed workflow uses the bundled native command	6.10	local	end-to-end	pending
+tool-servers	The local service composes automatic native tools	An operator tries the native execution route	6.10	local	integration	pending
+tool-servers	Native HTTP startup preserves execution proof	HTTP native bindings retain both backend roles	6.10	local	integration	pending
+tool-servers	Native HTTP startup preserves execution proof	HTTP native binding lacks its readiness port	6.10	local	integration	pending
+tool-servers	Native HTTP startup preserves execution proof	HTTP native scope differs from its credential	25.22	local	integration	pending
+workflow-run	Proven setup refusals can resume safely	Native owner refuses setup	28.3	local	integration	implemented
+workflow-run	Proven setup refusals can resume safely	Bound turn validation refuses setup	28.3	local	integration	implemented
+workflow-run	Proven setup refusals can resume safely	Startup delivery remains uncertain	28.3	local	integration	implemented
+workflow-run	Proven setup refusals can resume safely	Legacy delivery proof is absent	28.3	local	integration	implemented
+workflow-run	Proven setup refusals can resume safely	Setup recovery allowance is exhausted	28.3	local	integration	implemented
+workflow-run	Proven setup refusals can resume safely	Malformed delivery proof	28.3	local	integration	implemented
+workflow-run	Proven setup refusals can resume safely	Installed owner setup refusal	28.3	local	end-to-end	implemented
+tool-servers	Native tool audit acknowledgement is durable	Tool response waits for audit	6.10	local	integration	pending
+tool-servers	Native tool audit acknowledgement is durable	Audit write refuses completion	6.10	local	integration	pending
+tool-servers	Native tool audit acknowledgement is durable	Refused calls retain safe metadata	6.10	local	integration	pending
+tool-servers	Native tool audit acknowledgement is durable	Metadata belongs to its execution	6.10	local	integration	pending
+tool-servers	Native tool audit acknowledgement is durable	Installed native audit	6.10	local	end-to-end	pending
+tool-servers	Native vendor events contain only bounded tool metadata	Vendor events repeat private tool content	6.10	local	integration	pending
+tool-servers	Native vendor events contain only bounded tool metadata	Projection cannot conceal a credential	6.10	local	integration	pending
+tool-servers	Native vendor events contain only bounded tool metadata	Invalid vendor metadata fails safely	6.10	local	integration	pending
+tool-servers	Native vendor events contain only bounded tool metadata	Installed vendor event projection	6.10	local	end-to-end	pending
+dev-standards	Owned source comments fail the local hooks	Comments cannot enter an outgoing source snapshot	32.1	local	unit	implemented
+dev-standards	Owned source comments fail the local hooks	Comment text is reference data	32.2	local	unit	implemented
+dev-standards	Owned source comments fail the local hooks	Comment discovery cannot omit source variants	32.1	local	unit	implemented
+dev-standards	Failed hook prerequisites stop later commands	Source prerequisite fails before product tests	32.1	local	integration	implemented
+dev-standards	Failed hook prerequisites stop later commands	Documentation prerequisite fails before later commands	32.1	local	integration	implemented
+dev-standards	Failed hook prerequisites stop later commands	A successful hook retains its complete scope	32.1	local	integration	implemented
+dev-standards	CLI command metadata has canonical owners	Registered CLI commands have complete definitions	32.2	local	unit	implemented
+dev-standards	CLI command metadata has canonical owners	CLI reorganization preserves companion arguments	32.2	local	integration	implemented
+dev-standards	CLI command metadata has canonical owners	Prototype names cannot become CLI commands	32.2	local	unit	implemented
+approvals	Structured request turns retain their asking session	Complete turn members fit before publication	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	Turn member metadata exceeds its allowance	16.4	local	integration	implemented
+approvals	Structured request turns retain their asking session	New turn members require current lineage and expiry	16.4	local	integration	implemented
+dev-standards	Affected checks include downstream users and uncertain changes	Known acceptance evidence stays small	27.2	local	integration	implemented
+dev-standards	Affected checks include downstream users and uncertain changes	Unknown evidence stays full	27.2	local	integration	implemented
+dev-standards	Affected checks include downstream users and uncertain changes	Invalid acceptance evidence blocks delivery	27.2	local	integration	implemented
+distribution	Titan can develop itself without changing its active runtime	Saved run requires its recorded release	31.7	release	end-to-end	implemented
+distribution	Titan can develop itself without changing its active runtime	Runtime pin is required from the first record	31.7	local	integration	implemented
+distribution	Packaging bounds generated assets before decoding	Generated binary bytes remain exact	32.2	local	integration	implemented
+distribution	Packaging bounds generated assets before decoding	Both generator pipes can fill	32.2	local	integration	implemented
+distribution	Packaging bounds generated assets before decoding	Either generator pipe exceeds its allowance	32.2	local	integration	implemented
+distribution	Packaging bounds generated assets before decoding	Generator deadline takes precedence	32.2	local	integration	implemented
+distribution	Packaging bounds generated assets before decoding	Failed generator cannot supply an asset	32.2	local	integration	implemented
+distribution	Packaging bounds generated assets before decoding	Invalid generator budgets cannot start work	32.2	local	integration	implemented
+dev-standards	Spelling is a required local gate	Spelling batches preserve complete scope	27.5	local	integration	implemented
+cli-control	Run controls expose the whole lifecycle	Run watches until an outcome	30.1	local	end-to-end	implemented
+cli-control	Run controls expose the whole lifecycle	Observation flags conflict before work	30.1	local	unit	implemented
+workflow-file	Example files cover different kinds of problems	Batch check keeps ordered plans	3.5	foundation	unit	implemented
+workflow-file	Example files cover different kinds of problems	A later invalid file fails the batch	3.5	foundation	unit	implemented
+workflow-file	Example files cover different kinds of problems	Batch validation stays bounded	3.5	foundation	unit	implemented
+titan-server	The command-line tool is a client of the server	Background startup preserves ordinary run output	14.4	local	end-to-end	implemented
+titan-server	The command-line tool is a client of the server	Concurrent startup converges on one owner	14.4	local	integration	implemented
+titan-server	The command-line tool is a client of the server	Failed startup is bounded and reaped	14.4	local	integration	implemented
+titan-server	The command-line tool is a client of the server	Invalid work cannot start a daemon	14.4	local	end-to-end	implemented
+titan-server	The command-line tool is a client of the server	Readiness requires bounded authenticated health	14.4	local	integration	implemented
+cli-control	Human observers print durable events while work continues	Human watch drains the journal	30.2	local	integration	implemented
+cli-control	Human observers print durable events while work continues	Ordinary examples show the same live history	14.4	local	end-to-end	implemented
+cli-control	Human observers print durable events while work continues	Event transport fails during observation	30.2	local	integration	implemented
+cli-control	Human observers print durable events while work continues	Status transport fails after progress	30.2	local	integration	implemented
+cli-control	Identifiers and selectors have consistent meanings	Status cannot observe another run	30.2	local	integration	implemented
+cli-control	Identifiers and selectors have consistent meanings	Lifecycle response cannot switch targets	30.2	local	integration	implemented
+cli-control	Identifiers and selectors have consistent meanings	Artifact inspection cannot switch runs	30.5	local	integration	implemented
+cli-control	CLI submission receipts precede network effects	Restarted CLI reuses its caller	30.3	local	integration	implemented
+cli-control	CLI submission receipts precede network effects	Receipt conflicts prevent network work	30.3	local	integration	implemented
+cli-control	CLI submission receipts precede network effects	Full receipt storage keeps retry identity	30.3	local	integration	implemented
+cli-control	CLI submission receipts precede network effects	Lost response retains recovery arguments	30.3	local	integration	implemented
+titan-server	titan mcp gives agent tools a way in	Malformed MCP submission acknowledgement	14.5	local	integration	implemented
+cli-control	Output and errors have stable machine contracts	Ordinary responses share a versioned envelope	30.3	local	integration	implemented
+cli-control	Output and errors have stable machine contracts	Event following uses versioned lines	30.3	local	integration	implemented
+cli-control	Output and errors have stable machine contracts	Observation uncertainty retains its target	30.3	local	integration	implemented
+harness-adapters	Managed HTTP readiness waits for daemon acknowledgment	Managed SDK work follows scoped readiness	32.3	local	integration	implemented
+harness-adapters	Managed HTTP readiness waits for daemon acknowledgment	Refused readiness preserves operational recovery	32.3	local	integration	implemented
+harness-adapters	Managed HTTP readiness waits for daemon acknowledgment	Unrequested or repeated readiness is refused	32.3	local	integration	implemented
+harness-adapters	Managed HTTP readiness waits for daemon acknowledgment	HTTP output cannot overtake readiness	32.3	local	integration	implemented
+harness-adapters	Managed HTTP readiness waits for daemon acknowledgment	Standalone adapters retain HTTP readiness	32.3	local	integration	implemented
+test-strategy	The complete gate verifies all required scope once	Missing focused test cannot disappear	32.6	local	unit	implemented
+test-strategy	The complete gate verifies all required scope once	Focused inventory cannot silently shrink	32.6	local	unit	implemented
+workflow-run	File readers release stream and handle resources	Regular snapshot sources retain their bytes	28.2	local	integration	implemented
+workflow-run	File readers release stream and handle resources	Special snapshot sources are refused before reading	28.2	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Scoped config edits retain owner policy	29.6	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Refused config edits preserve the file	29.6	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Config schema export is offline	29.6	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Exact frozen configuration survives file edits and restart	29.7	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Frozen configuration refuses a different or malformed report	29.7	local	integration	implemented
+configuration	Configuration tools explain and safely change settings	Scoped show inspects files without starting services	29.8	local	integration	implemented
+workflow-run	Checkpoints preserve agent and workflow progress together	Attempt input is verified before continuation	28.9	local	integration	implemented
+workflow-run	Checkpoints preserve agent and workflow progress together	Attempt input is verified before publication	28.9	local	integration	implemented
+workflow-run	Checkpoints preserve agent and workflow progress together	Attempt input checks share finite admission	28.9	local	integration	implemented
+workflow-run	Checkpoints preserve agent and workflow progress together	Candidate bytes cannot replace their committed digest	28.10	local	integration	implemented
+dev-standards	Owned Markdown links have bounded snapshot verification	Broken staged link survives an unstaged repair	32.7	local	integration	implemented
+dev-standards	Owned Markdown links have bounded snapshot verification	Earlier outgoing broken link survives a later repair	32.7	local	integration	implemented
+dev-standards	Owned Markdown links have bounded snapshot verification	Finite document inventory refuses incomplete success	32.7	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Shallow product contracts retain their validation	32.8	local	unit	implemented
+dev-standards	Engineering rules match the reference project	Shallow stream readers retain limits and cleanup	32.9	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Competing capped failures retain the first reason	32.9	local	unit	implemented
+dev-standards	Engineering rules match the reference project	Shallow verification tooling retains refusals	32.10	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Shared vendor fixture records have finite reads	32.11	local	integration	implemented
+dev-standards	Engineering rules match the reference project	Shallow request fixtures retain their acceptance assertions	32.12	local	integration	implemented
+distribution	Owned command capture has finite process and stream ownership	Owned commands retain completed binary output	31.8	local	integration	implemented
+distribution	Owned command capture has finite process and stream ownership	Interrupted capture closes streams and owned children	31.8	local	integration	implemented
+distribution	Owned command capture has finite process and stream ownership	Invalid command input cannot launch	31.8	local	integration	implemented
+configuration	The default model is a setting without a version	Default model applies to a persona without a model	6.14	local	unit	implemented
+configuration	The default model is a setting without a version	Persona model wins	6.14	local	unit	implemented
+configuration	The default model is a setting without a version	No model set anywhere	6.14	local	unit	implemented
+configuration	The default model is a setting without a version	A model with a version is refused	6.14	local	unit	implemented
+distribution	Install checks the needed tools first	Required tool missing	31.9	local	integration	implemented
+distribution	Install checks the needed tools first	Only optional tools missing	31.9	local	integration	implemented
+distribution	A plain-language install guide exists	Install guide matches the package	31.9	local	integration	implemented
+distribution	A start script works before Bun exists	Bun absent at start	31.10	local	integration	implemented
+distribution	A start script works before Bun exists	Git absent at start	31.10	local	integration	implemented
+distribution	Titan tells the person when a newer version exists	Newer version exists	31.11	local	integration	pending
+distribution	Titan tells the person when a newer version exists	Check turned off	31.11	local	integration	pending
+distribution	Titan updates without losing data	Update that passes	31.12	local	integration	pending
+distribution	Titan updates without losing data	Update that fails	31.12	local	integration	pending
+distribution	The start script only starts the install	Later steps are commands	31.13	local	integration	pending
+knowledge-hub	The hub has a project scope and a home scope	A run saves a lesson in the project	33.1	local	integration	pending
+knowledge-hub	The hub has a project scope and a home scope	Search reads both hubs	33.1	local	integration	pending
+knowledge-hub	The hub has a project scope and a home scope	Promote an entry	33.1	local	integration	pending
+knowledge-hub	The hub has a project scope and a home scope	Clone brings the project hub	33.1	local	integration	pending
+knowledge-hub	The swarm always uses the hub	Run reads and writes the hub	33.2	local	integration	pending
+knowledge-hub	The swarm always uses the hub	Persona has hub tools	33.2	local	integration	pending
+knowledge-hub	The swarm always uses the hub	Hub tools are missing	33.2	local	integration	pending
+knowledge-hub	A person can explore the hub	List by scope	33.3	local	integration	implemented
+knowledge-hub	A person can explore the hub	Stats	33.3	local	integration	implemented
+knowledge-hub	A person can prune and consolidate the hub	Prune report changes nothing	33.4	local	integration	implemented
+knowledge-hub	A person can prune and consolidate the hub	Prune with apply keeps the text	33.4	local	integration	implemented
+knowledge-hub	A person can prune and consolidate the hub	Consolidate	33.4	local	integration	implemented
+knowledge-hub	The meaning search model is downloaded during install	Install downloads the model	33.5	local	integration	implemented
+knowledge-hub	The meaning search model is downloaded during install	Install without the model	33.5	local	integration	implemented
+knowledge-hub	The meaning search model is downloaded during install	Search offline after the download	33.5	local	integration	implemented
+workflow-run	A blocked run resumes by itself	Limit with a reset time	33.6	local	integration	pending
+workflow-run	A blocked run resumes by itself	Automatic resume	33.6	local	integration	pending
+workflow-run	A blocked run resumes by itself	Switch provider on resume	33.6	local	integration	pending
+workflow-run	Runs use prompt caching and report it	Cache fields are recorded	33.7	local	integration	pending
+workflow-run	Runs use prompt caching and report it	Same prefix for the same persona	33.7	local	integration	pending
+workflow-run	Runs use prompt caching and report it	Low cache share is flagged	33.7	local	integration	pending
+workflow-run	A workflow can mix agent, script and suggestion stages	Mixed workflow	33.8	local	integration	pending
+distribution	Updates can install by themselves without harming the user's work	Automatic update when idle	33.9	local	integration	pending
+distribution	Updates can install by themselves without harming the user's work	Active run blocks the update	33.9	local	integration	pending
+distribution	Updates can install by themselves without harming the user's work	Old data survives	33.9	local	integration	pending
+distribution	Updates can install by themselves without harming the user's work	Failed update goes back	33.9	local	integration	pending
+workflow-run	Steps change the real project as they run	A step writes to the project	33.12	local	integration	pending
+workflow-run	Steps change the real project as they run	Isolated mode stays available	33.12	local	integration	pending
+workflow-run	Every step has a restore point and a refuted step rolls back	Refuted step is rolled back	33.12	local	integration	pending
+workflow-run	Every step has a restore point and a refuted step rolls back	Outside changes stay	33.12	local	integration	pending
+workflow-run	Steps that touch the same file run one after another	Same file	33.12	local	integration	pending
+workflow-run	Steps that touch the same file run one after another	Different files	33.12	local	integration	pending
+workflow-run	Checks run inside the loop	Failing check goes back to the builder	33.13	local	integration	pending
+workflow-run	Checks run inside the loop	Check never passes	33.13	local	integration	pending
+workflow-run	The dashboard lists runs without reading whole boards	Run list is fast	33.14	local	end-to-end	implemented
+approvals	A run starts only on a backend the person named	Limit does not switch backend	33.15	local	integration	implemented
+approvals	A run starts only on a backend the person named	No backend named	33.15	local	integration	implemented
+approvals	Titan takes part in its own delivery	Commit lists hand changes	33.15	local	integration	implemented
+approvals	The skills carry the working rules	Skill names the rules	33.16	local	integration	implemented
+approvals	Titan takes part in its own delivery	Run files are recorded	33.17	local	integration	implemented
+harness-adapters	A persona's tools and skills reach its agent	Claude builder runs shell commands	33.18	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	Shell command that reaches a protected place is denied	33.18	adapter	contract	implemented
+harness-adapters	A persona's tools and skills reach its agent	A denied request does not stop the turn	33.20	adapter	contract	implemented
+workflow-run	A step can be allowed into a harness folder	A step writes a skill	33.19	local	integration	pending
+workflow-run	A step can be allowed into a harness folder	A folder that was not listed stays closed	33.19	local	integration	pending
+workflow-run	A step can be allowed into a harness folder	Git and Titan folders cannot be allowed	33.19	local	integration	pending
+workflow-run	A step can be allowed into a harness folder	The owner bounds the request	33.19	local	integration	pending
+knowledge-hub	Every run keeps a journal and every workflow shares what it learns	A finished run leaves a journal	33.2	local	integration	implemented
+knowledge-hub	Every run keeps a journal and every workflow shares what it learns	A failed run leaves a journal	33.2	local	integration	implemented
+knowledge-hub	Every run keeps a journal and every workflow shares what it learns	A run that cannot write its journal is blocked	33.2	local	integration	implemented
+knowledge-hub	Every run keeps a journal and every workflow shares what it learns	The next workflow reads the earlier journal	33.2	local	integration	implemented

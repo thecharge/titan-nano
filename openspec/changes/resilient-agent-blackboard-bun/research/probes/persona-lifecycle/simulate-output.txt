@@ -1,0 +1,19 @@
+bar 0.6, 30 uses per persona, 20000 personas per case
+
+Share of personas flagged as 'needs update' at some point within the uses, and the median use at which the flag came:
+- raw rate below the bar after 3 uses:
+    true rate 0.75: 39.4 % flagged, median use 4
+    true rate 0.6: 82.1 % flagged, median use 4
+    true rate 0.35: 99.9 % flagged, median use 3
+- raw rate below the bar after 10 uses:
+    true rate 0.75: 20.5 % flagged, median use 11
+    true rate 0.6: 73.6 % flagged, median use 10
+    true rate 0.35: 99.9 % flagged, median use 10
+- Wilson upper bound below the bar:
+    true rate 0.75: 2.2 % flagged, median use 3
+    true rate 0.6: 14.7 % flagged, median use 6
+    true rate 0.35: 89.5 % flagged, median use 8
+
+Picking between two personas with true rates 0.75 and 0.55, 200 picks, 2000 runs:
+- greedy: the worse persona got most picks in 26.6 % of runs; 27.5 % of all picks went to it
+- thompson: the worse persona got most picks in 1.8 % of runs; 12.3 % of all picks went to it

@@ -1,0 +1,35 @@
+name: Fix tests fixf
+goal: >-
+  Fix exactly the failing tests below without removing any test or weakening it: decide from the OpenSpec scenario text (Grep its name in openspec/changes/resilient-agent-blackboard-bun/specs, one directory per call) and the code whether the product code or the test expectation is wrong, and fix that one. Cause: several tasks were delivered in parallel and their changes now clash. Keep 100 percent function and line coverage, no comments, no inline strings, no local type aliases, no string literal types. You have no shell; read the failing factory and the code it calls. Failing output: (1) runawayAgent 3 cases: TitanError corrupt_board `Durable run record does not match its schema, paths or frozen plan` thrown at parseEvent packages/board/src/index.ts:105 called from commit packages/board/src/index.ts:141, from engine commit packages/runner/src/engine.ts:298, from addStep engine.ts:316, from observeRunaway testing/factories/hive-limits.ts:33. Task 15.6/15.7 changed the event or plan; the event written by addStep no longer matches the schema in packages/types/src/board.ts or the frozen plan; read parseEvent and fix schema or event. (2) serverRestartFolder (testing/e2e/server-restart-folder.test.ts, factory testing/factories/server-process.ts) negative cases 'unknown run id is refused after the restart' and 'run is not known to another home': `Unable to connect` ConnectionRefused for http://127.0.0.1:<port>/runs/run-missing: the test calls the server after it was stopped; keep the server running until the request is made.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixf
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixed by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

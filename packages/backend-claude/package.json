@@ -1,0 +1,23 @@
+{
+  "name": "@titan/backend-claude",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/messages": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@anthropic-ai/claude-agent-sdk": "catalog:",
+    "@titan/errors": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/types": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

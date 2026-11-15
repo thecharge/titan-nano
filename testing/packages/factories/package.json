@@ -1,0 +1,19 @@
+{
+  "name": "@titan/test-factories",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@titan/types": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/test-framework": "workspace:*",
+    "@titan/config": "workspace:*",
+    "@titan/runner": "workspace:*",
+    "@titan/workflow": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/streams": "workspace:*"
+  }
+}

@@ -1,0 +1,35 @@
+name: Fix tests fixu
+goal: >-
+  Fix exactly this gate failure, changing nothing else: the coverage check reports `{"file":"packages/runner/src/program.ts","rule":"uncovered_lines","lines":[52],"missingFunctions":0}` although all tests pass and the loop runs many times (lcov shows line 51 hit 94 times, line 52 zero). Line 52 is the closing brace of `while (true)` in `async function* follow` (lines 43-53). I reproduced the Bun coverage fault in a small file: an async generator with `yield*` and a `while (true)` loop whose last statement is a conditional await leaves the closing brace at zero. This shape reports no zero line: declare `let done = false;` before the loop, loop with `while (!done)`, keep `const finished = ended(); const page = await engine.events(id, { after }); yield* page.events; after = page.next_cursor;` then `done = !page.has_more && finished;` and as the last statement `if (!page.has_more && !done) await Promise.race([wake, Bun.sleep(ProgramLimit.PollMilliseconds)]);`, and no return inside the loop. Rewrite `follow` in packages/runner/src/program.ts to exactly that shape with the same behavior. Change nothing else. No comments. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixu
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixud by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

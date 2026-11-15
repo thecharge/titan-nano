@@ -1,0 +1,35 @@
+name: Fix tests fixb2
+goal: |-
+  Fix exactly this, changing nothing else. The user wants formatters on the pre-commit hook so formatting is part of the commit and does not stop it. lefthook.yml has pre-commit job staged-snapshot (`bun tooling/scripts/check-hook.ts commit`) that only verifies. Add, in lefthook.yml, a job that runs BEFORE staged-snapshot (lefthook runs jobs in order; use `parallel: false` explicitly if needed) which formats the staged files and re-stages them: `bunx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}` with `stage_fixed: true` and a glob for ts, tsx, js, json, jsonc files, and a second job for markdown, yaml and json docs using the repo script `bun run format:docs` (package.json script, dprint) with `stage_fixed: true` and glob "*.{md,yaml,yml}". Read lefthook.yml, package.json, dprint.json and tooling/scripts/check-hook.ts, hook-policy.ts first. If a test or policy script (testing/cases/hooks.ts, tooling/scripts/check-lint-policy.ts, check-package-policy.ts, check-spelling) reads lefthook.yml and fixes its shape, update that test or check with positive and negative cases in the existing style so the new jobs are required. The verification job must remain after the formatters. No comments in code (YAML comments also not). You have no shell: re-read the changed files after editing and list them in your summary.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixb2
+    do:
+      persona: builder
+      task: Add the formatter jobs as the goal says.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that formatters run before the verification job, stage their fixes, and that any test reading lefthook.yml covers them.
+limits:
+  max_parallel: 1
+  max_minutes: 60

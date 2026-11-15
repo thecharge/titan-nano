@@ -1,0 +1,27 @@
+# Product streaming and control-flow repair
+
+## Objective and scope
+
+This continues tasks 32.1 and 32.2 after the product contract-shape increment. Six existing product modules contain the nine remaining baseline product control-flow findings. The draft keeps work in those owning modules and preserves their public exports. Full reference parity, native checkpoint manifests, script execution and production acceptance remain open.
+
+Journal descriptor ownership stays in boardLines with a finally close. Record framing uses a separate generator and one shared record-size guard, retaining bounded Buffer reads, complete records and incomplete trailing writes. Artifact content retains one complete streamed digest check and one bounded range Buffer. Credential token reads retain descriptor metadata checks, a fixed Buffer ceiling and finally closure. Event pages retain the same count and byte refusal. Request pages retain per-run validation, exact continuation cursors, filters, unavailable-run evidence and the same page allowance. Their per-run appender closes over only the current bounded page. Capped parallel work preserves the first rejection, stops queued tasks and drains started peers before returning.
+
+New competing-failure cases have two positive and two negative inputs, including undefined and null reasons. They hold a started peer open and require the capped utility to remain pending until that peer drains. Existing queued-task and settlement cases remain intact. New raw-journal cases exercise the actual central record-byte boundary with complete and incomplete records. They require specific corruption errors above the ceiling, exact source-byte preservation and zero owned open descriptors. Existing stream descriptor, credentials, artifact and request-page fixtures remain required.
+
+## Verification state
+
+The first draft passed typechecking and reference inspection for the six product sources. The touched concurrency case table also had three pre-existing object-depth findings. Those expected outcomes and the four new competing-failure outcomes now use named values. The repeated reference check found zero findings across nine sources before the raw-journal fixture addition. The expanded draft still needs observed typechecking, static ownership checks and reference inspection.
+
+No runtime case has run for this draft. The contract-shape increment is in its complete staged hook in another checkout. Do not overlap an offline suite, installed probe, fault sequence or hook. Preserve the existing container resources and test deadlines. After that increment publishes, run the selected behavior and descriptor cases, inject type-correct faults, restore exact bytes, repeat verification, run installed acceptance and use ordinary complete staged and outgoing hooks. No live vendor call or Titan skill invocation is authorized by this record.
+
+The expanded draft passed typechecking, schema ownership, flat-case checks, spelling and the plain-language guide check. Reference inspection found zero findings across all twelve touched sources. The raw journal fixture writes a bounded real record and inspects it through the public RunStore.events iterator. It checks both the complete-record and pending-tail limits. Runtime and fault commands remain queued behind the other increment's normal hooks.
+
+## Initial runtime evidence
+
+After merging contract commit fc06e685c294ceaa1233ff363ee141992208ba6e, typechecking passed. A fresh bounded reference scan of all 294 tracked product sources, totaling 746689 bytes, found zero structure findings. This describes the current draft and does not establish testing or tooling parity. The focused behavior selection passed all 198 tests across eleven files in 7.51 seconds. Its command exited one for 265 omitted whole-product coverage gaps. Evidence is /tmp/titan-stream-control-first.log. The four new raw journal cases each completed within 394 milliseconds using the unchanged container resources and case deadlines. The four competing-failure cases passed. Falsification, restored verification, installed acceptance and complete gates remain required.
+
+## Falsification and installed acceptance
+
+Seven type-correct faults were caught. Replacing the first failure produced four case failures, omitting journal close produced twelve, omitting the journal bound produced two, omitting the artifact digest produced one, omitting credential close produced three, skipping a request cursor produced four and omitting request identity produced one. Original source bytes were restored in finally and restored typechecking passed. Evidence is /tmp/titan-stream-control-mutants.json and /tmp/titan-stream-control-restored-types.log. The restored selection passed all 198 tests across eleven files in 7.40 seconds, retaining focused command exit one for the same 265 omitted whole-product coverage gaps. Evidence is /tmp/titan-stream-control-restored.log.
+
+The rebuilt installed-package check exited zero. It retained all existing installed acceptance tables, including both native SDKs with stubbed responses, mixed delivery, active recovery, parallel request turns, configuration and checkpoint integrity. Evidence is /tmp/titan-stream-control-installed.log. Task 32.9 owns the two precise implemented scenarios and remains open until complete ordinary gate evidence passes. Tasks 32.1 and 32.2 retain all source and blocking-guard parity requirements. No live vendor call or Titan skill invocation occurred.

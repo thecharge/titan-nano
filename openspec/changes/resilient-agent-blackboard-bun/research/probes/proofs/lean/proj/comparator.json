@@ -1,0 +1,6 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": ["sumTo_formula", "sumTo_100"],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+}

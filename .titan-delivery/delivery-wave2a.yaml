@@ -1,0 +1,42 @@
+name: Deliver update check and titan update (31.11, 31.12)
+goal: |-
+  Deliver tasks 31.11 and 31.12 of the change resilient-agent-blackboard-bun, one step each. Read the requirements "Titan tells the person when a newer version exists" and "Titan updates without losing data" in openspec/changes/resilient-agent-blackboard-bun/specs/distribution/spec.md and every scenario under them, plus acceptance-map.tsv and design.md. Data safety is the first rule: never delete or overwrite user data, backup first, roll back on failure. Config settings go through the central config schema in packages/config and packages/types. No comments in code, no inline literals, tests with unit(factory, cases), offline with fakes (no real network, no real git remote; use a local folder as the update source), no live vendor calls. Do not edit tasks.md or the acceptance map.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: t31_11
+    do:
+      persona: builder
+      task: 'Deliver task 31.11 exactly as written, following the goal rules: 31.11 Write the update check, the one-line notice and the `update.source` and `update.check` settings. Done when the scenarios "Newer version exists" and "Check turned off" pass.'
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+  - id: t31_12
+    do:
+      persona: builder
+      task: 'Deliver task 31.12 exactly as written, following the goal rules: 31.12 Write `titan update` with `--check`, `--from`, the backup, the side-by-side install, the doctor gate and the rollback. Done when the scenarios "Update that passes" and "Update that fails" pass.'
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+limits:
+  max_parallel: 2
+  max_minutes: 120

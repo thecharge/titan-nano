@@ -1,0 +1,1 @@
+{ "name": "@titan/core", "type": "module", "exports": { ".": "./src/index.ts" } }

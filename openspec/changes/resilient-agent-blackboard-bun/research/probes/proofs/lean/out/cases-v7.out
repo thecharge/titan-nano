@@ -1,0 +1,148 @@
+setup | info: titanproof: no previous manifest, creating one from scratch
+setup | info: toolchain not updated; already up-to-date
+lake-manifest.json
+=== case good
+plain lean exit=0 ms=187
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+  | 'sumTo_100' does not depend on any axioms
+lake check, no default target, exit=0 ms=512
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake check, default target Solution, exit=0 ms=62557
+  | Resolving dependencies
+  | ✔ [2/3] Built Solution (193ms)
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses axioms: Classical.choice, propext, Quot.sound
+lake comparator exit=0 ms=1814
+  | Building Solution
+  | ✔ [2/3] Built Solution (192ms)
+  | Build completed successfully (3 jobs).
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Your solution is okay!
+=== case sorry
+plain lean exit=0 ms=157
+  | /tmp/plain.lean:5:8: warning: declaration uses `sorry`
+  | 'sumTo_formula' depends on axioms: [sorryAx]
+  | 'sumTo_100' does not depend on any axioms
+lake check, no default target, exit=0 ms=512
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake check, default target Solution, exit=1 ms=61396
+  | warning: Solution.lean:5:8: declaration uses `sorry`
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | error: Axiom 'sorryAx' is not permitted; it is used by 'sumTo_formula'
+  | Lean default kernel accepts the solution
+  | Uses axioms: Classical.choice, propext, Quot.sound, sorryAx
+lake comparator exit=1 ms=1387
+  | Build completed successfully (3 jobs).
+  | Building Solution
+  | ⚠ [2/3] Built Solution (172ms)
+  | warning: Solution.lean:5:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | error: Illegal axiom detected: 'sorryAx'
+=== case weakened
+plain lean exit=0 ms=146
+  | 'sumTo_formula' does not depend on any axioms
+  | 'sumTo_100' does not depend on any axioms
+lake check, no default target, exit=0 ms=519
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake check, default target Solution, exit=0 ms=62002
+  | Resolving dependencies
+  | ✔ [2/3] Built Solution (156ms)
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses axioms: Classical.choice, propext, Quot.sound
+lake comparator exit=1 ms=1381
+  | warning: Challenge.lean:8:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Building Solution
+  | ✔ [2/3] Built Solution (170ms)
+  | Build completed successfully (3 jobs).
+  | error: Challenge and solution theorem statement do not match: 'sumTo_formula'
+=== case redefined
+plain lean exit=0 ms=187
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+  | 'sumTo_100' does not depend on any axioms
+lake check, no default target, exit=0 ms=523
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake check, default target Solution, exit=0 ms=61541
+  | Resolving dependencies
+  | ✔ [2/3] Built Solution (172ms)
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses axioms: Classical.choice, propext, Quot.sound
+lake comparator exit=1 ms=1517
+  | warning: Challenge.lean:8:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Building Solution
+  | ✔ [2/3] Built Solution (196ms)
+  | Build completed successfully (3 jobs).
+  | error: Const does not match between challenge and target 'sumTo._f'
+=== case axiom
+plain lean exit=0 ms=169
+  | 'sumTo_formula' depends on axioms: [trust_me]
+  | 'sumTo_100' does not depend on any axioms
+lake check, no default target, exit=0 ms=518
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake check, default target Solution, exit=1 ms=61509
+  | ✔ [2/3] Built Solution (171ms)
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | error: Axiom 'trust_me' is not permitted; it is used by 'sumTo_formula'
+  | Lean default kernel accepts the solution
+  | Uses axioms: Classical.choice, propext, Quot.sound, trust_me
+lake comparator exit=1 ms=1377
+  | warning: Challenge.lean:8:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Building Solution
+  | ✔ [2/3] Built Solution (156ms)
+  | Build completed successfully (3 jobs).
+  | error: Illegal axiom detected: 'trust_me'
+=== case native
+plain lean exit=0 ms=173
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+  | 'sumTo_100' depends on axioms: [sumTo_100._native.native_decide.ax_1_1]
+lake check, no default target, exit=0 ms=525
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake check, default target Solution, exit=1 ms=61648
+  | ✔ [2/3] Built Solution (178ms)
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | error: Axiom 'sumTo_100._native.native_decide.ax_1_1' is not permitted; it is used by 'sumTo_100'
+  | Lean default kernel accepts the solution
+  | Uses axioms: Classical.choice, propext, Quot.sound, sumTo_100._native.native_decide.ax_1_1
+lake comparator exit=1 ms=1522
+  | warning: Challenge.lean:8:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Building Solution
+  | ✔ [2/3] Built Solution (198ms)
+  | Build completed successfully (3 jobs).
+  | error: Illegal axiom detected: 'sumTo_100._native.native_decide.ax_1_1'

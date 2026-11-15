@@ -1,0 +1,57 @@
+name: Deliver wave 1 (17.1, 24.2, 22.1, 24.3)
+goal: |-
+  Deliver four independent tasks of the change resilient-agent-blackboard-bun, one step each: Deliver task 17.1 Write the policy files, the kind of goal and the reward. Done when the scenarios "Kind from the workflow file", "Reward in the run record" and "Weights in the workflow file" pass.; Deliver task 24.2 Add the `lock_statement` request, the copy in `locked/` and the hash on the board. Done when "Lock request with its text", "The locked file is changed during a run" and "The statement waits for approval" pass.; Deliver task 22.1 Add candidate and attempt ids to pending hub changes. Done when the refuted-attempt and losing-candidate scenarios in spec knowledge-hub pass.; Deliver task 24.3 Build the `lean` check on `lake comparator` with a pinned toolchain, a fresh folder, no network and a time limit. Done when "The five cheats of the probe", "A real proof" and "A check that runs too long" pass with the six files of `research/probes/proofs/lean/cases/`.
+  Each step carries its own full instructions in its task text; read the task line in openspec/changes/resilient-agent-blackboard-bun/tasks.md, the specs, acceptance-map.tsv and design.md. No comments in code, no inline literals, tests with unit(factory, cases), offline, no live calls. Do not edit tasks.md or the acceptance map.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: t17_1
+    do:
+      persona: builder
+      task: 'Deliver task 17.1 exactly as written, following the goal rules: 17.1 Write the policy files, the kind of goal and the reward. Done when the scenarios "Kind from the workflow file", "Reward in the run record" and "Weights in the workflow file" pass.'
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+  - id: t24_2
+    do:
+      persona: builder
+      task: 'Deliver task 24.2 exactly as written, following the goal rules: 24.2 Add the `lock_statement` request, the copy in `locked/` and the hash on the board. Done when "Lock request with its text", "The locked file is changed during a run" and "The statement waits for approval" pass.'
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+  - id: t22_1
+    do:
+      persona: builder
+      task: "Deliver task 22.1 exactly as written, following the goal rules: 22.1 Add candidate and attempt ids to pending hub changes. Done when the refuted-attempt and losing-candidate scenarios in spec knowledge-hub pass."
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+  - id: t24_3
+    do:
+      persona: builder
+      task: 'Deliver task 24.3 exactly as written, following the goal rules: 24.3 Build the `lean` check on `lake comparator` with a pinned toolchain, a fresh folder, no network and a time limit. Done when "The five cheats of the probe", "A real proof" and "A check that runs too long" pass with the six files of `research/probes/proofs/lean/cases/`.'
+    falsify:
+      - persona: skeptic
+        task: Refute when a named scenario has no test that can fail, when a sentence of the requirement is not met, when a literal sits outside constants, or when a claim is unbacked; judge by reading code and tests.
+limits:
+  max_parallel: 4
+  max_minutes: 120

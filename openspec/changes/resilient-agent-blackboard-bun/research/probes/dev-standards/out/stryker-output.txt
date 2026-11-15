@@ -1,0 +1,45 @@
+23:06:32 (3208571) INFO ProjectReader Found 2 of 23 file(s) to be mutated.
+23:06:32 (3208571) INFO Instrumenter Instrumented 2 source file(s) with 39 mutant(s)
+23:06:32 (3208571) INFO ConcurrencyTokenProvider Creating 4 test runner process(es).
+23:06:32 (3208571) INFO DryRunExecutor Starting initial test run (command test runner with "perTest" coverage analysis). This may take a while.
+23:06:33 (3208571) INFO DryRunExecutor Initial test run succeeded. Ran 1 tests in 0 seconds (net 264 ms, overhead 1 ms).
+
+All tests
+  ✓ All tests (killed 34)
+
+[Survived] ArrayDeclaration
+src/fake-backend.ts:4:25
+-     const calls: Turn[] = [];
++     const calls: Turn[] = ["Stryker was here"];
+
+[Survived] StringLiteral
+src/fake-backend.ts:6:11
+-       name: "fake", calls,
++       name: "", calls,
+
+[Survived] CallExpression
+src/fake-backend.ts:8:7
+-         calls.push(turn);
++         ;
+
+[Survived] ConditionalExpression
+src/wilson.ts:3:7
+-     if (n === 0) return { lo: 0, hi: 1 };
++     if (false) return { lo: 0, hi: 1 };
+
+[Survived] ObjectLiteral
+src/wilson.ts:3:23
+-     if (n === 0) return { lo: 0, hi: 1 };
++     if (n === 0) return {};
+
+Ran 1.00 tests per mutant on average.
+-----------------|------------------|----------|-----------|------------|----------|----------|
+                 | % Mutation score |          |           |            |          |          |
+File             |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+-----------------|--------|---------|----------|-----------|------------|----------|----------|
+All files        |  87.18 |   87.18 |       34 |         0 |          5 |        0 |        0 |
+ fake-backend.ts |  75.00 |   75.00 |        9 |         0 |          3 |        0 |        0 |
+ wilson.ts       |  92.59 |   92.59 |       25 |         0 |          2 |        0 |        0 |
+-----------------|--------|---------|----------|-----------|------------|----------|----------|
+23:06:35 (3208571) INFO MutationTestExecutor Done in 2 seconds.
+exit code: 0, wall time: 3 s

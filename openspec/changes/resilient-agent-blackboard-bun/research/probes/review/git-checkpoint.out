@@ -1,0 +1,5 @@
+clean-tree stash create: ''
+dirty stash create files: .gitignore tracked.txt 
+hook after commit in worktree: HOOK-RAN-ON-HOST
+hook with hooksPath=/dev/null: none
+user tree after worktree commits:  M tracked.txt ?? user-untracked.txt 

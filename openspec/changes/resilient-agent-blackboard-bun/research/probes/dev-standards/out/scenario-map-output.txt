@@ -1,0 +1,10 @@
+$ bun scenario-map.ts openspec/changes/resilient-agent-blackboard-bun/specs scenario-tests  (the folder holds out/scenario-sample.test.ts.txt)
+186 scenarios, 2 with a test, 184 without, 1 unknown
+unknown: persona-lifecycle > A scenario that does not exist
+missing: persona-board > Board after a run with a question
+missing: persona-board > Parallel steps write at the same time
+missing: persona-board > Unknown request kind
+missing: persona-board > Answer reaches the asking agent
+missing: persona-board > Falsifier does not see board questions
+... and 179 more
+exit code: 1

@@ -1,0 +1,32 @@
+$ /usr/bin/python3 -I scripts/check-specs.py
+26 file(s) checked, 0 finding(s) {}
+23 capabilities, 259 requirements, 428 scenarios, 230 tasks; 0 errors
+Specification check only; no product tests ran.
+
+exit=0; observed_seconds=0.103
+$ /usr/bin/python3 -I scripts/test-check-specs.py
+
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 1.423s
+
+OK
+exit=0; observed_seconds=1.464
+$ openspec validate --all --strict
+✓ change/resilient-agent-blackboard-bun
+Totals: 1 passed, 0 failed (1 items)
+- Validating...
+exit=0; observed_seconds=0.761
+$ /usr/bin/python3 -I scripts/check-plain.py /workspace/titan-nano/openspec/changes/resilient-agent-blackboard-bun/research/development-practices-review.md
+1 file(s) checked, 0 finding(s) {}
+
+exit=0; observed_seconds=0.017
+$ git diff --check
+
+
+exit=0; observed_seconds=0.007
+Existing scenario identities retained: 395/395; added 33.
+Saved sibling report: 40 steps, summed duration 576.10 seconds; not a fresh run.
+Sibling inspection was read-only. No sibling pipeline ran.
+No Titan product, hook, CI, live vendor, paid compute or benchmark test ran. Speed targets remain guesses.
+Prior historical-source gap remains unresolved; its earlier failure is recorded in sweep-verification.txt.

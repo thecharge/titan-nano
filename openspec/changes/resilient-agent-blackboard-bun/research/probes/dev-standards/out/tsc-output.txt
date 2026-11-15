@@ -1,0 +1,7 @@
+$ tsc --noEmit -p tsconfig.json
+test/fixtures/fake-agent.ts(2,14): error TS1375: 'await' expressions are only allowed at the top level of a file when that file is a module, but this file has no imports or exports. Consider adding an empty 'export {}' to make this file a module.
+exit code: 1
+
+--- after: export {} in fake-agent.ts, then biome check --write (safe fixes only) ---
+$ tsc --noEmit -p tsconfig.json
+exit code: 0

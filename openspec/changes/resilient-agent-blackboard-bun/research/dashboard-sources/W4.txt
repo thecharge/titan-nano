@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"main","description":"AI Observability \u0026 Evaluation","full_name":"Arize-ai/phoenix","license":"NOASSERTION","pushed_at":"2026-11-06T06:14:07Z","stargazers_count":12168}

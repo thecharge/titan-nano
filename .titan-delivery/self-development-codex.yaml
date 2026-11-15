@@ -1,0 +1,116 @@
+name: Titan improves its own runtime checks and inspection guide
+goal: >-
+  Use the installed Titan controller and real Codex workers to improve Titan in its
+  shared live repository. Keep a reviewable code change, an inspection guide,
+  independent verdicts and retained script output.
+harness: codex
+workspace:
+  mode: live
+limits:
+  max_parallel: 2
+  max_minutes: 15
+defaults:
+  backend: codex-sdk
+  max_attempts: 2
+recovery:
+  max_retries: 2
+approvals:
+  tool: human
+personas:
+  implementer:
+    description: Repair Titan's Bun prerequisite version comparison
+    role: >-
+      Read DEV_RULES.md before editing. Preserve every staged or unrelated change.
+      Work only in your declared files in the shared live repository. Do not commit,
+      push, install dependencies, change configuration, start other agents or run
+      test suites. Implement a focused change and regression cases. The later script
+      step runs verification. Report exact changed paths and known limits.
+    tools: [Read, Glob, Grep, Write, Edit]
+  guide_writer:
+    description: Explain how to inspect this self-editing Titan workflow
+    role: >-
+      Read DEV_RULES.md and the installed Titan command help as needed. Write only
+      the declared guide. Preserve every staged and unrelated file. Do not commit,
+      push, install dependencies, change configuration or start other agents.
+      Use plain English and actual supported commands. Distinguish pending results
+      from observed completion.
+    tools: [Read, Glob, Grep, Write, Edit]
+  code_reviewer:
+    description: Independently challenge the runtime comparison change
+    role: >-
+      Read the implementation and shared case tables. Seek concrete counterexamples
+      against the task criteria. Remain read-only. Do not run test suites because
+      the controller owns the later script verification. Return a precise refutation
+      for a defect or a survived verdict with the inspection actually performed.
+    tools: [Read, Glob, Grep]
+  guide_reviewer:
+    description: Independently challenge the inspection instructions
+    role: >-
+      Read the guide and compare its commands with Titan's current CLI definitions.
+      Remain read-only and do not run test suites. Refute unsupported commands,
+      invented completion claims or an omitted way to inspect steps and changes.
+      Otherwise report the actual checks performed.
+    tools: [Read, Glob, Grep]
+steps:
+  - parallel:
+      - id: repair_bun_version
+        files:
+          - apps/cli/src/prerequisites.ts
+          - testing/cases/prerequisite-version.ts
+          - testing/factories/prerequisite-version.ts
+          - testing/unit/prerequisite-version.test.ts
+        do:
+          persona: implementer
+          task: >-
+            Inspect the existing candidate from the earlier run. Repair checkPrerequisites so malformed Bun versions cannot be reported
+            ready, a prerelease of the minimum supported version is rejected and
+            valid equal or newer releases within the existing shared version parser limits remain ready. Preserve the existing 256-character parser bound. Inspect existing version
+            parsing before choosing an implementation. Preserve required tool and
+            optional harness behavior. Reuse established shared factories and flat
+            positive and negative case tables. Add at least two positive and two
+            negative cases through checkPrerequisites' normal entry point. Include
+            malformed and older prerelease inputs. Respect source ownership rules
+            and avoid adding dependencies. Do not run tests now. Only edit the four
+            declared files. Constants already exported by the repository may be used.
+        falsify:
+          - persona: code_reviewer
+            task: >-
+              Inspect repair_bun_version against its complete task. Check malformed
+              versions, minimum-version prereleases, equal and newer releases,
+              backwards compatibility and case registration. The existing shared parser 256-character bound is part of supported input and must remain. Identify a concrete
+              failing input for any refutation. Remain read-only.
+      - id: write_inspection_guide
+        files: [docs/self-development.md]
+        do:
+          persona: guide_writer
+          task: >-
+            Write docs/self-development.md with concise instructions for inspecting
+            this workflow. Use the installed titan command and the current project
+            directory. Show the controller home as a user-supplied path. The plan is
+            .titan-delivery/self-development-codex.yaml. Explain the two parallel
+            tasks, independent reviewers and following script step. Give supported
+            commands for status, events, artifacts, usage, requests and dashboard
+            with a RUN_ID placeholder. Explain that execution uses the shared live
+            source tree and retained candidates are evidence. Describe how to inspect
+            changed source files with git diff. Do not claim the run passed before
+            it has finished. Do not claim full production readiness or enforced
+            native filesystem isolation. Write only the declared guide.
+        falsify:
+          - persona: guide_reviewer
+            task: >-
+              Inspect docs/self-development.md. Compare the listed commands and
+              options with current CLI definitions and check that paths match this
+              plan. Refute unsupported inspection commands, false completion claims
+              or missing explanation of parallel tasks and script output.
+  - id: verify_delivered_files
+    do:
+      script: >-
+        bun run typecheck && bun run check:docs && bun run check:links &&
+        git diff --check -- apps/cli/src/prerequisites.ts docs/self-development.md &&
+        test -s testing/unit/prerequisite-version.test.ts
+    falsify:
+      - script: >-
+          test -s docs/self-development.md &&
+          test -s testing/cases/prerequisite-version.ts &&
+          test -s testing/factories/prerequisite-version.ts &&
+          git diff --check

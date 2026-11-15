@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"main","description":"otel-desktop-viewer is a CLI tool for receiving OpenTelemetry traces while working on your local machine.","full_name":"CtrlSpice/otel-desktop-viewer","license":"Apache-2.0","pushed_at":"2026-11-03T17:15:23Z","stargazers_count":1302}

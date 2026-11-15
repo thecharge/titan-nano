@@ -1,0 +1,539 @@
+{
+  "schema_version": 18,
+  "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+  "workflow_id": "2e4b60af6e6a9678321875d3fc9642c1bd25d724ea2404261f8efb64e24c1b56",
+  "workflow_revision": "10a99abed385208d9f43ed830a7eebf9fe327293afd0ad7127aece131ef8283e",
+  "persona_references": {
+    "implementer": "implementer@1",
+    "guide_writer": "guide_writer@1",
+    "code_reviewer": "code_reviewer@1",
+    "guide_reviewer": "guide_reviewer@1"
+  },
+  "submission_id": "self-development-20261115-d",
+  "client_id": "codex-self-development-20261115",
+  "runtime_version": "0.1.0-alpha.1",
+  "runtime_build": "33245ba6b18bfede8ff1bade350deed5bd75d0b88da3155e3502e87305eb75bc",
+  "request_hash": "a6f486aff91200602fddab84ba2fb6f5ffae9d77dd02e077061c22a1103b3179",
+  "project": "/workspace/titan-nano",
+  "root": "/workspace/titan-nano/docs/examples/self-development",
+  "version": 198,
+  "created_at": 1794718915203,
+  "state": "passed",
+  "error": null,
+  "config": {
+    "value": {
+      "schema_version": 1,
+      "defaults": {
+        "backend": "codex-sdk",
+        "model": null,
+        "max_attempts": 2,
+        "claude_max_turns": 150,
+        "candidates": 1
+      },
+      "limits": {
+        "max_workspace_entries": 10000,
+        "max_workspace_bytes": 1073741824,
+        "max_workspace_depth": 64,
+        "max_steps": 50,
+        "max_parallel": 2,
+        "max_group_depth": 32,
+        "max_minutes": 15
+      },
+      "recovery": {
+        "max_retries": 2,
+        "base_delay_s": 1,
+        "max_delay_s": 60,
+        "jitter_ratio": 0.2,
+        "session_mode": "native_only"
+      },
+      "approvals": {
+        "ask": "auto",
+        "add_step": "auto",
+        "replan": "main",
+        "new_persona": "main",
+        "improve_persona": "main",
+        "merge_personas": "main",
+        "retire_persona": "main",
+        "delete_persona": "human",
+        "tool": "human",
+        "skill": "main",
+        "tool_server": "human",
+        "resource": "main",
+        "action": "human",
+        "raise_limit": "human",
+        "paid_compute": "human",
+        "lock_statement": "human"
+      },
+      "requests": {
+        "max_per_run": 256
+      },
+      "server": {
+        "agent_host": {
+          "gc_markers": 1,
+          "worker_threads": 2,
+          "startup_timeout_ms": 10000
+        },
+        "native_tools": {
+          "max_bindings": 1024,
+          "max_pending_operations": 4096,
+          "transport": "http",
+          "timeout_ms": 10000
+        },
+        "max_active_agents": 8,
+        "max_pending_agents": 1024,
+        "max_pending_request_operations": 256,
+        "max_pending_run_operations": 4096,
+        "max_pending_submissions": 4096,
+        "max_resident_runs": 1024,
+        "backends": {
+          "codex-sdk": {},
+          "claude-sdk": {}
+        }
+      },
+      "client": {
+        "max_submission_receipts": 10000
+      }
+    },
+    "hash": "5b5bb7df4ed9bcbbfa718e1d553280157609640ebf7c7b353b1ca52b86269e8f",
+    "sources": {
+      "schema_version": ["built-in"],
+      "defaults.backend": ["built-in", "workflow", "CLI"],
+      "defaults.model": ["built-in"],
+      "defaults.max_attempts": ["built-in", "workflow"],
+      "defaults.claude_max_turns": ["built-in", "project:/workspace/titan-nano/.titan/config.yaml"],
+      "defaults.candidates": ["built-in"],
+      "limits.max_workspace_entries": ["built-in"],
+      "limits.max_workspace_bytes": ["built-in"],
+      "limits.max_workspace_depth": ["built-in"],
+      "limits.max_steps": ["built-in"],
+      "limits.max_parallel": ["built-in", "workflow"],
+      "limits.max_group_depth": ["built-in"],
+      "limits.max_minutes": ["built-in", "workflow"],
+      "recovery.max_retries": ["built-in", "workflow"],
+      "recovery.base_delay_s": ["built-in"],
+      "recovery.max_delay_s": ["built-in"],
+      "recovery.jitter_ratio": ["built-in"],
+      "recovery.session_mode": ["built-in"],
+      "approvals.ask": ["built-in"],
+      "approvals.add_step": ["built-in"],
+      "approvals.replan": ["built-in"],
+      "approvals.new_persona": ["built-in"],
+      "approvals.improve_persona": ["built-in"],
+      "approvals.merge_personas": ["built-in"],
+      "approvals.retire_persona": ["built-in"],
+      "approvals.delete_persona": ["built-in"],
+      "approvals.tool": ["built-in", "workflow"],
+      "approvals.skill": ["built-in"],
+      "approvals.tool_server": ["built-in"],
+      "approvals.resource": ["built-in"],
+      "approvals.action": ["built-in"],
+      "approvals.raise_limit": ["built-in"],
+      "approvals.paid_compute": ["built-in"],
+      "approvals.lock_statement": ["built-in"],
+      "requests.max_per_run": ["built-in"],
+      "server.agent_host.gc_markers": ["built-in"],
+      "server.agent_host.worker_threads": ["built-in"],
+      "server.agent_host.startup_timeout_ms": ["built-in"],
+      "server.native_tools.max_bindings": ["built-in"],
+      "server.native_tools.max_pending_operations": ["built-in"],
+      "server.native_tools.transport": ["built-in"],
+      "server.native_tools.timeout_ms": ["built-in"],
+      "server.max_active_agents": ["built-in"],
+      "server.max_pending_agents": ["built-in"],
+      "server.max_pending_request_operations": ["built-in"],
+      "server.max_pending_run_operations": ["built-in"],
+      "server.max_pending_submissions": ["built-in"],
+      "server.max_resident_runs": ["built-in"],
+      "client.max_submission_receipts": ["built-in"]
+    }
+  },
+  "plan": {
+    "workflow": {
+      "name": "Titan improves its own runtime checks and inspection guide",
+      "goal": "Use the installed Titan controller and real Codex workers to improve Titan in its shared live repository. Keep a reviewable code change, an inspection guide, independent verdicts and retained script output.",
+      "harness": "codex",
+      "personas": {
+        "implementer": {
+          "description": "Repair Titan's Bun prerequisite version comparison",
+          "role": "Read DEV_RULES.md before editing. Preserve every staged or unrelated change. Work only in your declared files in the shared live repository. Do not commit, push, install dependencies, change configuration, start other agents or run test suites. Implement a focused change and regression cases. The later script step runs verification. Report exact changed paths and known limits.",
+          "tags": [],
+          "tools": ["Read", "Glob", "Grep", "Write", "Edit"]
+        },
+        "guide_writer": {
+          "description": "Explain how to inspect this self-editing Titan workflow",
+          "role": "Read DEV_RULES.md and the installed Titan command help as needed. Write only the declared guide. Preserve every staged and unrelated file. Do not commit, push, install dependencies, change configuration or start other agents. Use plain English and actual supported commands. Distinguish pending results from observed completion.",
+          "tags": [],
+          "tools": ["Read", "Glob", "Grep", "Write", "Edit"]
+        },
+        "code_reviewer": {
+          "description": "Independently challenge the runtime comparison change",
+          "role": "Read the implementation and shared case tables. Seek concrete counterexamples against the task criteria. Remain read-only. Do not run test suites because the controller owns the later script verification. Return a precise refutation for a defect or a survived verdict with the inspection actually performed.",
+          "tags": [],
+          "tools": ["Read", "Glob", "Grep"]
+        },
+        "guide_reviewer": {
+          "description": "Independently challenge the inspection instructions",
+          "role": "Read the guide and compare its commands with Titan's current CLI definitions. Remain read-only and do not run test suites. Refute unsupported commands, invented completion claims or an omitted way to inspect steps and changes. Otherwise report the actual checks performed.",
+          "tags": [],
+          "tools": ["Read", "Glob", "Grep"]
+        }
+      },
+      "steps": [
+        {
+          "parallel": [
+            {
+              "id": "repair_bun_version",
+              "do": {
+                "persona": "implementer",
+                "task": "Inspect the existing candidate from the earlier run. Repair checkPrerequisites so malformed Bun versions cannot be reported ready, a prerelease of the minimum supported version is rejected and valid equal or newer releases within the existing shared version parser limits remain ready. Preserve the existing 256-character parser bound. Inspect existing version parsing before choosing an implementation. Preserve required tool and optional harness behavior. Reuse established shared factories and flat positive and negative case tables. Add at least two positive and two negative cases through checkPrerequisites' normal entry point. Include malformed and older prerelease inputs. Respect source ownership rules and avoid adding dependencies. Do not run tests now. Only edit the four declared files. Constants already exported by the repository may be used."
+              },
+              "inputs": {},
+              "falsify": [
+                {
+                  "persona": "code_reviewer",
+                  "task": "Inspect repair_bun_version against its complete task. Check malformed versions, minimum-version prereleases, equal and newer releases, backwards compatibility and case registration. The existing shared parser 256-character bound is part of supported input and must remain. Identify a concrete failing input for any refutation. Remain read-only."
+                }
+              ],
+              "checks": [],
+              "verify": [],
+              "files": [
+                "apps/cli/src/prerequisites.ts",
+                "testing/cases/prerequisite-version.ts",
+                "testing/factories/prerequisite-version.ts",
+                "testing/unit/prerequisite-version.test.ts"
+              ]
+            },
+            {
+              "id": "write_inspection_guide",
+              "do": {
+                "persona": "guide_writer",
+                "task": "Write docs/self-development.md with concise instructions for inspecting this workflow. The controller is titan, project is /workspace/titan-nano and controller home is /workspace/titan-nano/.titan/self-development-fixed. The plan is .titan-delivery/self-development-codex.yaml. Explain the two parallel tasks, independent reviewers and following script step. Give supported commands for status, events, artifacts, usage, requests and dashboard with a RUN_ID placeholder. Explain that execution uses the shared live source tree and retained candidates are evidence. Describe how to inspect changed source files with git diff. Do not claim the run passed before it has finished. Do not claim full production readiness or enforced native filesystem isolation. Write only the declared guide."
+              },
+              "inputs": {},
+              "falsify": [
+                {
+                  "persona": "guide_reviewer",
+                  "task": "Inspect docs/self-development.md. Compare the listed commands and options with current CLI definitions and check that paths match this plan. Refute unsupported inspection commands, false completion claims or missing explanation of parallel tasks and script output."
+                }
+              ],
+              "checks": [],
+              "verify": [],
+              "files": ["docs/self-development.md"]
+            }
+          ]
+        },
+        {
+          "id": "verify_delivered_files",
+          "do": {
+            "script": "bun run typecheck && bun run check:docs && bun run check:links && git diff --check -- apps/cli/src/prerequisites.ts docs/self-development.md && test -s testing/unit/prerequisite-version.test.ts"
+          },
+          "inputs": {},
+          "falsify": [
+            {
+              "script": "test -s docs/self-development.md && test -s testing/cases/prerequisite-version.ts && test -s testing/factories/prerequisite-version.ts && git diff --check"
+            }
+          ],
+          "checks": [],
+          "verify": []
+        }
+      ],
+      "defaults": {
+        "backend": "codex-sdk",
+        "max_attempts": 2
+      },
+      "limits": {
+        "max_parallel": 2,
+        "max_minutes": 15
+      },
+      "recovery": {
+        "max_retries": 2
+      },
+      "approvals": {
+        "tool": "human"
+      },
+      "workspace": {
+        "mode": "live"
+      }
+    },
+    "nodes": [
+      {
+        "id": "repair_bun_version",
+        "do": {
+          "persona": "implementer",
+          "task": "Inspect the existing candidate from the earlier run. Repair checkPrerequisites so malformed Bun versions cannot be reported ready, a prerelease of the minimum supported version is rejected and valid equal or newer releases within the existing shared version parser limits remain ready. Preserve the existing 256-character parser bound. Inspect existing version parsing before choosing an implementation. Preserve required tool and optional harness behavior. Reuse established shared factories and flat positive and negative case tables. Add at least two positive and two negative cases through checkPrerequisites' normal entry point. Include malformed and older prerelease inputs. Respect source ownership rules and avoid adding dependencies. Do not run tests now. Only edit the four declared files. Constants already exported by the repository may be used."
+        },
+        "needs": [],
+        "inputs": {},
+        "falsify": [
+          {
+            "persona": "code_reviewer",
+            "task": "Inspect repair_bun_version against its complete task. Check malformed versions, minimum-version prereleases, equal and newer releases, backwards compatibility and case registration. The existing shared parser 256-character bound is part of supported input and must remain. Identify a concrete failing input for any refutation. Remain read-only."
+          }
+        ],
+        "checks": [],
+        "verify": [],
+        "files": [
+          "apps/cli/src/prerequisites.ts",
+          "testing/cases/prerequisite-version.ts",
+          "testing/factories/prerequisite-version.ts",
+          "testing/unit/prerequisite-version.test.ts"
+        ]
+      },
+      {
+        "id": "write_inspection_guide",
+        "do": {
+          "persona": "guide_writer",
+          "task": "Write docs/self-development.md with concise instructions for inspecting this workflow. The controller is titan, project is /workspace/titan-nano and controller home is /workspace/titan-nano/.titan/self-development-fixed. The plan is .titan-delivery/self-development-codex.yaml. Explain the two parallel tasks, independent reviewers and following script step. Give supported commands for status, events, artifacts, usage, requests and dashboard with a RUN_ID placeholder. Explain that execution uses the shared live source tree and retained candidates are evidence. Describe how to inspect changed source files with git diff. Do not claim the run passed before it has finished. Do not claim full production readiness or enforced native filesystem isolation. Write only the declared guide."
+        },
+        "needs": [],
+        "inputs": {},
+        "falsify": [
+          {
+            "persona": "guide_reviewer",
+            "task": "Inspect docs/self-development.md. Compare the listed commands and options with current CLI definitions and check that paths match this plan. Refute unsupported inspection commands, false completion claims or missing explanation of parallel tasks and script output."
+          }
+        ],
+        "checks": [],
+        "verify": [],
+        "files": ["docs/self-development.md"]
+      },
+      {
+        "id": "verify_delivered_files",
+        "do": {
+          "script": "bun run typecheck && bun run check:docs && bun run check:links && git diff --check -- apps/cli/src/prerequisites.ts docs/self-development.md && test -s testing/unit/prerequisite-version.test.ts"
+        },
+        "needs": ["repair_bun_version", "write_inspection_guide"],
+        "inputs": {},
+        "falsify": [
+          {
+            "script": "test -s docs/self-development.md && test -s testing/cases/prerequisite-version.ts && test -s testing/factories/prerequisite-version.ts && git diff --check"
+          }
+        ],
+        "checks": [],
+        "verify": []
+      }
+    ],
+    "revision": "10a99abed385208d9f43ed830a7eebf9fe327293afd0ad7127aece131ef8283e"
+  },
+  "backend": "codex-sdk",
+  "nodes": {
+    "repair_bun_version": {
+      "state": "passed",
+      "attempt": 1,
+      "refutations": 0,
+      "phases": {
+        "worker": {
+          "candidate_hash": "bbb740d9f3bd7d58e148822f4d3794f4fc2296c1019971675c039978fedda5e7",
+          "file_claim": {
+            "mode": "write",
+            "paths": [
+              "/workspace/titan-nano/apps/cli/src/prerequisites.ts",
+              "/workspace/titan-nano/testing/cases/prerequisite-version.ts",
+              "/workspace/titan-nano/testing/factories/prerequisite-version.ts",
+              "/workspace/titan-nano/testing/unit/prerequisite-version.test.ts"
+            ],
+            "claim_id": "953d3ac6-b6e3-41c9-ad54-f0ae62d9ce3a",
+            "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+            "step_id": "repair_bun_version",
+            "attempt": 1,
+            "project": "/workspace/titan-nano",
+            "phase": "worker",
+            "execution_id": "6f042868-8490-4de5-a5de-6525228321b4"
+          },
+          "delivery": "uncertain",
+          "dispatches": 1,
+          "session_id": "00000000-0000-4000-8000-92730fb56584",
+          "execution_id": "6f042868-8490-4de5-a5de-6525228321b4",
+          "executions": 1,
+          "retries": 0,
+          "next_retry": null,
+          "completed": true,
+          "answer": "Kept the existing `checkPrerequisites` repair, which uses the shared release parser to reject malformed versions and prereleases of the minimum supported Bun version. Required tool and optional harness checks were untouched.\n\nEdited only [testing/cases/prerequisite-version.ts](/workspace/titan-nano/testing/cases/prerequisite-version.ts). The new cases exercise `checkPrerequisites` through the existing factory and cover a release at 256 characters, a release at 257 characters, and a newer release with a large numeric component.\n\nThe tracked source diff passed `git diff --check`, and the untracked case file produced no whitespace diagnostics. Tests were deferred to the later verification step. The separate guide and reviewer steps were left untouched.",
+          "error": null
+        },
+        "falsifier-0": {
+          "file_claim": {
+            "mode": "write",
+            "paths": [
+              "/workspace/titan-nano/apps/cli/src/prerequisites.ts",
+              "/workspace/titan-nano/testing/cases/prerequisite-version.ts",
+              "/workspace/titan-nano/testing/factories/prerequisite-version.ts",
+              "/workspace/titan-nano/testing/unit/prerequisite-version.test.ts"
+            ],
+            "claim_id": "953d3ac6-b6e3-41c9-ad54-f0ae62d9ce3a",
+            "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+            "step_id": "repair_bun_version",
+            "attempt": 1,
+            "project": "/workspace/titan-nano",
+            "phase": "falsifier-0",
+            "execution_id": "81bb008c-f44d-4ed1-a46b-7837b75151a0"
+          },
+          "delivery": "uncertain",
+          "dispatches": 1,
+          "session_id": "00000000-0000-4000-8000-1fec79372b31",
+          "execution_id": "81bb008c-f44d-4ed1-a46b-7837b75151a0",
+          "executions": 1,
+          "retries": 0,
+          "next_retry": null,
+          "completed": true,
+          "answer": {
+            "verdict": "survived",
+            "evidence": "Read-only inspection found no counterexample. Traced checkPrerequisites through the shared parser and comparator. Malformed versions, 1.3.10-beta.1, 1.3.9-beta.1, and the existing older-release fixture 1.3.9 are rejected. The minimum 1.3.10, 1.4.0, and 1.3.10+build.01 are accepted. The 256-character release and 252-digit major component are accepted, while the 257-character release is rejected by the unchanged parser bound. The diff preserves non-Bun tool lookup and optional harness checks. Verified that the shared unit factory registers five positive and six negative cases through bunReadiness, which calls checkPrerequisites. Made no edits and ran no test suites.",
+            "failure": "other"
+          },
+          "error": null
+        }
+      },
+      "evidence": [],
+      "input": "/workspace/titan-nano/docs/examples/self-development/steps/repair_bun_version/attempt-1/input",
+      "work": "/workspace/titan-nano",
+      "snapshot": "/workspace/titan-nano/docs/examples/self-development/steps/repair_bun_version/attempt-1/candidate",
+      "changes": {
+        "testing/cases/prerequisite-version.ts": "7e13d2020c85005559f60efcdd1038ce87ccd2339312f8e75204836de2113fef"
+      },
+      "output": "Kept the existing `checkPrerequisites` repair, which uses the shared release parser to reject malformed versions and prereleases of the minimum supported Bun version. Required tool and optional harness checks were untouched.\n\nEdited only [testing/cases/prerequisite-version.ts](/workspace/titan-nano/testing/cases/prerequisite-version.ts). The new cases exercise `checkPrerequisites` through the existing factory and cover a release at 256 characters, a release at 257 characters, and a newer release with a large numeric component.\n\nThe tracked source diff passed `git diff --check`, and the untracked case file produced no whitespace diagnostics. Tests were deferred to the later verification step. The separate guide and reviewer steps were left untouched."
+    },
+    "write_inspection_guide": {
+      "state": "passed",
+      "attempt": 1,
+      "refutations": 0,
+      "phases": {
+        "worker": {
+          "candidate_hash": "298cc53da3ef15eb5caf2842c17b5c699b6877d3bbefefab202312118683ab9d",
+          "file_claim": {
+            "mode": "write",
+            "paths": ["/workspace/titan-nano/docs/self-development.md"],
+            "claim_id": "193ec82c-fc08-4f96-a14d-6015f30afe6f",
+            "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+            "step_id": "write_inspection_guide",
+            "attempt": 1,
+            "project": "/workspace/titan-nano",
+            "phase": "worker",
+            "execution_id": "f4fcce31-628f-4f5c-b41a-90e9045a876a"
+          },
+          "delivery": "uncertain",
+          "dispatches": 1,
+          "session_id": "00000000-0000-4000-8000-d4faf5cf6ef0",
+          "execution_id": "f4fcce31-628f-4f5c-b41a-90e9045a876a",
+          "executions": 1,
+          "retries": 0,
+          "next_retry": null,
+          "completed": true,
+          "answer": "Updated [docs/self-development.md](/workspace/titan-nano/docs/self-development.md) with commands for inspecting the run, reviewer verdicts, retained script output, and changes in the shared Git working tree. Only the guide was edited.\n\nConfirmed all six Titan command forms against the installed controller’s help. Documentation, links, formatting, shell syntax, and whitespace checks passed. The workflow’s final result remains unverified.",
+          "error": null
+        },
+        "falsifier-0": {
+          "file_claim": {
+            "mode": "write",
+            "paths": ["/workspace/titan-nano/docs/self-development.md"],
+            "claim_id": "193ec82c-fc08-4f96-a14d-6015f30afe6f",
+            "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+            "step_id": "write_inspection_guide",
+            "attempt": 1,
+            "project": "/workspace/titan-nano",
+            "phase": "falsifier-0",
+            "execution_id": "685bf50c-9a1c-4a03-a906-21bfda43b95d"
+          },
+          "delivery": "uncertain",
+          "dispatches": 1,
+          "session_id": "00000000-0000-4000-8000-4eb1f28c3876",
+          "execution_id": "685bf50c-9a1c-4a03-a906-21bfda43b95d",
+          "executions": 1,
+          "retries": 0,
+          "next_retry": null,
+          "completed": true,
+          "answer": {
+            "verdict": "survived",
+            "evidence": "All six command forms in docs/self-development.md match the installed controller’s help and the repository CLI definitions, including the event paging options, the requests run filter, and the dashboard’s one-time link. The guide’s paths, parallel tasks, independent reviewers, and follow-on script match the plan. I checked the artifact and dashboard implementations for the documented inspection routes and confirmed the Git instructions expose both tracked changes and untracked files. The guide makes no claim that the workflow passed. I ran no test suites and did not independently verify the candidate’s reported checks or the live run outcome.",
+            "failure": "other"
+          },
+          "error": null
+        }
+      },
+      "evidence": [],
+      "input": "/workspace/titan-nano/docs/examples/self-development/steps/write_inspection_guide/attempt-1/input",
+      "work": "/workspace/titan-nano",
+      "snapshot": "/workspace/titan-nano/docs/examples/self-development/steps/write_inspection_guide/attempt-1/candidate",
+      "changes": {
+        "docs/self-development.md": "3c0d5c9e56accc91f6a8fce379df3ee667eeb433d543bb45607a3d18ac82eea3"
+      },
+      "output": "Updated [docs/self-development.md](/workspace/titan-nano/docs/self-development.md) with commands for inspecting the run, reviewer verdicts, retained script output, and changes in the shared Git working tree. Only the guide was edited.\n\nConfirmed all six Titan command forms against the installed controller’s help. Documentation, links, formatting, shell syntax, and whitespace checks passed. The workflow’s final result remains unverified."
+    },
+    "verify_delivered_files": {
+      "state": "passed",
+      "attempt": 1,
+      "refutations": 0,
+      "phases": {
+        "worker": {
+          "candidate_hash": "298cc53da3ef15eb5caf2842c17b5c699b6877d3bbefefab202312118683ab9d",
+          "file_claim": {
+            "mode": "write",
+            "paths": ["/workspace/titan-nano"],
+            "claim_id": "b8fd7626-3ae3-42d9-a882-6d45e92fa812",
+            "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+            "step_id": "verify_delivered_files",
+            "attempt": 1,
+            "project": "/workspace/titan-nano",
+            "phase": "worker",
+            "execution_id": "3ee41009-2521-46c0-9097-7cf0bc062616"
+          },
+          "session_id": null,
+          "execution_id": "3ee41009-2521-46c0-9097-7cf0bc062616",
+          "executions": 0,
+          "retries": 0,
+          "next_retry": null,
+          "completed": true,
+          "answer": {
+            "exit_code": 0,
+            "stdout": "\n45 file(s) checked, 0 finding(s) {}\nOwned Markdown links and heading targets are valid\n",
+            "stderr": "$ tsc --noEmit\n$ bun tooling/scripts/check-docs.ts\n$ bun tooling/scripts/check-document-links.ts\n"
+          },
+          "error": null
+        },
+        "falsifier-0": {
+          "file_claim": {
+            "mode": "write",
+            "paths": ["/workspace/titan-nano"],
+            "claim_id": "f8723ca3-818e-466d-b77f-b541b5aa80d9",
+            "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+            "step_id": "verify_delivered_files",
+            "attempt": 1,
+            "project": "/workspace/titan-nano",
+            "phase": "falsifier-0",
+            "execution_id": "69a3c119-9199-4054-b1c6-24b976b41490"
+          },
+          "session_id": null,
+          "execution_id": "69a3c119-9199-4054-b1c6-24b976b41490",
+          "executions": 0,
+          "retries": 0,
+          "next_retry": null,
+          "completed": true,
+          "answer": {
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "",
+            "elapsed_ms": 145,
+            "capture": {
+              "path": "steps/verify_delivered_files/attempt-1/69a3c119-9199-4054-b1c6-24b976b41490.capture.json",
+              "hash": "c6d3617b0561aa8c38a501734b04d6d2253889e7ce2bcc0507887a8ee642cedf"
+            }
+          },
+          "error": null
+        }
+      },
+      "evidence": [],
+      "input": "/workspace/titan-nano/docs/examples/self-development/steps/verify_delivered_files/attempt-1/input",
+      "work": "/workspace/titan-nano",
+      "snapshot": "/workspace/titan-nano/docs/examples/self-development/steps/verify_delivered_files/attempt-1/candidate",
+      "changes": {},
+      "output": {
+        "exit_code": 0,
+        "stdout": "\n45 file(s) checked, 0 finding(s) {}\nOwned Markdown links and heading targets are valid\n",
+        "stderr": "$ tsc --noEmit\n$ bun tooling/scripts/check-docs.ts\n$ bun tooling/scripts/check-document-links.ts\n"
+      }
+    }
+  },
+  "base": "/workspace/titan-nano/docs/examples/self-development/base",
+  "base_hash": "5ce7256abee57029bc05dec9d02cb93a8ff538a3424da2214fb55297c1bc9676",
+  "artifacts": "/workspace/titan-nano/docs/examples/self-development/artifacts"
+}

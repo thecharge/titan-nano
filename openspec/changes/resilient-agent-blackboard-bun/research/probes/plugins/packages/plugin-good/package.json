@@ -1,0 +1,1 @@
+{ "name": "titan-plugin-good", "type": "module", "exports": { ".": "./src/index.ts" } }

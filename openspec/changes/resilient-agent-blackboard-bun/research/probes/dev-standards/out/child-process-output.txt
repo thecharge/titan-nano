@@ -1,0 +1,18 @@
+--- before the spawn guard (first version of the preload) ---
+$ bun test test/child-process.test.ts
+bun test v1.3.10 (30e609e0)
+
+test/child-process.test.ts:
+curl from child process: exit 0 http 200
+
+ 1 pass
+ 0 fail
+ 1 expect() calls
+
+--- after the spawn guard ---
+bun test v1.3.10 (30e609e0)
+
+ 11 pass
+ 0 fail
+ 12 expect() calls
+Ran 11 tests across 2 files. [48.00ms]

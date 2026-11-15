@@ -1,0 +1,48 @@
+name: Organize a small apartment move
+goal:
+  Write MOVE.md for a two-day apartment move using two people and a total assumed budget of 200 EUR.
+  State task dependencies, rest periods, uncertain estimates and a fallback for transport cancellation.
+personas:
+  author:
+    description: Produces a practical dependency-aware plan.
+    role:
+      Use the stated people, time and budget constraints. Make assumptions explicit and check arithmetic.
+      Write MOVE.md with a schedule and fallback. Return a summary.
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Write
+      - Edit
+    outputs:
+      summary:
+        type: string
+  reviewer:
+    description: Challenges feasibility under everyday disruptions.
+    role:
+      Seek overlapping commitments, missing dependencies or a budget contradiction. Check the transport
+      cancellation fallback. Return refuted with a concrete conflict, otherwise survived with checks performed.
+    tools:
+      - Read
+      - Glob
+      - Grep
+steps:
+  - id: schedule
+    do:
+      persona: author
+      task: Draft a two-day move schedule with its assumptions and budget.
+    falsify:
+      - persona: reviewer
+        task: Find overlapping commitments or a dependency that makes the schedule impossible.
+  - id: fallback
+    do:
+      persona: author
+      task: Complete MOVE.md with a transport cancellation fallback.
+    falsify:
+      - persona: reviewer
+        task: Try to break the fallback within the stated people, time and budget.
+    inputs:
+      schedule: schedule.summary
+limits:
+  max_parallel: 2
+  max_minutes: 10

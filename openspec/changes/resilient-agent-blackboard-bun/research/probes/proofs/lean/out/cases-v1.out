@@ -1,0 +1,103 @@
+=== case good
+plain lean exit=0 ms=184
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=2 ms=30
+  | error: `lake check` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+lake comparator exit=2 ms=31
+  | error: `lake comparator` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+=== case sorry
+plain lean exit=0 ms=144
+  | /tmp/plain.lean:5:8: warning: declaration uses `sorry`
+  | 'sumTo_formula' depends on axioms: [sorryAx]
+lake check exit=2 ms=27
+  | error: `lake check` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+lake comparator exit=2 ms=31
+  | error: `lake comparator` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+=== case weakened
+plain lean exit=0 ms=145
+  | 'sumTo_formula' does not depend on any axioms
+lake check exit=2 ms=29
+  | error: `lake check` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+lake comparator exit=2 ms=30
+  | error: `lake comparator` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+=== case redefined
+plain lean exit=0 ms=181
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=2 ms=33
+  | error: `lake check` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+lake comparator exit=2 ms=31
+  | error: `lake comparator` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+=== case axiom
+plain lean exit=0 ms=145
+  | 'sumTo_formula' depends on axioms: [trust_me]
+lake check exit=2 ms=31
+  | error: `lake check` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+lake comparator exit=2 ms=30
+  | error: `lake comparator` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+=== case native
+plain lean exit=0 ms=184
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=2 ms=31
+  | error: `lake check` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.
+lake comparator exit=2 ms=31
+  | error: `lake comparator` needs `bwrap` to sandbox the code it checks, and it was not found.
+  | 
+  |   Install `bubblewrap` from your distribution and put `bwrap` on PATH, or set
+  |   COMPARATOR_BWRAP to its full path. It needs either unprivileged user
+  |   namespaces or a `bwrap` installed setuid root, which is how distributions
+  |   that disable them ship it.

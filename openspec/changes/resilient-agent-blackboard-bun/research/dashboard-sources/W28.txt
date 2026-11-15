@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"main","description":"A terminal OpenTelemetry viewer inspired by otel-desktop-viewer","full_name":"ymtdzzz/otel-tui","license":"Apache-2.0","pushed_at":"2026-11-05T00:23:49Z","stargazers_count":1116}

@@ -1,0 +1,35 @@
+name: Fix typecheck g9
+goal: >-
+  Fix exactly these two `bun run typecheck` errors, changing nothing else. Error 1: testing/factories/board-posts.ts(92,62): argument has `kind: string` where the parameter needs the type RequestKind; the helper describeRequest(kind: string, ...) at line 27 must take RequestKind (import it from @titan/types, it is a Zod-derived type; the enum RequestKind is in @titan/constants) and the call at line 162 to 165 passes a `kind: string` argument from unknownRequestKindRefusal(kind: string): make that function accept the string and convert it with RequestKindSchema.parse or a cast through the schema from packages/types, so the typecheck passes and the test still checks the refusal of an unknown kind (read the test and the board code first). Error 2: testing/factories/tool-request.ts(147,55): Property 'Granted' does not exist on ToolGrant (packages/constants/src/request-testing.ts line 76); ToolGrant needs a member Granted with a plain-language string value used as the approval reason; add it there and check all other uses in testing/factories/tool-request.ts and testing/cases/tool-request.ts exist in ToolGrant (Grep each `ToolGrant.` use). No comments, no inline strings, keep 100 percent function coverage.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fix9
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixed by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

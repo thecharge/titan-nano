@@ -1,0 +1,9 @@
+writer 4 conflicts retried 0
+writer 5 conflicts retried 2
+writer 6 conflicts retried 1
+writer 3 conflicts retried 1
+writer 2 conflicts retried 2
+writer 8 conflicts retried 3
+writer 1 conflicts retried 1
+writer 7 conflicts retried 1
+final version 2400 expected 2400

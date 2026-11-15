@@ -1,0 +1,38 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": [
+        "tooling/scripts/inside-offline.ts",
+        "tooling/scripts/probe-package.ts",
+        "tooling/scripts/bootstrap-install.ts"
+      ],
+      "project": ["tooling/scripts/**/*.{ts,tsx,mts,cts}"],
+      "ignoreDependencies": [
+        "@commitlint/cli",
+        "@dprint/dockerfile",
+        "@dprint/markdown",
+        "@dprint/toml",
+        "@secretlint/secretlint-rule-preset-recommend",
+        "cspell",
+        "dprint-plugin-yaml",
+        "secretlint"
+      ]
+    },
+    "apps/*": {
+      "project": ["src/**/*.{ts,tsx,mts,cts}"]
+    },
+    "packages/*": {
+      "project": ["src/**/*.{ts,tsx,mts,cts}"]
+    },
+    "testing": {
+      "entry": [
+        "**/*{.test,_test,.spec,_spec}.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+        "fixtures/**/*.mjs"
+      ],
+      "project": ["**/*.{ts,tsx,mts,cts}", "fixtures/**/*.mjs"]
+    },
+    "testing/packages/*": {
+      "project": ["src/**/*.{ts,tsx,mts,cts}"]
+    }
+  }
+}

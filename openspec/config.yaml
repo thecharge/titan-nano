@@ -1,0 +1,36 @@
+schema: spec-driven
+
+context: |
+  Project: titan-nano. Tech stack (mandatory, set by the user): Bun JS monorepo
+  using Bun workspaces (packages/* and apps/*), TypeScript, bun:sqlite, bun test.
+  The product is a command-line tool (`titan`), packages, a local HTTP server
+  (`titan serve`), and MCP tool servers (`titan mcp` and `titan tool-server`).
+  It has no admin console. `titan serve` also serves a read-only dashboard page
+  of runs on 127.0.0.1, which the user asked for on 2026-11-06. End-to-end tests
+  cover the CLI, the local server with its dashboard, and the tool servers with
+  fake backends and stubbed vendor responses. Documentation is maintained and
+  checked independently; end-to-end tests do not generate it. Local hooks use
+  scoped checks; continuous integration runs complete offline verification.
+  Writing standard: ISO 24495-1:2023 (plain language). Readers must be able to
+  find what they need, understand what they find, and use that information.
+  Readers are developers who will build and review this project.
+
+rules:
+  proposal:
+    - Follow the OpenSpec template and instruction exactly. "Why" is 1-2 sentences. The whole proposal fits on 1-2 pages.
+    - Plain language (ISO 24495-1). Most important message first. Short sentences, one idea per sentence. Active voice. Familiar words.
+    - Do not use a technical term without saying what it means in the same sentence or the one before it.
+    - No unexplained abbreviations, no internal codes (such as L12 or F-03) without saying what they are, no invented jargon.
+  design:
+    - Use only the template sections, in order - Context, Goals / Non-Goals, Decisions, Risks / Trade-offs, Migration Plan, Open Questions.
+    - Plain language (ISO 24495-1). Each decision states what was chosen, why, and what else was considered, in short sentences.
+    - Define every technical term the first time it is used. Keep a short word list in Context.
+    - Every number must come from a measurement in the repository or be marked as a guess that still has to be measured.
+  specs:
+    - One spec per capability named in the proposal. Requirements use SHALL or MUST. Every requirement has at least one scenario with WHEN and THEN.
+    - Plain language (ISO 24495-1). One requirement is one rule a tester can check. Short sentences, familiar words, active voice.
+    - Scenarios describe what a person or a test can observe, with concrete values.
+  tasks:
+    - Follow the template exactly - numbered groups, each task a checkbox "- [ ] X.Y".
+    - Each task starts with a verb, is small enough for one session, and says how you know it is done.
+    - Plain language (ISO 24495-1).

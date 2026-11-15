@@ -1,0 +1,31 @@
+{
+  "lineWidth": 100,
+  "newLineKind": "lf",
+  "markdown": {
+    "textWrap": "never",
+    "codeBlock.skipFormat": true
+  },
+  "dockerfile": {
+    "associations": ["**/Containerfile", "**/Dockerfile"]
+  },
+  "includes": ["**/*.{md,toml,yaml,yml}", "**/Containerfile", "**/Dockerfile"],
+  "excludes": [
+    "**/node_modules",
+    "**/dist",
+    "**/coverage",
+    ".git/**",
+    ".agent/**",
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".titan/**",
+    "openspec/changes/*/research/probes/**",
+    "openspec/changes/*/research/sources/**"
+  ],
+  "plugins": [
+    "./node_modules/@dprint/markdown/plugin.wasm",
+    "./node_modules/@dprint/toml/plugin.wasm",
+    "./node_modules/@dprint/dockerfile/plugin.wasm",
+    "./node_modules/dprint-plugin-yaml/plugin.wasm"
+  ]
+}

@@ -1,0 +1,33 @@
+$ HOME=<empty folder> agy plugin import titan
+  [ok]    titan
+          ✔ skills      : 1 processed
+          - agents      : skipped (not found)
+          - commands    : skipped (not found)
+          ✔ mcpServers  : 1 processed
+          - hooks       : skipped (not found)
+
+Staged to <empty folder>/.gemini/config
+exit 0
+$ HOME=<empty folder> agy plugin list --json
+{
+  "imports": [
+    {
+      "name": "titan",
+      "source": "claude-code",
+      "importedAt": "2026-11-05T20:14:05Z",
+      "components": [
+        "skills",
+        "mcpServers"
+      ]
+    }
+  ]
+}
+<empty folder>/.gemini/config/plugins
+<empty folder>/.gemini/config/plugins/titan
+<empty folder>/.gemini/config/plugins/titan/skills
+<empty folder>/.gemini/config/plugins/titan/.claude-plugin
+<empty folder>/.gemini/config/plugins/titan/mcp_config.json
+<empty folder>/.gemini/config/plugins/titan/plugin.json
+<empty folder>/.gemini/config/plugins/titan/.mcp.json
+<empty folder>/.gemini/config/plugins/titan/skills/titan
+<empty folder>/.gemini/config/plugins/titan/.claude-plugin/plugin.json

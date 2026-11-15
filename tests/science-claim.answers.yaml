@@ -1,0 +1,11 @@
+version: 1
+answers:
+  - persona: author
+    task: Derive the probability of tails after the given sequence and write CLAIM.md.
+    answer:
+      summary: Offline fixture for science-claim step claim. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Try to refute the derivation or expose an unstated independence assumption.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for science-claim step claim.

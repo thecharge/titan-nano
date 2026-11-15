@@ -1,0 +1,35 @@
+name: Fix tests fixj
+goal: >-
+  Fix exactly these gate failures, changing nothing else, keeping every test and behavior. (1) installCodex, 5 cases, still fail in the offline run: `error: process blocked in tests: /tmp/titan-test-OAapNr/bin/codex` at checkProgram testing/support/guard.ts:53 via apply guard.ts:68 via launch apps/cli/src/launch.ts:7 via registerCodex apps/cli/src/commands/install.ts:57, called from testing/factories/main-agent-guide.ts:47 and 125. Read testing/support/guard.ts to see what programs the guard allows and make the test use that allowed way (for example the guard may allow only listed program paths, or the factory should replace the launch service with a fake through CliServices instead of really starting a process). (2) The coverage gate needs 100 percent functions and lines in every file; these are below: testing/factories/automatic-decision.ts 93.33 percent functions (one function never called), testing/factories/board-posts.ts 90.00 functions, testing/factories/hive-limits.ts 88.89 functions, testing/factories/tool-request.ts 96.77 functions, testing/factories/server-run.ts 96.97 functions and lines 181-183 uncovered, testing/factories/main-agent-guide.ts lines 130-131 and 135-140 uncovered, packages/server/src/event-stream.ts lines 37-39 uncovered, packages/runner/src/program.ts lines uncovered (98.94 percent). For each file find the function or branch that no test case calls (read the file and the cases that use it), then either add a case to the matching testing/cases table that calls it (at least one positive or negative case with a real expectation) or delete the dead code. No comments, no inline strings, no local type aliases, no string literal types. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixj
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixjd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

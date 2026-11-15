@@ -1,0 +1,38 @@
+version: 1
+answers:
+  - persona: author
+    task: Define the fictional service, customer and budget assumptions in ASSUMPTIONS.md.
+    answer:
+      summary: Offline fixture for business-plan step scope. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Find an assumption that conflicts with the stated goal.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for business-plan step scope.
+  - persona: author
+    task: Propose a measurable low-cost demand test in DEMAND.md.
+    answer:
+      summary: Offline fixture for business-plan step demand. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Find a demand-test outcome that would invalidate the proposal.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for business-plan step demand.
+  - persona: author
+    task: Allocate the 5000 EUR startup budget with an explicit reserve in BUDGET.md.
+    answer:
+      summary: Offline fixture for business-plan step costs. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Recompute the budget and seek a sum above 5000 EUR.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for business-plan step costs.
+  - persona: author
+    task: Combine the demand test and budget into PLAN.md with a decision rule.
+    answer:
+      summary: Offline fixture for business-plan step plan. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Seek a contradiction between the final plan, demand test and budget.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for business-plan step plan.

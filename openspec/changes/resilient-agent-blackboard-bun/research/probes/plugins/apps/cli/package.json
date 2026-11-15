@@ -1,0 +1,1 @@
+{ "name": "@titan/cli", "type": "module", "dependencies": { "@titan/core": "workspace:*", "titan-plugin-good": "workspace:*", "titan-plugin-old": "workspace:*" } }

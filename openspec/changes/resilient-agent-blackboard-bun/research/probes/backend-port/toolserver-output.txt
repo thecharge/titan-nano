@@ -1,0 +1,3 @@
+tools: [ "kb_search" ]
+result: [{"type":"text","text":"match for: time zones"}]
+ms 105

@@ -1,0 +1,164 @@
+diff --git a/apps/cli/src/prerequisites.ts b/apps/cli/src/prerequisites.ts
+index 4cd805d..898527b 100644
+--- a/apps/cli/src/prerequisites.ts
++++ b/apps/cli/src/prerequisites.ts
+@@ -4,16 +4,15 @@ import {
+   OptionalPrerequisites,
+   PrerequisiteName,
+   RequiredPrerequisites,
+-  VersionSeparator,
+ } from "@titan/constants";
+ import { harnessRepair, prerequisiteRepair } from "@titan/messages";
+ import type { CliServices, PrerequisiteStatus } from "@titan/types";
++import { compareRelease, releaseVersion } from "./updates.ts";
+ 
+-function olderThan(version: string, minimum: string): boolean {
+-  const have = version.split(VersionSeparator).map(Number);
+-  const need = minimum.split(VersionSeparator).map(Number);
+-  const index = need.findIndex((part, position) => (have[position] ?? 0) !== part);
+-  return index >= 0 && (have[index] ?? 0) < (need[index] ?? 0);
++function supportedBun(version: string): boolean {
++  const installed = releaseVersion(version);
++  const minimum = releaseVersion(MinimumBunVersion);
++  return installed !== null && minimum !== null && compareRelease(installed, minimum) >= 0;
+ }
+ 
+ function status(
+@@ -33,7 +32,7 @@ export function checkPrerequisites(
+     const required = RequiredPrerequisites.some((item) => item === name);
+     const ready =
+       name === PrerequisiteName.Bun
+-        ? !olderThan(services.runtimeVersion, MinimumBunVersion)
++        ? supportedBun(services.runtimeVersion)
+         : services.program(name) !== null;
+     return status(name, required, ready, prerequisiteRepair[name]);
+   });
+diff --git a/packages/constants/src/runner.ts b/packages/constants/src/runner.ts
+index 5433a92..ebcb566 100644
+--- a/packages/constants/src/runner.ts
++++ b/packages/constants/src/runner.ts
+@@ -207,6 +207,6 @@ const FalsifierProperties = {
+ export const FalsifierOutput = {
+   type: "object",
+   properties: FalsifierProperties,
+-  required: ["verdict", "evidence"],
++  required: ["verdict", "evidence", "failure"],
+   additionalProperties: false,
+ };
+diff --git a/docs/self-development.md b/docs/self-development.md
+new file mode 100644
+index 0000000..d580442
+--- /dev/null
++++ b/docs/self-development.md
+@@ -0,0 +1,47 @@
++# Inspect the Titan self-development run
++
++The plan is `.titan-delivery/self-development-codex.yaml`. It starts two Codex tasks in parallel:
++
++- `repair_bun_version` fixes the Bun prerequisite version check and adds regression cases. An independent reviewer looks for counterexamples and checks that the cases are registered.
++- `write_inspection_guide` writes this guide. A different independent reviewer checks the commands against the CLI and looks for omissions or unsupported claims.
++
++Both reviewers inspect the work without editing files and record their verdicts. Once both branches pass their reviews, `verify_delivered_files` runs type checking, documentation and link checks, a targeted Git diff check, and a check that the regression test file is nonempty. Its independent script checks that the guide and case support files are nonempty and runs `git diff --check` across the working tree.
++
++Workers, reviewers, and scripts use the same live source tree. Worker edits reach the working tree as they happen. Declared file paths coordinate work. Titan keeps candidate snapshots as evidence of what workers delivered and reviewers inspected.
++
++## Inspect run evidence
++
++Replace `RUN_ID` with the run identifier recorded at submission. Use the same controller home for each command.
++
++```sh
++cd /workspace/titan-nano
++TITAN=titan
++TITAN_RUN_HOME=/workspace/titan-nano/.titan/self-development-fixed
++RUN_ID=RUN_ID
++
++"$TITAN" status "$RUN_ID" --home "$TITAN_RUN_HOME"
++"$TITAN" events "$RUN_ID" --home "$TITAN_RUN_HOME" --after 0 --limit 100
++"$TITAN" artifacts "$RUN_ID" --home "$TITAN_RUN_HOME" --json
++"$TITAN" usage "$RUN_ID" --home "$TITAN_RUN_HOME" --json
++"$TITAN" requests --run-id "$RUN_ID" --home "$TITAN_RUN_HOME"
++"$TITAN" dashboard --home "$TITAN_RUN_HOME"
++```
++
++Use status and events to follow the steps and reviewer verdicts. Continue paging through events by passing the last event cursor as `--after`. Usage reports include completeness flags for totals. Requests show whether a decision is waiting. For the dashboard, open the one-time link and select `RUN_ID` from the run list.
++
++When verified artifacts are available, use the artifact report or the dashboard's **Verified artifacts** view to find the retained output for `verify_delivered_files`. Inspect the independent check under the step's evidence in the dashboard. A pending step is still awaiting a result. Report a run pass only after status confirms successful completion and the retained evidence shows the checks that ran.
++
++## Review the live changes
++
++Run these commands from the project directory. The first shows status for the declared files. The second shows tracked working-tree changes relative to `HEAD`, including staged changes.
++
++```sh
++git status --short -- apps/cli/src/prerequisites.ts \
++  testing/cases/prerequisite-version.ts testing/factories/prerequisite-version.ts \
++  testing/unit/prerequisite-version.test.ts docs/self-development.md
++git diff HEAD -- apps/cli/src/prerequisites.ts \
++  testing/cases/prerequisite-version.ts testing/factories/prerequisite-version.ts \
++  testing/unit/prerequisite-version.test.ts docs/self-development.md
++```
++
++For a new file marked `??`, use `git diff --no-index -- /dev/null PATH`, replacing `PATH` with the file path. Exit status 1 means the two inputs differ. Compare the live diff with the retained evidence when attributing changes to this run, since the live tree can contain earlier or concurrent edits.
+diff --git a/testing/cases/prerequisite-version.ts b/testing/cases/prerequisite-version.ts
+new file mode 100644
+index 0000000..0013461
+--- /dev/null
++++ b/testing/cases/prerequisite-version.ts
+@@ -0,0 +1,32 @@
++import { MinimumBunVersion, UpdatePolicy } from "@titan/constants";
++import { positive, rejected } from "@titan/test-factories";
++
++const buildPrefix = `${MinimumBunVersion}+`;
++const maximumLengthRelease =
++  buildPrefix + "a".repeat(UpdatePolicy.VersionCharacters - buildPrefix.length);
++
++export const prerequisiteVersionCases = {
++  positive: [
++    positive("minimum release is ready", [MinimumBunVersion], true),
++    positive("newer release is ready", ["1.4.0"], true),
++    positive("build metadata preserves readiness", [`${MinimumBunVersion}+build.01`], true),
++    positive("release at the parser length limit is ready", [maximumLengthRelease], true),
++    positive(
++      "newer release with a large major version is ready",
++      [`${"9".repeat(UpdatePolicy.VersionCharacters - ".0.0".length)}.0.0`],
++      true,
++    ),
++  ],
++  negative: [
++    rejected("malformed major version is rejected", ["invalid.3.10"], false),
++    rejected("extra numeric component is rejected", [`${MinimumBunVersion}.0`], false),
++    rejected("minimum release prerelease is rejected", [`${MinimumBunVersion}-beta.1`], false),
++    rejected("older release prerelease is rejected", ["1.3.9-beta.1"], false),
++    rejected("zero-padded numeric prerelease is rejected", ["1.4.0-beta.01"], false),
++    rejected(
++      "release above the parser length limit is rejected",
++      [`${maximumLengthRelease}a`],
++      false,
++    ),
++  ],
++};
+diff --git a/testing/factories/prerequisite-version.ts b/testing/factories/prerequisite-version.ts
+new file mode 100644
+index 0000000..c65b5ad
+--- /dev/null
++++ b/testing/factories/prerequisite-version.ts
+@@ -0,0 +1,9 @@
++import { PrerequisiteName } from "@titan/constants";
++import { defaultServices } from "../../apps/cli/src/bootstrap.ts";
++import { checkPrerequisites } from "../../apps/cli/src/prerequisites.ts";
++
++export function bunReadiness(runtimeVersion: string): boolean | undefined {
++  return checkPrerequisites({ ...defaultServices, runtimeVersion, program: () => null }, null).find(
++    (status) => status.name === PrerequisiteName.Bun,
++  )?.ready;
++}
+diff --git a/testing/unit/prerequisite-version.test.ts b/testing/unit/prerequisite-version.test.ts
+new file mode 100644
+index 0000000..b932efa
+--- /dev/null
++++ b/testing/unit/prerequisite-version.test.ts
+@@ -0,0 +1,5 @@
++import { unit } from "@titan/test-factories";
++import { prerequisiteVersionCases } from "../cases/prerequisite-version.ts";
++import { bunReadiness } from "../factories/prerequisite-version.ts";
++
++unit(bunReadiness, prerequisiteVersionCases);

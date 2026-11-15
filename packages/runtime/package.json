@@ -1,0 +1,28 @@
+{
+  "name": "@titan/runtime",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@titan/core": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/errors": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/runner": "workspace:*",
+    "@titan/server": "workspace:*",
+    "@titan/backend-claude": "workspace:*",
+    "@titan/backend-codex": "workspace:*",
+    "@titan/backend-fake": "workspace:*",
+    "@titan/embedder-local": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/config": "workspace:*",
+    "@titan/streams": "workspace:*",
+    "@titan/workspace": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  }
+}

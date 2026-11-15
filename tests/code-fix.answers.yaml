@@ -1,0 +1,20 @@
+version: 1
+answers:
+  - persona: author
+    task: Identify one reproducible defect and record its cause in REVIEW.md.
+    answer:
+      summary: Offline fixture for code-fix step cause. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Try to disprove the stated defect using the source and a concrete input.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for code-fix step cause.
+  - persona: author
+    task: Apply the smallest fix for the diagnosed defect and add a regression test.
+    answer:
+      summary: Offline fixture for code-fix step fix. All costs and observations are supplied assumptions.
+  - persona: reviewer
+    task: Seek a concrete regression or an input that defeats the proposed fix.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for code-fix step fix.

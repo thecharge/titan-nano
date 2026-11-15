@@ -1,0 +1,31 @@
+bun test v1.3.10 (30e609e0)
+
+test/z3.test.ts:
+init ms 137
+Aborted(Assertion failed)
+worker: onmessage() captured an uncaught exception: RuntimeError: Aborted(Assertion failed)
+RuntimeError: Aborted(Assertion failed)
+    at abort (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:887:27)
+    at assert (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:435:5)
+    at removeRunDependency (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:844:5)
+    at receiveInstance (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:1058:5)
+    at wasmModuleReceived (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:1101:9)
+    at handleMessage (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:578:9)
+Pthread 0x01d5bf60 sent an error! undefined:undefined: Aborted(Assertion failed)
+1676 |           var message = 'worker sent an error!';
+1677 |           if (worker.pthread_ptr) {
+1678 |             message = `Pthread ${ptrToString(worker.pthread_ptr)} sent an error!`;
+1679 |           }
+1680 |           err(`${message} ${e.filename}:${e.lineno}: ${e.message}`);
+1681 |           throw e;
+                       ^
+error: Aborted(Assertion failed)
+      at <anonymous> (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:1681:17)
+      at <anonymous> (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/z3probe/node_modules/z3-solver/build/z3-built.js:1686:44)
+      at emitError (node:events:43:23)
+      at #onError (node:worker_threads:222:14)
+(fail) z3 under bun: proof and counterexample [182.00ms]
+
+ 0 pass
+ 1 fail
+Ran 1 test across 1 file. [244.00ms]

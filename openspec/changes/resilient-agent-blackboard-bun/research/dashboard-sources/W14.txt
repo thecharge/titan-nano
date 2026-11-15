@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"main","description":"Grafana Tempo is a high volume, minimal dependency distributed tracing backend.","full_name":"grafana/tempo","license":"AGPL-3.0","pushed_at":"2026-11-06T05:10:13Z","stargazers_count":5562}

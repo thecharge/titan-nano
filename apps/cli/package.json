@@ -1,0 +1,32 @@
+{
+  "name": "@titan/cli",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "bin": {
+    "titan": "./src/main.ts"
+  },
+  "files": [
+    "src",
+    "assets"
+  ],
+  "dependencies": {
+    "@titan/artifacts": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/config": "workspace:*",
+    "@titan/workflow": "workspace:*",
+    "@titan/server": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/errors": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/runtime": "workspace:*",
+    "@titan/knowledge": "workspace:*",
+    "@titan/streams": "workspace:*",
+    "@titan/workspace": "workspace:*",
+    "@titan/process": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

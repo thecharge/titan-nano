@@ -1,0 +1,35 @@
+name: Fix gates 10
+goal: >-
+  Fix exactly these gate errors, changing nothing else, keeping behavior and all tests, 100 percent function coverage. (1) `bun run check:flat-tests` fails with `Test inventory is missing or exceeds its read allowance` because packages/constants/src/test-structure.ts FlatTestRule.MaximumFiles is 256 and the repo now has more than 256 test files: raise MaximumFiles to 1024 (Grep for other uses and tests that assert the old number, such as 256, and update them to match). (2) `bun run check:promises`: apps/cli/src/guide.ts:18 `const examples = await Promise.all(`, testing/factories/main-agent-guide.ts:73 `const held = await Promise.all(`, testing/factories/persona-lifecycle.ts:91 `const kept = await Promise.all(` are unbounded Promise aggregation; use lazy tasks with `all` or `settle` from @titan/core (read how another file such as packages/runner uses all with lazy task functions). (3) `bun run check:unused` reports unused exports in packages/knowledge/src/persona-pick.ts: seededRandom line 9, betaDraw line 43, floorShare line 49, pickPersona line 53, fadeCounts line 68. Only simulatePicks is imported elsewhere (packages/knowledge/src/index.ts line 13). Remove the export keyword on those five functions if no test imports them; if a test needs one, import it through the package index and export it from there instead. Keep every function called by a test so coverage stays 100 percent.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fix12
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixed by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

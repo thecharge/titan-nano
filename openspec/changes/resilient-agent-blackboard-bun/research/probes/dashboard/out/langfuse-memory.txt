@@ -1,0 +1,6 @@
+lfprobe-clickhouse-1 237.1MiB / 58.51GiB
+lfprobe-langfuse-web-1 978.6MiB / 58.51GiB
+lfprobe-langfuse-worker-1 634.4MiB / 58.51GiB
+lfprobe-minio-1 57.84MiB / 58.51GiB
+lfprobe-postgres-1 38.45MiB / 58.51GiB
+lfprobe-redis-1 5.727MiB / 58.51GiB

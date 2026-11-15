@@ -1,0 +1,12 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+or {
+  JsStringLiteralExpression() as $s where {
+    not $s <: within JsImportCallExpression(),
+    register_diagnostic(span=$s, message="Inline string literal. Use an enum or const from the constants package, a message from the messages package, or a value from the config package.", severity="error")
+  },
+  JsTemplateChunkElement() as $c where {
+    register_diagnostic(span=$c, message="Inline template text. Build strings from constants, messages or config values.", severity="error")
+  }
+}

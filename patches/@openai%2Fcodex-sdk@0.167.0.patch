@@ -1,0 +1,49 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index fabaa1cbfb85c9dfede32cdb0bc4893a243f2f7b..aa52e58e3b4e670ef3f15f0a6b00bcfdfa480e22 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -223,6 +223,7 @@ type CodexConfigObject = {
+ };
+ type CodexOptions = {
+     codexPathOverride?: string;
++    ignoreUserConfig?: boolean;
+     baseUrl?: string;
+     apiKey?: string;
+     /**
+diff --git a/dist/index.js b/dist/index.js
+index 04492aee5c59991ef0d40b0752a62d4b93a21338..33a38bf4b045570d4e00c8a61c7270c1e8e5210d 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -161,7 +161,8 @@ var CodexExec = class {
+   envOverride;
+   configOverrides;
+   rawConfigOverrides;
+-  constructor(executablePath = null, env, configOverrides, rawConfigOverrides) {
++  ignoreUserConfig;
++  constructor(executablePath = null, env, configOverrides, rawConfigOverrides, ignoreUserConfig = false) {
+     if (executablePath) {
+       this.executablePath = executablePath;
+       this.pathDirs = [];
+@@ -173,9 +174,11 @@ var CodexExec = class {
+     this.envOverride = env;
+     this.configOverrides = configOverrides;
+     this.rawConfigOverrides = rawConfigOverrides;
++    this.ignoreUserConfig = ignoreUserConfig;
+   }
+   async *run(args) {
+     const commandArgs = ["exec", "--experimental-json"];
++    if (this.ignoreUserConfig) commandArgs.push("--ignore-user-config");
+     if (this.configOverrides) {
+       for (const override of serializeConfigOverrides(this.configOverrides)) {
+         commandArgs.push("--config", override);
+@@ -525,8 +528,8 @@ var Codex = class {
+   exec;
+   options;
+   constructor(options = {}) {
+-    const { codexPathOverride, env, config, configOverrides } = options;
+-    this.exec = new CodexExec(codexPathOverride, env, config, configOverrides);
++    const { codexPathOverride, env, config, configOverrides, ignoreUserConfig } = options;
++    this.exec = new CodexExec(codexPathOverride, env, config, configOverrides, ignoreUserConfig);
+     this.options = options;
+   }
+   /**

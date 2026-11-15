@@ -1,0 +1,35 @@
+name: Fix tests fixi
+goal: >-
+  Fix exactly this failing test without removing or weakening it. All 5 installCodex cases (integration test for install codex, factory around testing/factories for installCodex; Grep fake-codex.sh in testing) fail in the offline container with `EROFS: read-only file system, chmod '/workspace/testing/fixtures/fake-codex.sh'`: the factory calls chmod on a fixture inside the read-only repo. Instead write the fake codex program into the test's temporary folder (the folder that holds the bin/codex path, for example /tmp/titan-test-XXXX/bin/codex) with the executable mode set at write time (Bun.write then chmod on the temp copy, or fs.writeFile with mode), reading the fixture text only. Do not chmod anything inside the repo. Keep 100 percent function and line coverage, no comments, no inline strings, no local type aliases, no string literal types. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixi
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixid by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

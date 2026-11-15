@@ -1,0 +1,28 @@
+bun test v1.3.10 (30e609e0)
+
+test/otlp-backends.test.ts:
+jaeger old /api/traces status 404
+jaeger: sent 4 spans, read back 4: execute_tool lean_check | invoke_agent lean-prover | invoke_agent skeptic | invoke_workflow prove-sum-formula
+phoenix status 200
+phoenix: sent 4 spans, read back 8: execute_tool lean_check | execute_tool lean_check | invoke_agent lean-prover | invoke_agent lean-prover | invoke_agent skeptic | invoke_agent skeptic | invoke_workflow prove-sum-formula | invoke_workflow prove-sum-formula
+32 | 		const j: any = await r.json();
+33 | 		if (i === 0) console.log("phoenix status", r.status);
+34 | 		names = (j.data ?? []).map((s: any) => s.name);
+35 | 	}
+36 | 	console.log(`phoenix: sent ${sent} spans, read back ${names.length}: ${names.sort().join(" | ")}`);
+37 | 	expect(names.length).toBe(sent);
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: 4
+Received: 8
+
+      at <anonymous> (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/95ba3f8b-5eca-4634-9cd6-60e9d9fee8b2/scratchpad/dashprobe/test/otlp-backends.test.ts:37:23)
+(fail) phoenix 20.23.0 receives the run and lists 4 spans [520.01ms]
+aspire total spans held 4
+aspire: sent 4 spans, read back 4: execute_tool lean_check | invoke_agent lean-prover | invoke_agent skeptic | invoke_workflow prove-sum-formula
+
+ 2 pass
+ 1 fail
+ 3 expect() calls
+Ran 3 tests across 1 file. [1.66s]

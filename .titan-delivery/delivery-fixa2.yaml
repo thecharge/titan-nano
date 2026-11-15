@@ -1,0 +1,37 @@
+name: Fix tests fixa2
+goal: |-
+  Fix exactly this lint failure, changing nothing else. `bunx biome check packages testing apps` reports five times at packages/core/src/index.ts:21 (columns 18, 31, 43, 56, 68): "Inline string literal. Use an enum or const from the constants package". The code is in function uuidFromText:
+  const [first = "", second = "", third = "", fourth = "", fifth = ""] = UuidLayout.Groups.map(([start, end]) => digits.slice(start, end));
+  The empty string defaults are the inline literals. Rewrite so no inline string literal is used, for example map the groups to an array and read the five parts by index with the existing TextSymbol.Empty constant from @titan/constants as the fallback (check that TextSymbol.Empty exists with Grep in packages/constants/src), or destructure with `?? TextSymbol.Empty`. The result of uuidFromText must stay identical: join of [first, second, UuidLayout.Version + third, UuidLayout.Variant + fourth, fifth] with UuidLayout.Separator. Keep typecheck clean (noUncheckedIndexedAccess is on). No comments. You have no shell: read the file again after editing and list the exact change in your summary.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixa2
+    do:
+      persona: builder
+      task: Fix the five inline literals in uuidFromText.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that uuidFromText has no inline string literal and returns the same value as before.
+limits:
+  max_parallel: 1
+  max_minutes: 30

@@ -1,0 +1,357 @@
+import {
+  chmod,
+  lstat,
+  mkdir,
+  mkdtemp,
+  open,
+  readlink,
+  realpath,
+  rename,
+  rm,
+  symlink,
+} from "node:fs/promises";
+import { basename, dirname, join, relative, resolve } from "node:path";
+import {
+  CliCommand,
+  CliRuntime,
+  DaemonStartup,
+  ErrorCode,
+  ExitCode,
+  FileOpenMode,
+  HookFile,
+  IoLimit,
+  PackageManagerArgument,
+  Packaging,
+  ProbeOption,
+  ServerLimit,
+  UpdateFile,
+  UpdateMode,
+  UpdatePhase,
+} from "@titan/constants";
+import { hash, newId } from "@titan/core";
+import { errorMessage, TitanError } from "@titan/errors";
+import { ownKnowledge, projectHubHome } from "@titan/knowledge";
+import { UpdateMessage, updateBackupRetained } from "@titan/messages";
+import { captureCommand } from "@titan/process";
+import {
+  inspectUpdateCatalog,
+  ownMaintenance,
+  ownStoppedHome,
+  requestServerStop,
+} from "@titan/server/maintenance";
+import { atomicWrite, readFileBytes } from "@titan/streams";
+import {
+  CliOutputSchema,
+  type CommandContext,
+  UpdateDoctorSchema,
+  type UpdateInstallObserver,
+  type UpdateTransaction,
+  UpdateTransactionSchema,
+  UpdateVersionSchema,
+} from "@titan/types";
+import { exists } from "@titan/workspace";
+import { probeDaemon } from "./daemon.ts";
+import { createUpdateBackup, verifyUpdateBackup } from "./update-backup.ts";
+import { buildUpdateRelease } from "./update-source.ts";
+import { compareRelease, releaseVersion, selectUpdateRelease, updateSettings } from "./updates.ts";
+
+async function readTransaction(home: string) {
+  const path = join(home, UpdateFile.Transaction);
+  if (!(await exists(path))) return null;
+  return UpdateTransactionSchema.parse(
+    JSON.parse((await readFileBytes(path, IoLimit.DataBytes)).toString()),
+  );
+}
+
+function unfinished(transaction: UpdateTransaction | null): boolean {
+  return (
+    transaction !== null &&
+    transaction.phase !== UpdatePhase.Complete &&
+    transaction.phase !== UpdatePhase.RolledBack
+  );
+}
+
+function managedTarget(installation: string, target: string): boolean {
+  return UpdateFile.LauncherPattern.test(relative(installation, resolve(installation, target)));
+}
+
+async function managedInstallation(context: CommandContext) {
+  const executable = context.services.executable;
+  if (!executable) throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  const entry = await realpath(executable[1]);
+  const release = resolve(dirname(entry), Packaging.ReleaseFromBundle);
+  if (
+    basename(dirname(release)) !== Packaging.Releases ||
+    !basename(release).startsWith(Packaging.ArchivePrefix) ||
+    entry !== resolve(release, Packaging.InstalledPath, Packaging.Bundle)
+  )
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  const installation = resolve(release, Packaging.InstallationFromRelease);
+  const launcher = join(installation, UpdateFile.Launcher);
+  if (!(await lstat(launcher)).isSymbolicLink())
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  const transaction = await readTransaction(context.home);
+  const recovering =
+    unfinished(transaction) &&
+    transaction?.installation === installation &&
+    (await realpath(resolve(installation, transaction.previous))) === entry;
+  if ((await realpath(launcher)) !== entry && !recovering)
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  if (!managedTarget(installation, await readlink(launcher)))
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  return { installation, launcher, previous: await readlink(launcher), runtime: executable[0] };
+}
+
+async function selectLauncher(installation: string, expected: string, next: string): Promise<void> {
+  const launcher = join(installation, UpdateFile.Launcher);
+  if (!(await lstat(launcher)).isSymbolicLink() || (await readlink(launcher)) !== expected)
+    throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.LauncherChanged);
+  const temporary = join(installation, UpdateFile.NextLauncher + newId());
+  try {
+    await symlink(next, temporary);
+    await rename(temporary, launcher);
+    const directory = await open(installation, FileOpenMode.Read);
+    try {
+      await directory.sync();
+    } finally {
+      await directory.close();
+    }
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
+async function recordTransaction(home: string, transaction: UpdateTransaction): Promise<void> {
+  await atomicWrite(
+    join(home, UpdateFile.Transaction),
+    JSON.stringify(UpdateTransactionSchema.parse(transaction)),
+  );
+}
+
+async function recoverUpdate(home: string, installation: string): Promise<boolean> {
+  const transaction = await readTransaction(home);
+  if (!transaction || !unfinished(transaction)) return false;
+  if (
+    transaction.installation !== installation ||
+    !managedTarget(installation, transaction.previous) ||
+    !managedTarget(installation, transaction.next)
+  )
+    throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.TransactionChanged);
+  if (transaction.backup) {
+    if (
+      dirname(resolve(transaction.backup)) !== resolve(home, UpdateFile.Backups) ||
+      !(await lstat(transaction.backup)).isDirectory()
+    )
+      throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.TransactionChanged);
+    const bytes = await readFileBytes(
+      join(transaction.backup, UpdateFile.Manifest),
+      IoLimit.DataBytes,
+    );
+    if (hash(bytes) !== transaction.backup_digest)
+      throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.TransactionChanged);
+    const verified = await verifyUpdateBackup(transaction.backup);
+    if (verified.backup.roots[0]?.source !== resolve(home))
+      throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.TransactionChanged);
+  }
+  const current = await readlink(join(installation, UpdateFile.Launcher));
+  if (current === transaction.next)
+    await selectLauncher(installation, current, transaction.previous);
+  else if (current !== transaction.previous)
+    throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.LauncherChanged);
+  await recordTransaction(home, { ...transaction, phase: UpdatePhase.RolledBack });
+  return true;
+}
+
+async function stopForUpdate(context: CommandContext): Promise<void> {
+  const running = await probeDaemon(context.home, DaemonStartup.ProbeMilliseconds, null);
+  if (running) await requestServerStop(context.home, context.options.force !== true);
+}
+
+async function stagedCommand(runtime: string, entry: string, args: readonly string[], cwd: string) {
+  const result = await captureCommand([runtime, entry, ...args], cwd, {
+    timeout_ms: UpdateFile.PackageMilliseconds,
+    maximum_bytes: Packaging.OutputBytes,
+  });
+  if (result.exit_code !== ExitCode.Success)
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.PackageFailed);
+  const output = CliOutputSchema.parse(JSON.parse(result.stdout.toString()));
+  if (output.error) throw new TitanError(ErrorCode.Arguments, UpdateMessage.PackageFailed);
+  return output.data;
+}
+
+async function validateRelease(
+  runtime: string,
+  staged: string,
+  backup: string,
+  current: string,
+): Promise<string> {
+  const entry = join(staged, Packaging.InstalledPath, Packaging.Bundle);
+  const version = UpdateVersionSchema.parse(
+    await stagedCommand(runtime, entry, [ProbeOption.Version, CliRuntime.JsonFlag], staged),
+  ).version;
+  const before = releaseVersion(current);
+  const after = releaseVersion(version);
+  if (!before || !after || compareRelease(after, before) <= 0)
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.Downgrade);
+  const report = UpdateDoctorSchema.parse(
+    await stagedCommand(
+      runtime,
+      entry,
+      [
+        CliCommand.Doctor,
+        ProbeOption.Home,
+        join(backup, UpdateFile.Home),
+        ProbeOption.Backup,
+        backup,
+        CliRuntime.JsonFlag,
+      ],
+      staged,
+    ),
+  );
+  if (report.prerequisites.some((item) => item.required && !item.ready))
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.PackageFailed);
+  await verifyUpdateBackup(backup);
+  return version;
+}
+
+export async function installUpdate(context: CommandContext, observe?: UpdateInstallObserver) {
+  const managed = await managedInstallation(context);
+  let archive = context.options.from
+    ? await realpath(resolve(context.services.cwd(), context.options.from))
+    : null;
+  if (archive && !(await lstat(archive)).isFile())
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.PackageRequired);
+  const pending = unfinished(await readTransaction(context.home));
+  const selected =
+    archive || pending ? null : await selectUpdateRelease(context.home, context.services.version);
+  if (!archive && !pending && !selected)
+    return { current_version: context.services.version, updated: false };
+  await mkdir(context.home, { recursive: true, mode: ServerLimit.DirectoryMode });
+  await using resources = new AsyncDisposableStack();
+  if (resolve(context.home) !== managed.installation)
+    await ownMaintenance(managed.installation, resources);
+  await ownMaintenance(context.home, resources);
+  if (!pending && selected) {
+    const source = await mkdtemp(join(managed.installation, UpdateFile.SourcePrefix));
+    resources.defer(() => rm(source, { recursive: true, force: true }));
+    archive = await buildUpdateRelease(selected, source, managed.runtime);
+  }
+  await stopForUpdate(context);
+  await ownStoppedHome(context.home, resources);
+  const recovered = await recoverUpdate(context.home, managed.installation);
+  if (recovered) return { recovered: true, launcher: managed.launcher };
+  if (!archive) {
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.PackageRequired);
+  }
+  const catalog = await inspectUpdateCatalog(context.home);
+  const projects = [...new Set([...catalog.projects, context.project])].map(projectHubHome).sort();
+  await ownKnowledge(context.home, resources);
+  for (const project of projects)
+    if (project !== resolve(context.home) && (await exists(project)))
+      await ownKnowledge(project, resources);
+  const releases = join(managed.installation, Packaging.Releases);
+  if (!(await lstat(releases)).isDirectory())
+    throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  const staged = await mkdtemp(join(releases, Packaging.ArchivePrefix));
+  await chmod(staged, ServerLimit.DirectoryMode);
+  const transaction: UpdateTransaction = {
+    schema_version: 1,
+    installation: managed.installation,
+    previous: managed.previous,
+    next: relative(managed.installation, join(staged, Packaging.CliPath)),
+    phase: UpdatePhase.Preparing,
+    backup: null,
+    backup_digest: null,
+  };
+  await recordTransaction(context.home, transaction);
+  try {
+    await observe?.(transaction.phase);
+    const roots = [...projects, ...catalog.runs];
+    const present: string[] = [];
+    for (const root of roots) if (await exists(root)) present.push(root);
+    const backup = await createUpdateBackup(context.home, present, context.services.version);
+    transaction.backup = backup;
+    transaction.backup_digest = hash(
+      await readFileBytes(join(backup, UpdateFile.Manifest), IoLimit.DataBytes),
+    );
+    transaction.phase = UpdatePhase.BackedUp;
+    await recordTransaction(context.home, transaction);
+    await observe?.(transaction.phase);
+    await atomicWrite(join(staged, HookFile.Manifest), UpdateFile.PrivateManifest);
+    const installed = await captureCommand(
+      [managed.runtime, PackageManagerArgument.Add, UpdateFile.IgnoreScripts, archive],
+      staged,
+      { timeout_ms: UpdateFile.PackageMilliseconds, maximum_bytes: Packaging.OutputBytes },
+    );
+    if (installed.exit_code !== ExitCode.Success)
+      throw new TitanError(ErrorCode.Arguments, UpdateMessage.PackageFailed);
+    transaction.phase = UpdatePhase.Installed;
+    await recordTransaction(context.home, transaction);
+    await observe?.(transaction.phase);
+    const version = await validateRelease(
+      managed.runtime,
+      staged,
+      backup,
+      context.services.version,
+    );
+    if (selected && version !== selected.version)
+      throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.TransactionChanged);
+    const selectedRelease = join(
+      releases,
+      [Packaging.ArchivePrefix + version, newId()].join(UpdateFile.Separator),
+    );
+    await rename(staged, selectedRelease);
+    transaction.next = relative(managed.installation, join(selectedRelease, Packaging.CliPath));
+    transaction.phase = UpdatePhase.Verified;
+    await recordTransaction(context.home, transaction);
+    await observe?.(transaction.phase);
+    await selectLauncher(managed.installation, transaction.previous, transaction.next);
+    transaction.phase = UpdatePhase.Switched;
+    await recordTransaction(context.home, transaction);
+    await observe?.(transaction.phase);
+    transaction.phase = UpdatePhase.Complete;
+    await recordTransaction(context.home, transaction);
+    return { version, backup, launcher: managed.launcher };
+  } catch (error) {
+    let reason = error;
+    try {
+      await recoverUpdate(context.home, managed.installation);
+    } catch (recovery) {
+      reason = recovery;
+    }
+    if (transaction.backup) {
+      const failure = new TitanError(
+        reason instanceof TitanError ? reason.code : ErrorCode.Arguments,
+        updateBackupRetained(errorMessage(reason), transaction.backup),
+        reason instanceof TitanError ? reason.exitCode : ExitCode.Input,
+        [transaction.backup],
+      );
+      failure.cause = reason;
+      throw failure;
+    }
+    throw reason;
+  }
+}
+
+export async function runAutomaticUpdate(
+  context: CommandContext,
+  args: readonly string[],
+): Promise<number | null> {
+  if (!context.services.handoff || (await updateSettings(context.home)).mode !== UpdateMode.Auto)
+    return null;
+  const result = await installUpdate({
+    ...context,
+    options: { ...context.options, force: false, from: undefined },
+  }).catch((error: unknown) => {
+    if (
+      !(
+        error instanceof TitanError &&
+        (error.code === ErrorCode.ServerBusy || error.code === ErrorCode.ServerLocked)
+      )
+    )
+      context.services.notice(UpdateMessage.AutomaticFailed);
+    return null;
+  });
+  if (!result?.launcher) return null;
+  return context.services.handoff(result.launcher, args, context.project);
+}

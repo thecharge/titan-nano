@@ -1,0 +1,56 @@
+diff --git a/package.json b/package.json
+index 2e3785a8f236cf266e261ed1d2df11280188f1e1..6c6a5a29b424163450a457f8b5113792802622f2 100644
+--- a/package.json
++++ b/package.json
+@@ -59,6 +59,51 @@
+             "import": "./dist/esm/experimental/tasks/index.js",
+             "require": "./dist/cjs/experimental/tasks/index.js"
+         },
++        "./inMemory.js": {
++            "types": "./dist/esm/inMemory.d.ts",
++            "import": "./dist/esm/inMemory.js",
++            "require": "./dist/cjs/inMemory.js"
++        },
++        "./server/mcp.js": {
++            "types": "./dist/esm/server/mcp.d.ts",
++            "import": "./dist/esm/server/mcp.js",
++            "require": "./dist/cjs/server/mcp.js"
++        },
++        "./server/stdio.js": {
++            "types": "./dist/esm/server/stdio.d.ts",
++            "import": "./dist/esm/server/stdio.js",
++            "require": "./dist/cjs/server/stdio.js"
++        },
++        "./shared/transport.js": {
++            "types": "./dist/esm/shared/transport.d.ts",
++            "import": "./dist/esm/shared/transport.js",
++            "require": "./dist/cjs/shared/transport.js"
++        },
++        "./client/stdio.js": {
++            "types": "./dist/esm/client/stdio.d.ts",
++            "import": "./dist/esm/client/stdio.js",
++            "require": "./dist/cjs/client/stdio.js"
++        },
++        "./server/webStandardStreamableHttp.js": {
++            "types": "./dist/esm/server/webStandardStreamableHttp.d.ts",
++            "import": "./dist/esm/server/webStandardStreamableHttp.js",
++            "require": "./dist/cjs/server/webStandardStreamableHttp.js"
++        },
++        "./client/streamableHttp.js": {
++            "types": "./dist/esm/client/streamableHttp.d.ts",
++            "import": "./dist/esm/client/streamableHttp.js",
++            "require": "./dist/cjs/client/streamableHttp.js"
++        },
++        "./types.js": {
++            "types": "./dist/esm/types.d.ts",
++            "import": "./dist/esm/types.js",
++            "require": "./dist/cjs/types.js"
++        },
++        "./client/index.js": {
++            "types": "./dist/esm/client/index.d.ts",
++            "import": "./dist/esm/client/index.js",
++            "require": "./dist/cjs/client/index.js"
++        },
+         "./*": {
+             "types": "./dist/esm/*.d.ts",
+             "import": "./dist/esm/*",

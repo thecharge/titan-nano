@@ -1,0 +1,21 @@
+{
+  "name": "@titan/workspace",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@titan/constants": "workspace:*",
+    "@titan/errors": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/config": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/streams": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  }
+}

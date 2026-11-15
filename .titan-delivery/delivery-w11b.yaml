@@ -1,0 +1,35 @@
+name: Deliver titan w11b
+goal: >-
+  Deliver Tasks 11.5, 11.6, 11.7 and 11.8 of tasks.md of OpenSpec change resilient-agent-blackboard-bun, for Claude Code and Codex. Scenarios: the ones named in the Done-when text of each task. Find the exact scenario text with Grep on its name in openspec/changes/resilient-agent-blackboard-bun/specs, one directory per call, then find the existing code with Grep in packages and apps. Many parts already exist: add only the missing code, and one flat positive and negative test table per scenario under testing/ (cases, factories, registration in testing/unit, integration or e2e) in the style of neighbours such as testing/cases/ask-answer.ts and testing/factories/ask-answer.ts. Test types and shapes: schemas live in packages/types, never inline object types or local interfaces in tests; literals in packages/constants. Do not use class definitions with implicit constructors in test factories; every function must be called by a case (the gate needs 100 percent functions and lines). Set the matching rows of openspec/changes/resilient-agent-blackboard-bun/research/acceptance-map.tsv to implemented. Do the work now; do not stop to report that it is large. You have no shell and need not run anything: a later gate runs typecheck, lint and tests. State what you wrote and which scenarios still lack a test.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: w11b
+    do:
+      persona: builder
+      task: Tasks 11.5, 11.6, 11.7 and 11.8, with their test tables and code.
+    falsify:
+      - persona: skeptic
+        task: Check that each scenario of the named tasks has a test table in testing/ and matching code, and that acceptance map rows are set.
+limits:
+  max_parallel: 1
+  max_minutes: 40

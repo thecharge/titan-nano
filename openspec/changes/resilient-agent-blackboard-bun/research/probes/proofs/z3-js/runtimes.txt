@@ -1,0 +1,8 @@
+v24.14.1
+runtime node v24.14.1: "x*x > x" negation sat, x = 1, ms 173
+node exit=0
+1.3.10
+Aborted(Assertion failed)
+worker: onmessage() captured an uncaught exception: RuntimeError: Aborted(Assertion failed)
+RuntimeError: Aborted(Assertion failed)
+bun exit=124

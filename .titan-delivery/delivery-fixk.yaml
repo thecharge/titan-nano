@@ -1,0 +1,35 @@
+name: Fix tests fixk
+goal: >-
+  Fix exactly this failing test group without removing or weakening a case: installCodex (all 6 cases, factory testing/factories/main-agent-guide.ts, lines 25 to 60 and 100 to 140, fixture testing/fixtures/fake-codex.sh). Failure in the offline run: `error: process blocked in tests: /tmp/titan-test-XXXX/bin/codex` at checkProgram testing/support/guard.ts line 53; the guard function allowedProgram (guard.ts lines 39 to 44) lets a process run only when its program is `bun`, `git`, process.execPath, or its resolved path starts with the fixtures folder (testing/fixtures). The repo is read-only in the offline container, so nothing can be chmod-ed there, and a temp-folder copy of the fake program is blocked. The program is started by launch in apps/cli/src/launch.ts called from registerCodex in apps/cli/src/commands/install.ts line 57. Make the test pass inside these rules: the simplest way is a fake codex written as a Bun script in testing/fixtures (replacing fake-codex.sh by fake-codex.ts) and started with the command array [process.execPath, <fixtures path>/fake-codex.ts, ...] by giving the install command the codex program as a configurable command array (a CliServices field or config value with a default of the real codex), or replace the launch service in the test by a fake that records the command and returns the exit code the case needs. The cases that need: codex mcp add receives the titan mcp command, codex mcp list lists titan, a failed add is reported and leaves the list empty, a missing codex program is reported, the Codex skill body equals the Claude skill body. Keep 100 percent function and line coverage in every touched file, no comments, no inline strings, no local type aliases, no string literal types. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixk
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixkd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

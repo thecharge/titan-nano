@@ -1,0 +1,605 @@
+{
+  "update": {
+    "description": "Check or install a release with a verified backup and managed launcher",
+    "options": ["home", "check", "from", "force", "project"],
+    "validate": "<function>",
+    "handler": "<function>"
+  },
+  "guide": {
+    "description": "Read the agent workflow guide",
+    "options": [],
+    "handler": "<function>"
+  },
+  "schema": {
+    "description": "Inspect an input schema",
+    "positionals": [
+      {
+        "name": "schema",
+        "required": false,
+        "choices": ["workflow", "config"]
+      }
+    ],
+    "options": [],
+    "handler": "<function>"
+  },
+  "install": {
+    "description": "Install a project skill",
+    "options": ["home", "project", "harness", "force", "no-model"],
+    "handler": "<function>"
+  },
+  "check": {
+    "description": "Validate one or more workflow files without execution",
+    "positionals": [
+      {
+        "name": "workflow file",
+        "required": true,
+        "multiple": true
+      }
+    ],
+    "options": [
+      "home",
+      "project",
+      "config",
+      "backend",
+      "harness",
+      "fake-script",
+      "max-parallel",
+      "set"
+    ],
+    "handler": "<function>"
+  },
+  "run": {
+    "description": "Run a validated workflow and watch until it settles. Use --detach for accepted submission",
+    "positionals": [
+      {
+        "name": "workflow file",
+        "required": true
+      }
+    ],
+    "options": [
+      "home",
+      "project",
+      "config",
+      "backend",
+      "harness",
+      "fake-script",
+      "max-parallel",
+      "set",
+      "watch",
+      "detach",
+      "dry-run",
+      "client-id",
+      "submission-id",
+      "harness-session-id"
+    ],
+    "handler": "<function>"
+  },
+  "resume": {
+    "description": "Continue an existing run",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "watch", "backend"],
+    "handler": "<function>"
+  },
+  "answer": {
+    "description": "Answer an exact request or pass it to the person with --to-person",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      },
+      {
+        "name": "request ID",
+        "required": true
+      },
+      {
+        "name": "decision",
+        "required": false,
+        "choices": ["approve", "deny"]
+      }
+    ],
+    "options": [
+      "home",
+      "request-version",
+      "client-id",
+      "reason",
+      "to-person",
+      "persona",
+      "yes",
+      "deny"
+    ],
+    "validate": "<function>",
+    "handler": "<function>"
+  },
+  "approve": {
+    "description": "Approve an exact request with the person credential",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      },
+      {
+        "name": "request ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "request-version", "client-id", "reason", "persona"],
+    "validate": "<function>",
+    "handler": "<function>"
+  },
+  "deny": {
+    "description": "Deny an exact request with the person credential",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      },
+      {
+        "name": "request ID",
+        "required": true
+      },
+      {
+        "name": "reason",
+        "required": true
+      }
+    ],
+    "options": ["home", "request-version", "client-id"],
+    "validate": "<function>",
+    "handler": "<function>"
+  },
+  "requests": {
+    "description": "List scoped requests or inspect exact run and request IDs",
+    "options": [
+      "home",
+      "cursor",
+      "limit",
+      "run-id",
+      "client-id",
+      "harness-session-id",
+      "project-path",
+      "state"
+    ],
+    "handler": "<function>",
+    "validate": "<function>",
+    "subcommands": {
+      "show": {
+        "description": "List scoped requests or inspect exact run and request IDs",
+        "positionals": [
+          {
+            "name": "run ID",
+            "required": true
+          },
+          {
+            "name": "request ID",
+            "required": true
+          }
+        ],
+        "options": ["home"],
+        "handler": "<function>"
+      }
+    }
+  },
+  "improve": {
+    "description": "Run the improve loop for a finished run",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "persona", "rounds"],
+    "validate": "<function>",
+    "handler": "<function>"
+  },
+  "lessons": {
+    "description": "Print the kept lessons, newest first, or only those that contain the given words",
+    "positionals": [
+      {
+        "name": "words",
+        "required": false,
+        "multiple": true
+      }
+    ],
+    "options": ["home"],
+    "handler": "<function>"
+  },
+  "plans": {
+    "description": "Print the 3 saved plans of a kind with the highest rewards",
+    "positionals": [
+      {
+        "name": "plan kind",
+        "required": true
+      }
+    ],
+    "options": ["home"],
+    "handler": "<function>"
+  },
+  "policy": {
+    "description": "Not implemented",
+    "options": []
+  },
+  "traces": {
+    "description": "Not implemented",
+    "options": []
+  },
+  "persona": {
+    "description": "Inspect saved persona definitions and quality history",
+    "options": ["home"],
+    "subcommands": {
+      "show": {
+        "description": "Inspect saved versions and quality history, newest first",
+        "positionals": [
+          {
+            "name": "persona name or version",
+            "required": true
+          }
+        ],
+        "options": ["home", "before", "limit"],
+        "handler": "<function>"
+      }
+    }
+  },
+  "kb": {
+    "description": "Manage readable knowledge entries and retained versions",
+    "options": ["home"],
+    "handler": "<function>",
+    "subcommands": {
+      "prune": {
+        "description": "Report old, replaced and duplicate entries, or archive them with --apply",
+        "options": ["home", "project", "scope", "apply", "before"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "consolidate": {
+        "description": "Report duplicate groups, or join them with --apply while retaining every source",
+        "options": ["home", "project", "scope", "apply", "before"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "restore": {
+        "description": "Restore an archived entry by id while preserving its version history",
+        "positionals": [
+          {
+            "name": "entry ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "project", "scope"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "add": {
+        "description": "Add a Markdown or persona YAML file to the knowledge hub",
+        "positionals": [
+          {
+            "name": "entry file",
+            "required": true
+          }
+        ],
+        "options": ["home", "project", "scope"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "get": {
+        "description": "Read a final knowledge entry by id",
+        "positionals": [
+          {
+            "name": "entry ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "project"],
+        "handler": "<function>"
+      },
+      "update": {
+        "description": "Update a knowledge entry using its current version",
+        "positionals": [
+          {
+            "name": "entry ID",
+            "required": true
+          },
+          {
+            "name": "entry file",
+            "required": true
+          }
+        ],
+        "options": ["home", "project", "entry-version"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "delete": {
+        "description": "Delete an ordinary knowledge entry using its current version",
+        "positionals": [
+          {
+            "name": "entry ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "project", "entry-version"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "search": {
+        "description": "Search final knowledge entries by words, with an explicit meaning fallback",
+        "positionals": [
+          {
+            "name": "question",
+            "required": false
+          }
+        ],
+        "options": ["home", "project", "mode", "kind", "limit", "all"],
+        "handler": "<function>"
+      },
+      "promote": {
+        "description": "Copy a project entry to the home hub and keep the project entry",
+        "positionals": [
+          {
+            "name": "entry ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "project"],
+        "handler": "<function>"
+      },
+      "list": {
+        "description": "List entries of both hubs, filtered by kind, scope, tag and state",
+        "options": ["home", "project", "kind", "scope", "tag", "state", "limit"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "stats": {
+        "description": "Print the figures of each hub: entries, size, oldest, newest, never read, meaning search",
+        "options": ["home", "project"],
+        "handler": "<function>"
+      },
+      "show": {
+        "description": "Print an entry with its history and its links",
+        "positionals": [
+          {
+            "name": "entry ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "project", "scope", "before", "limit"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "reindex": {
+        "description": "Rebuild the search database and readable index from final files",
+        "options": ["home"],
+        "handler": "<function>"
+      }
+    }
+  },
+  "backends": {
+    "description": "Inspect backend availability",
+    "options": [],
+    "handler": "<function>"
+  },
+  "doctor": {
+    "description": "Inspect local runtime prerequisites",
+    "options": ["home", "project", "fetch-model", "backup"],
+    "handler": "<function>"
+  },
+  "serve": {
+    "description": "Run the local engine",
+    "options": ["home"],
+    "handler": "<function>"
+  },
+  "mcp": {
+    "description": "Serve the stdio MCP protocol",
+    "options": ["home"],
+    "handler": "<function>",
+    "protocol": true
+  },
+  "worker": {
+    "description": "Not implemented",
+    "options": []
+  },
+  "tool-server": {
+    "description": "Serve tools for one host-authorized native execution over standard input and output.",
+    "options": [],
+    "handler": "<function>",
+    "protocol": true
+  },
+  "trace": {
+    "description": "Not implemented",
+    "options": []
+  },
+  "dashboard": {
+    "description": "Print a one-time login link for the read-only dashboard",
+    "options": ["home"],
+    "handler": "<function>"
+  },
+  "proof": {
+    "description": "Not implemented",
+    "options": []
+  },
+  "config": {
+    "subcommands": {
+      "show": {
+        "description": "Inspect scoped or committed run settings with optional setting sources",
+        "options": ["home", "project", "scope", "run-id", "sources"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "init": {
+        "description": "Create a private scoped configuration file without replacing an existing file",
+        "options": ["home", "project", "scope"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "validate": {
+        "description": "Validate scoped settings and inspect the file version",
+        "options": ["home", "project", "scope"],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "set": {
+        "description": "Change one scoped setting using its expected file version",
+        "options": ["home", "project", "scope", "expected-version"],
+        "positionals": [
+          {
+            "name": "setting",
+            "required": true
+          },
+          {
+            "name": "value",
+            "required": true
+          }
+        ],
+        "validate": "<function>",
+        "handler": "<function>"
+      },
+      "schema": {
+        "description": "Export the configuration input schema",
+        "options": [],
+        "handler": "<function>"
+      }
+    },
+    "description": "Inspect resolved settings and their sources",
+    "positionals": [
+      {
+        "name": "workflow file",
+        "required": false
+      }
+    ],
+    "options": [
+      "home",
+      "project",
+      "config",
+      "backend",
+      "harness",
+      "fake-script",
+      "max-parallel",
+      "set"
+    ],
+    "handler": "<function>"
+  },
+  "runs": {
+    "description": "List known runs",
+    "options": ["home", "before", "limit", "client-id", "harness-session-id", "project-path"],
+    "handler": "<function>",
+    "validate": "<function>"
+  },
+  "status": {
+    "description": "Inspect an exact run",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "watch"],
+    "handler": "<function>"
+  },
+  "usage": {
+    "description": "Inspect committed usage totals and missing reports for an exact run",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home"],
+    "handler": "<function>"
+  },
+  "events": {
+    "description": "Read run events",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "after", "limit", "follow", "format"],
+    "handler": "<function>",
+    "validate": "<function>"
+  },
+  "pause": {
+    "description": "Pause an exact run",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "watch"],
+    "handler": "<function>"
+  },
+  "cancel": {
+    "description": "Cancel an exact run",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home", "watch"],
+    "handler": "<function>"
+  },
+  "artifacts": {
+    "description": "Inspect verified kept delivery files and outputs",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      }
+    ],
+    "options": ["home"],
+    "handler": "<function>",
+    "subcommands": {
+      "export": {
+        "description": "Export one verified kept file and its metadata into a new directory",
+        "positionals": [
+          {
+            "name": "run ID",
+            "required": true
+          },
+          {
+            "name": "artifact ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "output"],
+        "handler": "<function>",
+        "validate": "<function>"
+      },
+      "list": {
+        "description": "Inspect verified kept delivery files and outputs",
+        "positionals": [
+          {
+            "name": "run ID",
+            "required": true
+          }
+        ],
+        "options": ["home"],
+        "handler": "<function>"
+      },
+      "show": {
+        "description": "Read a bounded verified byte page from one kept file",
+        "positionals": [
+          {
+            "name": "run ID",
+            "required": true
+          },
+          {
+            "name": "artifact ID",
+            "required": true
+          }
+        ],
+        "options": ["home", "offset", "limit"],
+        "handler": "<function>",
+        "validate": "<function>"
+      }
+    }
+  },
+  "apply": {
+    "description": "Not implemented",
+    "options": []
+  }
+}

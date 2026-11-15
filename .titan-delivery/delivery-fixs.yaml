@@ -1,0 +1,35 @@
+name: Fix tests fixs
+goal: >-
+  Fix exactly this gate failure, changing nothing else: the coverage check (`bun run test`, 4605 tests pass, 0 fail) reports `{"file":"packages/runner/src/program.ts","rule":"uncovered_lines","lines":[52],"missingFunctions":0}`. Line 52 of packages/runner/src/program.ts is `if (!page.has_more) await Promise.race([wake, Bun.sleep(ProgramLimit.PollMilliseconds)]);` inside `follow`: no test drives `follow` through a page with has_more false while the run has not ended. Add test cases (at least 2 positive and 2 negative, using the existing unit(factory, cases) pattern and the existing program factory and case files; Grep testing/ for `follow` and `runWorkflow` to find them) in which a run is still running when the first event page has no more events, so that follow waits (on the wake promise or the poll sleep) and then yields the later events and finishes; negative cases: follow on a run that already ended returns without waiting. Do not change product code. Do not add test files beyond the allowance: put the cases in existing case and factory files. No comments. No inline string literals: use constants. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixs
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixsd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

@@ -1,0 +1,35 @@
+name: Fix tests fixc3
+goal: |-
+  Fix exactly this, changing nothing else. `bun run check:typescript-policy` fails with: ENOENT: no such file or directory, open '/workspace/titan-nano/packages/embedder-fake/tsconfig.json'. The new workspace packages/embedder-fake (task 20.1, fixed embedder that gives the same vector for the same text) has only package.json and src/. Its neighbour packages/policy has tsconfig.json with {"extends": "../../tsconfig.json", "include": ["src/**/*"]} and a README.md. Read packages/policy/tsconfig.json, packages/policy/README.md, packages/policy/package.json and packages/embedder-fake/package.json and src, then: create packages/embedder-fake/tsconfig.json the same way as the neighbour (check tooling/scripts/check-typescript-policy.ts and the constants it uses, and root tsconfig.json, to see the exact shape and whether the package must be listed in a root file such as tsconfig.json paths, package.json workspaces or bunfig; add it there the same way the neighbours are listed), and a README.md for packages/embedder-fake in plain language (what it is, the one function it exports, the same text gives the same vector; follow the neighbour's README form; no comments needed). Also check tooling/scripts/check-package-policy.ts rules and the cspell words so the README passes `bun run check:spelling` (use only common words). You have no shell: re-read the created files and list them.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixc3
+    do:
+      persona: builder
+      task: Add the missing tsconfig and README for embedder-fake.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that tsconfig.json matches the neighbour and the package is listed wherever the neighbours are.
+limits:
+  max_parallel: 1
+  max_minutes: 60

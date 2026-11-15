@@ -1,0 +1,69 @@
+name: Plan a small fictional repair service
+goal:
+  Produce PLAN.md for a fictional repair service with a starting budget of 5000 EUR. Label every price
+  and demand estimate as an assumption. Keep the startup budget within the limit and identify a measurable
+  decision to test demand.
+personas:
+  author:
+    description: Writes an explicit assumption-based plan.
+    role:
+      Write only the file named by the current task. Use the goal and supplied inputs. Record assumptions
+      and arithmetic, keep estimates distinct from observed facts and return a summary of your contribution.
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Write
+      - Edit
+    outputs:
+      summary:
+        type: string
+  reviewer:
+    description: Challenges the budget and demand reasoning.
+    role:
+      Seek a numerical contradiction, unsupported factual claim or violated budget. Return refuted
+      with a concrete counterexample, otherwise survived with the checks performed.
+    tools:
+      - Read
+      - Glob
+      - Grep
+steps:
+  - id: scope
+    do:
+      persona: author
+      task: Define the fictional service, customer and budget assumptions in ASSUMPTIONS.md.
+    falsify:
+      - persona: reviewer
+        task: Find an assumption that conflicts with the stated goal.
+  - parallel:
+      - id: demand
+        do:
+          persona: author
+          task: Propose a measurable low-cost demand test in DEMAND.md.
+        falsify:
+          - persona: reviewer
+            task: Find a demand-test outcome that would invalidate the proposal.
+        inputs:
+          scope: scope.summary
+      - id: costs
+        do:
+          persona: author
+          task: Allocate the 5000 EUR startup budget with an explicit reserve in BUDGET.md.
+        falsify:
+          - persona: reviewer
+            task: Recompute the budget and seek a sum above 5000 EUR.
+        inputs:
+          scope: scope.summary
+  - id: plan
+    do:
+      persona: author
+      task: Combine the demand test and budget into PLAN.md with a decision rule.
+    falsify:
+      - persona: reviewer
+        task: Seek a contradiction between the final plan, demand test and budget.
+    inputs:
+      demand: demand.summary
+      costs: costs.summary
+limits:
+  max_parallel: 2
+  max_minutes: 10

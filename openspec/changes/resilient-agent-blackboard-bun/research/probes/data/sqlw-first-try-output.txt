@@ -1,0 +1,93 @@
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+
+Bun v1.3.10 (Linux x64)
+
+Bun v1.3.10 (Linux x64)
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+
+Bun v1.3.10 (Linux x64)
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+
+Bun v1.3.10 (Linux x64)
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+
+Bun v1.3.10 (Linux x64)
+
+Bun v1.3.10 (Linux x64)
+1 | import { Database } from "bun:sqlite";
+2 | const db = new Database("kb.db"); db.run("pragma journal_mode=wal"); db.run("pragma busy_timeout=5000");
+                                         ^
+SQLiteError: database is locked
+      errno: 5,
+ byteOffset: -1,
+       code: "SQLITE_BUSY"
+
+      at run (bun:sqlite:336:21)
+      at /tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/dataprobe/sqlw-first-try.ts:2:38
+      at loadAndEvaluateModule (2:1)
+
+Bun v1.3.10 (Linux x64)
+writer 1 conflicts retried 0
+SQLITE_BUSY errors: 7

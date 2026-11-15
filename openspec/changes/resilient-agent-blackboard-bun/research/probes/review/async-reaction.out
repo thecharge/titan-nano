@@ -1,0 +1,9 @@
+sync reaction threw: contract/pre missing
+rows after sync veto: 0
+asyncTx returned: [object Promise] inTransaction right after: false
+async rejection: async contract/pre missing
+rows after async veto: 1 (1 means the vetoed write was COMMITTED)
+reactions=0: 1.2 us per write
+reactions=10: 1.7 us per write
+reactions=100: 6.1 us per write
+1 reaction with unindexed predicate query, table 80001 rows: 2038.1 us per write (last batch)

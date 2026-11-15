@@ -1,0 +1,21 @@
+{
+  "hash": "298cc53da3ef15eb5caf2842c17b5c699b6877d3bbefefab202312118683ab9d",
+  "proofs_hash": "d9af82faf6b4e59ce3f0c34e94e1ccb2238945c928311f53845429de0580ce63",
+  "paths": [
+    "apps/cli/src/prerequisites.ts",
+    "docs/self-development.md",
+    "testing/cases/prerequisite-version.ts",
+    "testing/factories/prerequisite-version.ts",
+    "testing/unit/prerequisite-version.test.ts"
+  ],
+  "outputs": {
+    "verify_delivered_files": {
+      "exit_code": 0,
+      "stdout": "\n45 file(s) checked, 0 finding(s) {}\nOwned Markdown links and heading targets are valid\n",
+      "stderr": "$ tsc --noEmit\n$ bun tooling/scripts/check-docs.ts\n$ bun tooling/scripts/check-document-links.ts\n"
+    }
+  },
+  "result_format": 2,
+  "publication_scope": "declared task outputs",
+  "original_path_count": 2554
+}

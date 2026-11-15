@@ -1,0 +1,30 @@
+{
+  "name": "@titan/runner",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/config": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/workflow": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/errors": "workspace:*",
+    "@titan/knowledge": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/workspace": "workspace:*",
+    "@titan/board": "workspace:*",
+    "@titan/store": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/streams": "workspace:*",
+    "@titan/requests": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

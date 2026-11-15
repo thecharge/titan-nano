@@ -1,0 +1,8 @@
+Drift: persona 0 has rate 0.75 and persona 1 has 0.55 for 200 picks; then they swap (0.55 and 0.75) for 200 more picks. 2000 runs.
+- plain Thompson (no fading): after the swap, 22.7 % of picks went to the persona that is now better
+- Thompson, counts fade by 0.98 per pick: after the swap, 69.3 % of picks went to the persona that is now better
+- Thompson, counts fade by 0.95 per pick: after the swap, 71.2 % of picks went to the persona that is now better
+
+Near-equal personas: true rates 0.62 and 0.60, 400 picks, 2000 runs.
+- plain Thompson: the less-used persona got 25.5 % of picks on average; it got under 10 % in 17.3 % of runs
+- Thompson with a floor of 10 % of picks for each persona: the less-used persona got 32.1 % of picks on average; it got under 10 % in 0.3 % of runs

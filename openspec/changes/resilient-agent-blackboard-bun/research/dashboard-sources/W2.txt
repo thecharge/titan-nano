@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"main","description":"CNCF Jaeger, a Distributed Tracing Platform","full_name":"jaegertracing/jaeger","license":"Apache-2.0","pushed_at":"2026-11-06T02:56:27Z","stargazers_count":23381}

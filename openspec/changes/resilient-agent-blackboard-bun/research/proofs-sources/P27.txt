@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"master","description":"A simple REPL for Lean 4, returning information about errors and sorries.","full_name":"leanprover-community/repl","license":"Apache-2.0","pushed_at":"2026-10-28T13:16:36Z","stargazers_count":237}

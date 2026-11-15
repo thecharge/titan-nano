@@ -1,0 +1,15 @@
+$ bun test test/openai-agents.test.ts
+bun test v1.3.10 (30e609e0)
+
+test/openai-agents.test.ts:
+handoff tool names seen by the model: [ "transfer_to_refund_agent" ]
+last agent: refund_agent | final output: refund done
+agent-as-tool last agent: main | output: the answer is 42
+runInParallel=false: error=InputGuardrailTripwireTriggered, fake model calls=0
+runInParallel=true: error=InputGuardrailTripwireTriggered, fake model calls=1
+maxTurns=3: MaxTurnsExceededError | tool runs: 3
+
+ 5 pass
+ 0 fail
+ 9 expect() calls
+Ran 5 tests across 1 file. [460.00ms]

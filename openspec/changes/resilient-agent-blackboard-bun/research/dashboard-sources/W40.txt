@@ -1,0 +1,1 @@
+{"archived":false,"default_branch":"main","description":"Aspire is the tool for code-first, extensible, observable dev and deploy.","full_name":"microsoft/aspire","license":"MIT","pushed_at":"2026-11-06T07:31:01Z","stargazers_count":6398}

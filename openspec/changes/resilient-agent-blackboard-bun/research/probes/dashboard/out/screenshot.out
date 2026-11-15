@@ -1,0 +1,4 @@
+login URL shape: http://127.0.0.1:47123/login?code=<one-time>
+reusing or guessing a code: 403
+page shows ""id":6": true
+second browser without the cookie: 401 on /api/runs

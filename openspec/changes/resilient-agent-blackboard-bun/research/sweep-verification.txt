@@ -1,0 +1,28 @@
+$ /usr/bin/python3 -I scripts/check-specs.py
+26 file(s) checked, 0 finding(s) {}
+23 capabilities, 249 requirements, 395 scenarios, 220 tasks; 0 errors
+Specification check only; no product tests ran.
+
+exit=0
+$ /usr/bin/python3 -I scripts/test-check-specs.py
+
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 1.401s
+
+OK
+exit=0
+$ openspec validate --all --strict
+✓ change/resilient-agent-blackboard-bun
+Totals: 1 passed, 0 failed (1 items)
+- Validating...
+exit=0
+$ git diff --check
+
+
+exit=0
+Original scenario identities retained: 304 of 304; added 91
+Research ledger: 94 entries, 0 failing; exit=0
+Historical source-text files found by expected source id: 0
+Historical quote check: 10 quotes found verbatim, 146 missing; exit=1
+No product, live SDK, paid compute or benchmark tests ran.

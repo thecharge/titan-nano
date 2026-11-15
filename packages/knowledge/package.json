@@ -1,0 +1,26 @@
+{
+  "name": "@titan/knowledge",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/config": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/errors": "workspace:*",
+    "@titan/messages": "workspace:*",
+    "@titan/store": "workspace:*",
+    "@titan/streams": "workspace:*",
+    "@titan/types": "workspace:*",
+    "sqlite-vec": "catalog:"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  }
+}

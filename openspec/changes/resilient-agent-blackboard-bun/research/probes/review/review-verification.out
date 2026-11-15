@@ -1,0 +1,23 @@
+# fetched 2026-11-05 by the main session
+## https://raw.githubusercontent.com/firecracker-microvm/firecracker/main/docs/RELEASE_POLICY.md
+|   v1.17 |   2026-09-10 |      v1.17.0 |          2027-03-10 | Supported                       |
+|   v1.16 |   2026-06-03 |      v1.16.2 |          2026-12-03 | Supported                       |
+|   v1.15 |   2026-03-09 |      v1.15.1 |          2026-09-09 | 2026-09-10 (v1.17 released)     |
+|   v1.14 |   2025-12-17 |      v1.14.4 |          2026-06-17 | 2026-06-03 (v1.16 released)     |
+|    v1.7 |   2024-03-18 |       v1.7.0 |          2024-09-18 | 2024-09-18 (end of 6mo support) |
+## https://raw.githubusercontent.com/firecracker-microvm/firecracker/main/docs/prod-host-setup.md
+
+For assuring secure isolation in production deployments, Firecracker should be
+started using the `jailer` binary that's part of each Firecracker release, or
+executed under process constraints equal or more restrictive than those in the
+jailer. For more about Firecracker sandboxing please see
+## https://raw.githubusercontent.com/firecracker-microvm/firecracker/main/docs/snapshotting/snapshot-support.md
+strong mechanism that enables users to guarantee that unique things stay unique
+across snapshot restores, we consider resuming execution from the same state
+more than once insecure.
+The vsock device is reset across snapshot/restore to avoid inconsistent state
+## F-13: check-quotes.py with an empty corpus dir
+10 quotes found verbatim, 145 missing
+## F-25: podman images | grep alpine
+docker.io/library/alpine:latest b92841763c5c
+docker.io/library/alpine:<none> 742fde26380a

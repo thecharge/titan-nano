@@ -1,0 +1,63 @@
+name: Deliver titan groups 9 10 13 14
+goal: >-
+  Deliver the open tasks of OpenSpec change resilient-agent-blackboard-bun named in each step, for Claude Code
+  and Codex. Read tasks.md, the named spec scenarios, DEV_RULES.md and the existing code first. A task is done
+  only when flat positive and negative test tables for its named scenarios exist under testing/ (cases,
+  factories, and registration in testing/unit, integration or e2e), the code makes them pass, and the
+  acceptance map row is set to implemented. You have no shell and need not run anything: a later gate runs typecheck, lint and tests. Do not claim a test passed. Every test factory function must be called by a case, because the gate needs every function and line covered; no callback that only runs on an unreachable path. State what you wrote,
+  which files changed, and which scenarios still lack proof.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: requests
+    do:
+      persona: builder
+      task: >-
+        Tasks 9.1 to 9.7 in openspec/changes/resilient-agent-blackboard-bun/tasks.md: board, request kinds,
+        answers, private messages, pause with exit code 3, titan answer, --yes and --to-person. Find what
+        exists in packages/board, packages/requests and apps/cli, add only the missing tests and code.
+    falsify:
+      - persona: skeptic
+        task: Check each scenario named in tasks 9.1 to 9.7 has a test table in testing/ and matching code.
+  - id: falsifiers
+    do:
+      persona: builder
+      task: >-
+        Tasks 10.1 to 10.4: persona and script falsifiers, falsifier input limits, retry with evidence up to
+        max_attempts, parallel candidates and judging. Find what exists in packages/runner and add only the
+        missing tests and code.
+    falsify:
+      - persona: skeptic
+        task: Check each scenario named in tasks 10.1 to 10.4 has a test table in testing/ and matching code.
+  - id: api
+    do:
+      persona: builder
+      task: >-
+        Tasks 13.1, 13.2 and 14.1 to 14.3: runWorkflow, resumeRun and answerRequest exports, HTTP API parity,
+        titan serve token and Origin checks, routes with Last-Event-ID, rebuild on start. Find what exists in
+        packages/runner and packages/server and add only the missing tests and code.
+    falsify:
+      - persona: skeptic
+        task: Check each scenario named in tasks 13.1, 13.2 and 14.1 to 14.3 has a test table in testing/ and matching code.
+limits:
+  max_parallel: 3
+  max_minutes: 45

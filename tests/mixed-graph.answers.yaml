@@ -1,0 +1,38 @@
+version: 1
+answers:
+  - persona: planner
+    task: Set reasonable assumptions for the trip.
+    answer:
+      note: Offline fixture for scope. Travel facts and prices remain unverified.
+  - persona: skeptic
+    task: Find an assumption that violates the goal.
+    answer:
+      verdict: survived
+      evidence: Named offline reply for scope. No live research was performed.
+  - persona: planner
+    task: Draft transport options with uncertain prices marked.
+    answer:
+      note: Offline fixture for transport. Travel facts and prices remain unverified.
+  - persona: skeptic
+    task: Find a cost or timing contradiction.
+    answer:
+      verdict: survived
+      evidence: Named offline reply for transport. No live research was performed.
+  - persona: planner
+    task: Draft activities and a conservative budget.
+    answer:
+      note: Offline fixture for activities. Travel facts and prices remain unverified.
+  - persona: skeptic
+    task: Find an activity that does not fit the stated budget.
+    answer:
+      verdict: survived
+      evidence: Named offline reply for activities. No live research was performed.
+  - persona: planner
+    task: Combine the options into one plan with a budget and uncertainties.
+    answer:
+      note: Offline fixture for assemble. Travel facts and prices remain unverified.
+  - persona: skeptic
+    task: Recheck the whole budget and seek a concrete conflict.
+    answer:
+      verdict: survived
+      evidence: Named offline reply for assemble. No live research was performed.

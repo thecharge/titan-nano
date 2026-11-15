@@ -1,0 +1,22 @@
+bun test v1.3.10 (30e609e0)
+
+test/no-network.test.ts:
+13 |     try {
+14 |       const r = https.get("https://example.com/", () => res(null));
+15 |       r.on("error", (e) => res(e));
+16 |     } catch (e) { res(e as Error); }
+17 |   });
+18 |   expect(String(err)).toContain("network blocked");
+                           ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "network blocked"
+Received: "null"
+
+      at <anonymous> (/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/devprobe/test/no-network.test.ts:18:23)
+(fail) node:https request is blocked [36.00ms]
+
+ 6 pass
+ 1 fail
+ 8 expect() calls
+Ran 7 tests across 1 file. [64.00ms]

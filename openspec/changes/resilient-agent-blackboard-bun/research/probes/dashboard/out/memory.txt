@@ -1,0 +1,10 @@
+# measured 2026-11-06T07:29:18Z with docker stats --no-stream, after the export test
+tj 13.93MiB / 58.51GiB
+tp 415.9MiB / 58.51GiB
+ta 64.36MiB / 58.51GiB
+lfprobe-clickhouse-1 485.6MiB / 58.51GiB
+lfprobe-langfuse-web-1 594.3MiB / 58.51GiB
+lfprobe-langfuse-worker-1 629.8MiB / 58.51GiB
+lfprobe-minio-1 65.9MiB / 58.51GiB
+lfprobe-postgres-1 46.35MiB / 58.51GiB
+lfprobe-redis-1 4.645MiB / 58.51GiB

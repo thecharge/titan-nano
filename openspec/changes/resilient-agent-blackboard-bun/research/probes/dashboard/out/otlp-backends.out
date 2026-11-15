@@ -1,0 +1,16 @@
+bun test v1.3.10 (30e609e0)
+
+test/otlp-backends.test.ts:
+jaeger old /api/traces status 404
+jaeger: sent 4 spans, read back 4: execute_tool lean_check | invoke_agent lean-prover | invoke_agent skeptic | invoke_workflow prove-sum-formula
+phoenix status 200
+phoenix: sent 4 spans, read back 4: execute_tool lean_check | invoke_agent lean-prover | invoke_agent skeptic | invoke_workflow prove-sum-formula
+aspire total spans held 4
+aspire: sent 4 spans, read back 4: execute_tool lean_check | invoke_agent lean-prover | invoke_agent skeptic | invoke_workflow prove-sum-formula
+langfuse old /api/public/observations status 404
+langfuse: sent 4 spans, read back 4: AGENT:invoke_agent lean-prover | AGENT:invoke_agent skeptic | SPAN:invoke_workflow prove-sum-formula | TOOL:lean_check
+
+ 4 pass
+ 0 fail
+ 4 expect() calls
+Ran 4 tests across 1 file. [2.73s]

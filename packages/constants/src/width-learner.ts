@@ -1,0 +1,40 @@
+export const WidthLearner = {
+  Widths: [1, 2, 4, 8],
+  Group: 4,
+  Fade: 0.98,
+  Precision: 1000000000,
+  Step: 1,
+  None: 0,
+  Floor: -1,
+} as const;
+
+export const WidthFixture = {
+  Seed: 42,
+  OtherSeed: 7,
+  Runs: 200,
+  Last: 50,
+  Parts: 8,
+  OneWidth: 1,
+  NoParts: 0,
+  PartMinutes: 1,
+  TimeWeight: 0.05,
+  AgentWeight: 0.01,
+  Survived: 1,
+  Limit: 0.1,
+  Cap: 8,
+  LowCap: 1,
+  Digits: 2,
+  List: ",",
+  Join: "|",
+  Timeout: 120000,
+  Reward: {
+    Low: 0.4,
+    Mid: 0.6,
+    High: 0.8,
+  },
+  Width: {
+    One: 1,
+    Four: 4,
+    Eight: 8,
+  },
+} as const;

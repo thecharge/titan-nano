@@ -1,0 +1,10 @@
+lean Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)
+lean toolchain archive lean-4.35.0-linux.tar.zst sha256:7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+image titan-probe/lean-bwrap:2 sha256:59962e5a90f51d02eb54f67bce90f8aaee807cfc1738bd9a23042aaf5a0a14cd from ubuntu:24.04
+bubblewrap bubblewrap 0.9.0
+image titan-probe/z3:1 sha256:4a0c55a48ee598194190b461313e178daf129c504e413cd2d11f8beed1cb1991 from ubuntu:24.04
+Z3 version 4.8.12 - 64 bit
+z3-solver 5.3.1
+bun 1.3.10
+node v24.14.1
+Docker version 29.9.2, build a82e528

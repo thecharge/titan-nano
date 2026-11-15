@@ -1,0 +1,10 @@
+$ bun apps/cli/src/main.ts titan-plugin-good titan-plugin-old titan-plugin-missing titan-plugin-good
+{
+ "backends": [],
+ "errors": [
+  "titan-plugin-good: not installed (Cannot find package 'titan-plugin-good' from '/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/pluginprobe/packages/core/src/index.ts')",
+  "titan-plugin-old: not installed (Cannot find package 'titan-plugin-old' from '/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/pluginprobe/packages/core/src/index.ts')",
+  "titan-plugin-missing: not installed (Cannot find package 'titan-plugin-missing' from '/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/pluginprobe/packages/core/src/index.ts')",
+  "titan-plugin-good: not installed (Cannot find package 'titan-plugin-good' from '/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/pluginprobe/packages/core/src/index.ts')"
+ ]
+}

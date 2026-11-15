@@ -1,0 +1,39 @@
+name: Plan with independent parallel research
+goal: Produce a practical plan for a weekend in Sofia under 150 EUR. Mark uncertain prices and facts instead of inventing them.
+personas:
+  planner:
+    description: Writes a plan from the available inputs.
+    role: Work from the goal and provided inputs. State assumptions and uncertainties. Return the requested structured outputs.
+    tools: [Read]
+    outputs:
+      note: { type: string }
+  skeptic:
+    description: Looks for a concrete failure in a plan.
+    role: Try to refute the candidate against the goal and inputs. Give a precise counterexample or explain what you checked.
+    tools: [Read]
+graph:
+  nodes:
+    - id: scope
+      needs: []
+      do: { persona: planner, task: Set reasonable assumptions for the trip. }
+      falsify: [{ persona: skeptic, task: Find an assumption that violates the goal. }]
+    - id: transport
+      needs: [scope]
+      inputs: { scope: scope.note }
+      do: { persona: planner, task: Draft transport options with uncertain prices marked. }
+      falsify: [{ persona: skeptic, task: Find a cost or timing contradiction. }]
+    - id: activities
+      needs: [scope]
+      inputs: { scope: scope.note }
+      do: { persona: planner, task: Draft activities and a conservative budget. }
+      falsify: [{ persona: skeptic, task: Find an activity that does not fit the stated budget. }]
+    - id: assemble
+      needs: [transport, activities]
+      inputs: { transport: transport.note, activities: activities.note }
+      do:
+        {
+          persona: planner,
+          task: Combine the options into one plan with a budget and uncertainties.,
+        }
+      falsify: [{ persona: skeptic, task: Recheck the whole budget and seek a concrete conflict. }]
+limits: { max_parallel: 2, max_minutes: 10 }

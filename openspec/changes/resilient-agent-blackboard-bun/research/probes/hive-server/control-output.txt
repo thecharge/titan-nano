@@ -1,0 +1,2 @@
+CONTROL no version check: statuses 200 and 200, 2 answer events for one request
+CONTROL state in memory only: 4 steps before the crash, 0 after

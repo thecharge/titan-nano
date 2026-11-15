@@ -1,0 +1,40 @@
+name: Challenge a probability claim
+goal:
+  Evaluate the claim that six heads from a fair independent coin make tails more likely on the next
+  flip. State assumptions, derive the next-flip probability and give a counterexample to any unsupported
+  conclusion.
+personas:
+  author:
+    description: Explains the claim from stated premises.
+    role:
+      Use the stated fair-coin and independence assumptions. Write CLAIM.md with the claim, reasoning,
+      assumptions and conclusion. Distinguish logical deductions from observations. Return a summary.
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Write
+      - Edit
+    outputs:
+      summary:
+        type: string
+  reviewer:
+    description: Searches for a mathematical counterexample.
+    role:
+      Challenge each inference against the fair independent coin assumptions. Give a concrete counterexample
+      for a false inference. Return survived only with the reasoning you checked.
+    tools:
+      - Read
+      - Glob
+      - Grep
+steps:
+  - id: claim
+    do:
+      persona: author
+      task: Derive the probability of tails after the given sequence and write CLAIM.md.
+    falsify:
+      - persona: reviewer
+        task: Try to refute the derivation or expose an unstated independence assumption.
+limits:
+  max_parallel: 2
+  max_minutes: 10

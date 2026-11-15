@@ -1,0 +1,102 @@
+
+
+ Isabelle
+
+Isabelle · · 
+
+Navigation
+
+Home
+
+Overview
+
+Installation
+
+Documentation
+
+Site Mirrors:
+
+ Cambridge (.uk)
+
+ Munich (.de)
+
+ Sydney (.au)
+
+ Potsdam, NY (.us)
+
+What is Isabelle?
+
+Isabelle is a generic proof assistant. It allows mathematical formulas to be expressed in a formal language and provides tools for proving those formulas in a logical calculus. Isabelle was originally developed at the University of Cambridge and Technische Universität München, but now includes numerous contributions from institutions and individuals worldwide. See the Isabelle overview for a brief introduction.
+
+Now available: Isabelle2026 (October 2026)
+
+ Download for Linux
+
+ Download for Linux (ARM)
+
+ Download for Windows
+
+ Download for macOS (ARM)
+
+ Download for macOS (Intel)
+
+Notes:
+
+Hardware requirements:
+
+Small experiments: 4 GB memory, 2 CPU cores
+
+Medium applications: 8 GB memory, 4 CPU cores
+
+Large projects: 16–32 GB memory, 8 CPU cores
+
+Some notable changes:
+
+Support for inlined theory options and conditional developments.
+
+Improved support for Apple Silicon, without Intel emulation.
+
+Improved control over prover output in batch-builds.
+
+Many Isabelle/jEdit improvements, notably for Accessibility (NVDA).
+
+Many Isabelle/VSCode improvements, notably HTML-based GUI via Scala.js.
+
+HOL: various improvements to code generation.
+
+HOL: various improvements of theory libraries, notably HOL-Analysis.
+
+HOL: additional library material, notably HOL-New_Algebra.
+
+HOL: updates and improvements of Sledgehammer and external provers.
+
+HOL: various improvements of SMT support, with cvc5 proof reconstruction.
+
+ML: 64_32 mode now supports 32 GiB heap instead of 16 GiB.
+
+ML: sanity checks for string literals vs. formal names.
+
+ML: minor improvements of kernel integrity.
+
+System: improved logging of Isabelle/Scala and Isabelle/ML.
+
+System: support for Scala.js with many Isabelle/Scala modules.
+
+See also the cumulative NEWS.
+
+Distribution & Support
+
+Isabelle is distributed for free under a conglomerate of open-source licenses, but the main code-base is subject to BSD-style regulations. The application bundles include source and binary packages and documentation, see the detailed installation instructions. A vast collection of Isabelle examples and applications is available from the Archive of Formal Proofs.
+
+Support is available by the official documentation and mailing lists:
+
+The isabelle-users mailing list provides a forum for Isabelle users to discuss problems, exchange information, and make announcements. Users of official Isabelle releases should subscribe or see the archive.
+
+The isabelle-dev mailing list covers the Isabelle development process, including intermediate repository versions, and administrative issues concerning the website or testing infrastructure. Early adopters of development snapshots or repository versions (with alternative repository clone) should subscribe or see the archive.
+
+Zulip Chat is a real-time discussion platform to exchange ideas, ask questions, and collaborate on Isabelle projects, with minimalistic public archive.
+
+Stack Overflow and Stack Exchange are a question-and-answer platform, with complex review process but limited discussion facilities.
+
+Last updated: 2026-10-05 17:20:38
+

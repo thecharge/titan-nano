@@ -1,0 +1,11 @@
+Z3 version 4.8.12 - 64 bit
+== claim-true.smt2: exit 0, 355 ms (includes container start)
+unsat
+== claim-false.smt2: exit 0, 341 ms (includes container start)
+sat
+(
+  (define-fun x () Int
+    1)
+)
+== claim-hard.smt2: exit 0, 5370 ms (includes container start)
+timeout

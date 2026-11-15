@@ -1,0 +1,8 @@
+{
+  "testRunner": "command",
+  "commandRunner": { "command": "bun test" },
+  "mutate": ["src/wilson.ts", "src/fake-backend.ts"],
+  "reporters": ["clear-text"],
+  "concurrency": 4,
+  "tempDirName": ".stryker-tmp"
+}

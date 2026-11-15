@@ -1,0 +1,35 @@
+name: Fix tests fixb5
+goal: |-
+  Fix exactly this, changing nothing else. cspell.json now holds the word "bunx" in its words list (between "bunfs" and "bwrap"), but `bun run check:spelling` fails with a ZodError at path ["words"], message "Invalid input", because the word list is pinned: packages/types/src/spelling.ts line 30 checks `exactStringList(SpellingConfiguration.words)` and SpellingConfiguration is defined in packages/constants. Find SpellingConfiguration.words (Grep SpellingConfiguration in packages/constants/src) and add "bunx" in the same position, between "bunfs" and "bwrap", so it equals cspell.json exactly. If a test case file (Grep "bunfs" in testing/) lists the words, update it the same way. You have no shell: re-read the changed files and list them.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixb5
+    do:
+      persona: builder
+      task: Add bunx to the pinned word list.
+    falsify:
+      - persona: skeptic
+        task: Check by reading that the constants list equals the cspell.json list and nothing else changed.
+limits:
+  max_parallel: 1
+  max_minutes: 60

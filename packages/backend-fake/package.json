@@ -1,0 +1,22 @@
+{
+  "name": "@titan/backend-fake",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@titan/messages": "workspace:*",
+    "@titan/core": "workspace:*",
+    "@titan/constants": "workspace:*",
+    "@titan/types": "workspace:*",
+    "@titan/errors": "workspace:*"
+  },
+  "engines": {
+    "bun": ">=1.3.10"
+  },
+  "private": true
+}

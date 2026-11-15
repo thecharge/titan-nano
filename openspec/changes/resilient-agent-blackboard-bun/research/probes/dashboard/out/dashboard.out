@@ -1,0 +1,13 @@
+bun test v1.3.10 (30e609e0)
+
+test/dashboard.test.ts:
+login status 303 set-cookie flags: titan_session=<id>; HttpOnly; SameSite=Strict; Path=/
+[{"run":"run-live","status":"running","steps":["prove"],"elapsed_ms":400,"attempts":1,"most_agents_at_once":1,"gen_ai.usage.input_tokens":0,"gen_ai.usage.output_tokens":0,"cost_usd":0,"verdicts":{},"proofs":{}},{"run":"run-past","status":"passed","steps":["prove","review"],"elapsed_ms":4100,"attempts":2,"most_agents_at_once":1,"gen_ai.usage.input_tokens":2100,"gen_ai.usage.output_tokens":1000,"cost_usd":0.03,"verdicts":{"survived":1},"proofs":{"proven":1}}]
+new event arrived after 201 ms
+after Last-Event-ID 3 the first message is: id: 4
+page script sources: /../chunk-kj1w61y8.js
+
+ 6 pass
+ 0 fail
+ 19 expect() calls
+Ran 6 tests across 1 file. [239.00ms]

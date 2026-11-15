@@ -1,0 +1,35 @@
+name: Fix tests fixt
+goal: >-
+  Fix exactly this gate failure, changing nothing else: the pre-commit gate runs `bun run test` with stdout inherited into lefthook. About 480 KB into the output, in the middle of the printed text coverage table (cut at `testing/packages/factories/src/recove`), Bun prints `error: An internal error occurred (WriteFailed)`, then the lcov file is never written: `ENOENT: no such file or directory, open '/workspace/coverage/lcov.info'`, and `error: script "test" exited with code 1`. The same run outside the hook, with output to a file, prints the whole table and passes. The text table of 1000+ files is too big for the hook output. In packages/constants/src/development.ts, TestCoverageArguments (line 29) has `--coverage-reporter=text` and `--coverage-reporter=lcov`. Remove the text reporter so only `--coverage-reporter=lcov` remains; tooling/scripts/check-coverage.ts already reads the lcov file and prints its own findings, so check that it needs nothing from the text table (read it). Grep packages, testing and tooling for any test, case or other code that repeats these arguments or the text reporter and update it to match. Change nothing else. No comments. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixt
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixtd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

@@ -1,0 +1,9 @@
+PASS short jobs finish inside the hour: statuses COMPLETED, COMPLETED, COMPLETED; largest ttl sent 60.0 min
+PASS a 2-hour job ends by the deadline: status timed_out after 59.5 min
+PASS open jobs are cancelled at the deadline: titan: timed_out, timed_out; cancel calls with the status before: job-1 IN_QUEUE; job-2 IN_PROGRESS
+PASS no job is sent with under 10 s left: status timed_out, 0 jobs sent
+PASS a 90-minute limit is refused: limits.max_minutes is 90, but a run that uses RunPod may last at most 60 minutes
+PASS wrong key is refused: status 401
+6 passed, 0 failed
+CONTROL no deadline, RunPod defaults: status TIMED_OUT after 10.1 min
+CONTROL no deadline, 3-hour timeout sent: status COMPLETED after 120.1 min

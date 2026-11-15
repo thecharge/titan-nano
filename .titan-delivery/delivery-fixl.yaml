@@ -1,0 +1,35 @@
+name: Fix tests fixl
+goal: >-
+  Fix exactly these gate failures, changing nothing else, keeping every test. (1) `bun run check:unused` (knip) reports an unused file testing/fixtures/fake-codex.ts, which the factory testing/factories/main-agent-guide.ts starts by path. knip.json workspace testing has entries only for tests and fixtures/**/*.mjs: make the fake an .mjs file (rename to testing/fixtures/fake-codex.mjs, plain JavaScript, update the path in the factory) or otherwise make it a counted entry; also delete the old testing/fixtures/fake-codex.sh if nothing uses it (Grep). (2) The coverage gate needs 100 percent lines and functions in every file; below 100 now: apps/cli/src/commands/install.ts lines 98.21 percent (one or two lines not run, read the file and find the branch no case reaches, such as the failure or missing program branch), packages/runner/src/program.ts lines 98.94 percent, testing/factories/board-posts.ts functions 96.43 percent (one function never called), testing/factories/main-agent-guide.ts functions 96.77 percent and lines 92.81 percent with lines 127 to 129 and 131 to 137 never run. For each find the branch or function no case reaches (read the file and the cases that use it) and either add a case to the matching testing/cases table that reaches it with a real expectation, or delete dead code. No comments, no inline strings, no local type aliases, no string literal types. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixl
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixld by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

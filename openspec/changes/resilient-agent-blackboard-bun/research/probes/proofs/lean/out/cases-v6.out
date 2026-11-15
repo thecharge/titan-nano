@@ -1,0 +1,113 @@
+setup | info: titanproof: no previous manifest, creating one from scratch
+setup | info: toolchain not updated; already up-to-date
+lake-manifest.json
+=== case good
+plain lean exit=0 ms=182
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=0 ms=681
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake comparator exit=0 ms=2049
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Challenge
+  | Building Solution
+  | ✔ [2/3] Built Solution (190ms)
+  | Build completed successfully (3 jobs).
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Solution
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Your solution is okay!
+=== case sorry
+plain lean exit=0 ms=142
+  | /tmp/plain.lean:5:8: warning: declaration uses `sorry`
+  | 'sumTo_formula' depends on axioms: [sorryAx]
+lake check exit=0 ms=516
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake comparator exit=1 ms=1375
+  | Build completed successfully (3 jobs).
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Challenge
+  | Building Solution
+  | ⚠ [2/3] Built Solution (147ms)
+  | warning: Solution.lean:5:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | error: Illegal axiom detected: 'sorryAx'
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Solution
+=== case weakened
+plain lean exit=0 ms=143
+  | 'sumTo_formula' does not depend on any axioms
+lake check exit=0 ms=506
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake comparator exit=1 ms=1367
+  | warning: Challenge.lean:6:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Challenge
+  | Building Solution
+  | ✔ [2/3] Built Solution (167ms)
+  | Build completed successfully (3 jobs).
+  | error: Challenge and solution theorem statement do not match: 'sumTo_formula'
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Solution
+=== case redefined
+plain lean exit=0 ms=165
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=0 ms=513
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake comparator exit=1 ms=1497
+  | warning: Challenge.lean:6:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Challenge
+  | Building Solution
+  | ✔ [2/3] Built Solution (188ms)
+  | Build completed successfully (3 jobs).
+  | error: Const does not match between challenge and target 'sumTo._f'
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Solution
+=== case axiom
+plain lean exit=0 ms=148
+  | 'sumTo_formula' depends on axioms: [trust_me]
+lake check exit=0 ms=518
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake comparator exit=1 ms=1372
+  | warning: Challenge.lean:6:8: declaration uses `sorry`
+  | Build completed successfully (3 jobs).
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Challenge
+  | Building Solution
+  | ✔ [2/3] Built Solution (149ms)
+  | Build completed successfully (3 jobs).
+  | error: Illegal axiom detected: 'trust_me'
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Solution
+=== case native
+plain lean exit=0 ms=186
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+  | 'sumTo_100' depends on axioms: [sumTo_100._native.native_decide.ax_1_1]
+lake check exit=0 ms=517
+  | Resolving dependencies
+  | Building and exporting
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Uses no axioms
+lake comparator exit=0 ms=1780
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Challenge
+  | Building Solution
+  | ✔ [2/3] Built Solution (197ms)
+  | Build completed successfully (3 jobs).
+  | Exporting #[Quot, Quot.mk, Quot.lift, Quot.ind, sumTo_formula, propext, Quot.sound, Classical.choice, Nat.add, Nat.sub, Nat.mul, Nat.pow, Nat.gcd, Nat.div, Nat.mod, Nat.beq, Nat.ble, Nat.land, Nat.lor, Nat.xor, Nat.shiftLeft, Nat.shiftRight, String.ofList, Char.ofNat, List, eagerReduce, Nat, String, String.mk, Char, optParam, autoParam, semiOutParam, outParam] from Solution
+  | Running Lean default kernel on solution
+  | Lean default kernel accepts the solution
+  | Your solution is okay!

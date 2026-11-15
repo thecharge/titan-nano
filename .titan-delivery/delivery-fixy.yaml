@@ -1,0 +1,45 @@
+name: Fix tests fixy
+goal: |-
+  Fix exactly these gate failures, changing nothing else. The output of titan run r15_3 (task 15.3, open calls) was merged into a tree where other runs changed the same files, and the merge dropped parts. Gate output:
+  ### bun run typecheck
+  packages/knowledge/src/open-call.ts(2,15): error TS2724: '"@titan/types"' has no exported member named 'OpenCallPick'. Did you mean 'OpenCall'?
+  packages/knowledge/src/open-call.ts(2,47): error TS2724: '"@titan/types"' has no exported member named 'PersonaRegisterEntry'. Did you mean 'PersonaHistoryEntry'?
+  packages/types/src/contracts/runner.ts(4,15): error TS2305: Module '"../persona-lifecycle.ts"' has no exported member 'OpenCallPick'.
+  packages/workflow/src/features.ts(7,60): error TS2339: Property 'Call' does not exist on type 'typeof PendingFeature'.
+  testing/factories/open-call.ts(11,8): error TS2724: '"@titan/types"' has no exported member named 'PersonaRegisterEntry'. Did you mean 'PersonaHistoryEntry'?
+  testing/factories/open-call.ts(12,3): error TS2724: '"@titan/types"' has no exported member named 'PersonaRegisterEntrySchema'. Did you mean 'PersonaHistoryEntrySchema'?
+  testing/factories/open-call.ts(52,14): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+    Type 'undefined' is not assignable to type 'string'.
+  The lint output reports the same missing exports. The finished candidate of the run is in the folder .titan/runs/26325298-069d-426e-89fd-cf151452f26a/steps/r15_3/attempt-3/candidate (read these files with Read): its packages/types/src/persona-lifecycle.ts lines 102-116 define PersonaRegisterEntrySchema, PersonaRegisterEntry, OpenCallPickSchema and OpenCallPick, and its packages/constants/src/workflow-features.ts and packages/workflow/src/features.ts define and use PendingFeature.Call. Bring exactly these missing parts into the current tree files (packages/types/src/persona-lifecycle.ts, packages/constants/src/workflow-features.ts, packages/workflow/src/features.ts, and anything else listed above), keep exports reachable from packages/types/src/index.ts, keep the current tree's other contents (the current persona-lifecycle.ts imports from ./persona-history.ts to avoid an import cycle: do not create a new cycle), and fix the type error at testing/factories/open-call.ts(52,14). Then compare every file the candidate changed against the tree with Read and Grep to confirm nothing else of task 15.3 is missing. No comments. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixy
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixyd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

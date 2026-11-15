@@ -1,0 +1,40 @@
+name: Fix tests fixx
+goal: |-
+  Fix exactly these gate failures, changing nothing else. Several titan runs (tasks 5.1, 11.2, 15.1, 15.4) were merged. Gate output:
+  (A) Every script that loads packages/types fails with `ReferenceError: Cannot access 'RunSettingOverridesSchema' before initialization. at packages/types/src/workflow.ts:141:8` (workflow.ts line 141 spreads `RunSettingOverridesSchema.shape` imported from ./config.ts at line 15). Biome noImportCycles reports the cycle: types/src/config.ts imports ./knowledge.ts (line 23) -> knowledge.ts imports PersonaHistorySchema from ./persona-lifecycle.ts (line 14) -> persona-lifecycle.ts imports PersonaSchema from ./workflow.ts (line 3) -> workflow.ts imports config.ts (line 15). Break the cycle: move the schema that creates it into its own new file in packages/types/src (for example move RunSettingOverridesSchema out of config.ts, or move what persona-lifecycle needs), keep every export available from packages/types/src/index.ts under the same names, and update imports. Read the files first.
+  (B) `bun run typecheck`: packages/knowledge/src/persona-register.ts(153,59): error TS2379: Argument of type '{ request_turns?: boolean | undefined; description?: string | undefined; role?: string | undefined; tags?: string[] | undefined; backend?: Backend | undefined; model?: string | ...}' is not assignable with exactOptionalPropertyTypes: Types of property 'description' are incompatible, Type 'string | undefined' is not assignable to type 'string'. And packages/runner/src/steps.ts(193,19): error TS2698: Spread types may only be created from object types.
+  (C) `bun run check:promises`: testing/factories/persona-register.ts:100: unbounded Promise aggregation; use lazy tasks with all or settle from @titan/core.
+  (D) `bun run lint`: packages/knowledge/src/persona-register.ts:40:41 Inline object type (function splitReference(value: string): { name: string; version: number }): define a Zod schema in packages/types and use its inferred type. packages/runner/src/improvement.ts lines 14:17, 15:55, 23:43 and 66:40: Inline string literal (the `"script"` in `"script" in step.do`, `"script" in entry`, and the literals at lines 23 and 66, one of them in `refused`): use an enum or const from @titan/constants.
+  Also run through the files you change to make sure no other inline literal or inline type is left. No comments. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixx
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixxd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

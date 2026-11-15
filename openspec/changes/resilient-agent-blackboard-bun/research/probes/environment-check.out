@@ -1,0 +1,29 @@
+date: 2026-11-05T10:55:03+02:00
+kernel: 6.17.0-1033-oem
+cpus: 16
+               total        used        free      shared  buff/cache   available
+Mem:              58          12          16           0          30          46
+kvm: read-write
+cpu virt flags count: 16
+kernel.apparmor_restrict_unprivileged_userns = 1
+bun: 1.3.10
+firecracker: Firecracker v1.7.0
+podman: podman version 4.9.3
+runtime crun: installed
+runtime runc: installed
+runtime runsc: NOT-installed
+runtime kata: NOT-installed
+runtime krun: NOT-installed
+bwrap net-unshare: bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted
+== firecracker v1.7 CI kernel 5.10.209 + ubuntu-22.04 rootfs, 1 vCPU, 256 MiB, cold boot to init marker
+run 1: to-marker 969 ms, to-exit 1009 ms, found=True
+run 2: to-marker 975 ms, to-exit 1025 ms, found=True
+run 3: to-marker 1006 ms, to-exit 1061 ms, found=True
+run 4: to-marker 1002 ms, to-exit 1045 ms, found=True
+run 5: to-marker 1009 ms, to-exit 1051 ms, found=True
+== podman/crun alpine, --network=none --cap-drop=ALL --read-only
+run 1: to-marker 160 ms, to-exit 230 ms, found=True
+run 2: to-marker 154 ms, to-exit 233 ms, found=True
+run 3: to-marker 152 ms, to-exit 224 ms, found=True
+run 4: to-marker 158 ms, to-exit 234 ms, found=True
+run 5: to-marker 135 ms, to-exit 184 ms, found=True

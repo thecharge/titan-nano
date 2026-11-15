@@ -1,0 +1,24 @@
+version: 1
+answers:
+  - persona: author
+    task: Draft a two-day move schedule with its assumptions and budget.
+    answer:
+      summary:
+        Offline fixture for everyday-problem step schedule. All costs and observations are supplied
+        assumptions.
+  - persona: reviewer
+    task: Find overlapping commitments or a dependency that makes the schedule impossible.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for everyday-problem step schedule.
+  - persona: author
+    task: Complete MOVE.md with a transport cancellation fallback.
+    answer:
+      summary:
+        Offline fixture for everyday-problem step fallback. All costs and observations are supplied
+        assumptions.
+  - persona: reviewer
+    task: Try to break the fallback within the stated people, time and budget.
+    answer:
+      verdict: survived
+      evidence: Offline independent check for everyday-problem step fallback.

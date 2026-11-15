@@ -1,0 +1,98 @@
+{
+  "run_id": "5306657b-61fe-4294-8c5a-9adfdc53caa6",
+  "state": "passed",
+  "backend": "codex-sdk",
+  "project": "/workspace/titan-nano",
+  "workspace": "live",
+  "controller": "titan",
+  "controller_home": "/workspace/titan-nano/.titan/self-development-fixed",
+  "workflow": ".titan-delivery/self-development-codex.yaml",
+  "result": "/workspace/titan-nano/docs/examples/self-development/result.md",
+  "events": "/workspace/titan-nano/docs/examples/self-development/events.jsonl",
+  "steps": {
+    "repair_bun_version": {
+      "state": "passed",
+      "attempt": 1,
+      "changes": {
+        "testing/cases/prerequisite-version.ts": "7e13d2020c85005559f60efcdd1038ce87ccd2339312f8e75204836de2113fef"
+      },
+      "reviews": {
+        "falsifier-0": {
+          "verdict": "survived",
+          "evidence": "Read-only inspection found no counterexample. Traced checkPrerequisites through the shared parser and comparator. Malformed versions, 1.3.10-beta.1, 1.3.9-beta.1, and the existing older-release fixture 1.3.9 are rejected. The minimum 1.3.10, 1.4.0, and 1.3.10+build.01 are accepted. The 256-character release and 252-digit major component are accepted, while the 257-character release is rejected by the unchanged parser bound. The diff preserves non-Bun tool lookup and optional harness checks. Verified that the shared unit factory registers five positive and six negative cases through bunReadiness, which calls checkPrerequisites. Made no edits and ran no test suites.",
+          "failure": "other"
+        }
+      },
+      "worker_result": "Kept the existing `checkPrerequisites` repair, which uses the shared release parser to reject malformed versions and prereleases of the minimum supported Bun version. Required tool and optional harness checks were untouched.\n\nEdited only [testing/cases/prerequisite-version.ts](/workspace/titan-nano/testing/cases/prerequisite-version.ts). The new cases exercise `checkPrerequisites` through the existing factory and cover a release at 256 characters, a release at 257 characters, and a newer release with a large numeric component.\n\nThe tracked source diff passed `git diff --check`, and the untracked case file produced no whitespace diagnostics. Tests were deferred to the later verification step. The separate guide and reviewer steps were left untouched."
+    },
+    "write_inspection_guide": {
+      "state": "passed",
+      "attempt": 1,
+      "changes": {
+        "docs/self-development.md": "3c0d5c9e56accc91f6a8fce379df3ee667eeb433d543bb45607a3d18ac82eea3"
+      },
+      "reviews": {
+        "falsifier-0": {
+          "verdict": "survived",
+          "evidence": "All six command forms in docs/self-development.md match the installed controller’s help and the repository CLI definitions, including the event paging options, the requests run filter, and the dashboard’s one-time link. The guide’s paths, parallel tasks, independent reviewers, and follow-on script match the plan. I checked the artifact and dashboard implementations for the documented inspection routes and confirmed the Git instructions expose both tracked changes and untracked files. The guide makes no claim that the workflow passed. I ran no test suites and did not independently verify the candidate’s reported checks or the live run outcome.",
+          "failure": "other"
+        }
+      },
+      "worker_result": "Updated [docs/self-development.md](/workspace/titan-nano/docs/self-development.md) with commands for inspecting the run, reviewer verdicts, retained script output, and changes in the shared Git working tree. Only the guide was edited.\n\nConfirmed all six Titan command forms against the installed controller’s help. Documentation, links, formatting, shell syntax, and whitespace checks passed. The workflow’s final result remains unverified."
+    },
+    "verify_delivered_files": {
+      "state": "passed",
+      "attempt": 1,
+      "changes": {},
+      "reviews": {
+        "falsifier-0": {
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "elapsed_ms": 145,
+          "capture": {
+            "path": "steps/verify_delivered_files/attempt-1/69a3c119-9199-4054-b1c6-24b976b41490.capture.json",
+            "hash": "c6d3617b0561aa8c38a501734b04d6d2253889e7ce2bcc0507887a8ee642cedf"
+          }
+        }
+      },
+      "worker_result": {
+        "exit_code": 0,
+        "stdout": "\n45 file(s) checked, 0 finding(s) {}\nOwned Markdown links and heading targets are valid\n",
+        "stderr": "$ tsc --noEmit\n$ bun tooling/scripts/check-docs.ts\n$ bun tooling/scripts/check-document-links.ts\n"
+      }
+    }
+  },
+  "prior_runs": [
+    "c5f9efaf-a460-442a-9efc-a3f9401388bd",
+    "9e3b2d41-7619-4fb5-afb1-746a4597d344",
+    "7245de97-14fc-428f-b85e-c5ccac8f1ef1"
+  ],
+  "recovery_notes": [
+    "Repaired the Codex reviewer schema by requiring every declared property. This manual controller repair is uncommitted.",
+    "A sandboxed foreground launch could not write Codex session state. The authorized account run uses a controller launched with the required filesystem access.",
+    "Shared-tree snapshot conflicts required explicit resume. Both workers dispatched concurrently in prior run 7245de97-14fc-428f-b85e-c5ccac8f1ef1. The final run retained the parallel group and resumed the guide after the code review.",
+    "An earlier reviewer refuted a 257-character version. The final task explicitly preserves the existing 256-character shared-parser limit and checks its boundary."
+  ],
+  "delivery_notes": [
+    "Demo source changes remain uncommitted for inspection.",
+    "The workflow script passed type checking, documentation, links, whitespace and file-presence checks. The full offline test suite was not run for these demo changes.",
+    "Production readiness and the five-minute commit/push target remain unmet."
+  ],
+  "configuration_repair": {
+    "remote_main": "e7fdfb4eed784187da08933f2ac10e7cfbf57852",
+    "commit_gate": {
+      "passed": 6871,
+      "failed": 0,
+      "sources": 485,
+      "coverage_gaps": 0
+    },
+    "installed_package_check": "passed",
+    "managed_install": "passed"
+  },
+  "behavioral_probes": {
+    "passed": 11,
+    "failed": 0,
+    "method": "Direct calls through the shared regression factory and checkPrerequisites normal entry point"
+  }
+}

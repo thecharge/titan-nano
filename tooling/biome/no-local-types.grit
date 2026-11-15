@@ -1,0 +1,14 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+or {
+  TsInterfaceDeclaration() as $n where {
+    register_diagnostic(span=$n, message="Interface declared outside the types package. Declare shapes as Zod schemas, and contracts, in packages/types.", severity="error")
+  },
+  TsTypeAliasDeclaration() as $n where {
+    register_diagnostic(span=$n, message="Type alias declared outside the types package. Infer types from Zod schemas in packages/types.", severity="error")
+  },
+  TsObjectType() as $n where {
+    register_diagnostic(span=$n, message="Inline object type. Define a Zod schema in packages/types and use its inferred type.", severity="error")
+  }
+}

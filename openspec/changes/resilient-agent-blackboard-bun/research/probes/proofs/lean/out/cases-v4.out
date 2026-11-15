@@ -1,0 +1,71 @@
+setup | info: titanproof: no previous manifest, creating one from scratch
+setup | info: toolchain not updated; already up-to-date
+lake-manifest.json
+=== case good
+plain lean exit=0 ms=166
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=1 ms=35
+  | Resolving dependencies
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+lake comparator exit=1 ms=34
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+  | Resolving dependencies
+=== case sorry
+plain lean exit=0 ms=142
+  | /tmp/plain.lean:5:8: warning: declaration uses `sorry`
+  | 'sumTo_formula' depends on axioms: [sorryAx]
+lake check exit=1 ms=35
+  | Resolving dependencies
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+lake comparator exit=1 ms=37
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+  | Resolving dependencies
+=== case weakened
+plain lean exit=0 ms=141
+  | 'sumTo_formula' does not depend on any axioms
+lake check exit=1 ms=41
+  | Resolving dependencies
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+lake comparator exit=1 ms=37
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+  | Resolving dependencies
+=== case redefined
+plain lean exit=0 ms=164
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+lake check exit=1 ms=41
+  | Resolving dependencies
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+lake comparator exit=1 ms=34
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+  | Resolving dependencies
+=== case axiom
+plain lean exit=0 ms=162
+  | 'sumTo_formula' depends on axioms: [trust_me]
+lake check exit=1 ms=36
+  | Resolving dependencies
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+lake comparator exit=1 ms=35
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+  | Resolving dependencies
+=== case native
+plain lean exit=0 ms=184
+  | 'sumTo_formula' depends on axioms: [propext, Quot.sound]
+  | 'sumTo_100' depends on axioms: [sumTo_100._native.native_decide.ax_1_1]
+lake check exit=1 ms=39
+  | Resolving dependencies
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+lake comparator exit=1 ms=35
+  | bwrap: Can't mount proc on /newroot/proc: Operation not permitted
+  | error: Child exited with 1
+  | Resolving dependencies

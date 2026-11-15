@@ -1,0 +1,21 @@
+capability	requirement	scenario	task	stage	test_level	status
+harness-delivery	Delivery records match observed acceptance	A checked rollback task has a counterexample	6.3	release	integration	implemented
+harness-delivery	Delivery records match observed acceptance	A production service has only component proof	3.2	release	integration	implemented
+harness-delivery	Refused attempts preserve user work	User changes a file before rollback	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	Worker tries an unlisted write	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	Runs negotiate overlapping live scopes	2.3	release	integration	implemented
+harness-delivery	Refused attempts preserve user work	Independent file scopes continue	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	A waiting claim is cancelled	2.3	release	integration	implemented
+harness-delivery	Refused attempts preserve user work	A changed file invalidates reconciliation approval	2.3	release	integration	implemented
+harness-delivery	Backend authorization precedes dispatch	Selected backend reaches a limit	2.5	release	integration	implemented
+harness-delivery	Backend authorization precedes dispatch	Resume requests an unapproved backend	2.5	release	integration	implemented
+harness-delivery	Installed workflows use complete production services	A failed check returns to the builder	3.1	release	integration	implemented
+harness-delivery	Installed workflows use complete production services	A later workflow reads the earlier journal	3.4	release	integration	implemented
+harness-delivery	Installed workflows use complete production services	A journal retry retains durable lesson references	3.3	release	integration	implemented
+harness-delivery	Readiness requires complete release evidence	Source tests pass but the package check fails	4.1	release	integration	implemented
+harness-delivery	Readiness requires complete release evidence	Applicable product requirements are pending	6.3	release	integration	implemented
+harness-delivery	Refused attempts preserve user work	Native hosts share independent scopes	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	Shared readers yield to an earlier writer	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	Scope expansion releases the earlier claim	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	A changed read requires fresh reconciliation	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	An interrupted received result is reconciled once	2.4	release	integration	implemented

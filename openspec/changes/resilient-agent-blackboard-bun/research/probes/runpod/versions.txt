@@ -1,0 +1,2 @@
+node_modules/@ai-sdk/openai-compatible/package.json:  "version": "3.0.75",
+node_modules/ai/package.json:  "version": "7.0.163",

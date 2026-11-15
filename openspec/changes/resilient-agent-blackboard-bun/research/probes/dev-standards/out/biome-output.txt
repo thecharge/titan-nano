@@ -1,0 +1,17 @@
+$ biome check src test
+       40 │ + → );
+    24 41 │   });
+    25 42 │   
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 21.
+Checked 12 files in 3ms. No fixes applied.
+Found 19 errors.
+Found 22 warnings.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+exit code: 1

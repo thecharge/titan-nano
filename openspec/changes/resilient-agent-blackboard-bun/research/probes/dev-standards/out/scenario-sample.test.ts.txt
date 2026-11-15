@@ -1,0 +1,4 @@
+import { test } from "bun:test";
+test("persona-lifecycle > A good persona becomes proven", () => {});
+test("persona-lifecycle > A weak persona needs an update", () => {});
+test("persona-lifecycle > A scenario that does not exist", () => {});

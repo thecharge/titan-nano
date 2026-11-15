@@ -1,0 +1,125 @@
+import { DashboardRoute } from "@titan/constants";
+
+export const DashboardMessage = {
+  Knowledge: "Knowledge",
+  Loading: "Loading…",
+  Retry: "Try again",
+  LoadFailed: "This view is temporarily unavailable",
+  RetryHint: "Check that the Titan server is running, then try again.",
+  RunList: "Recent runs",
+  OlderRuns: "Older runs",
+  LatestRuns: "Latest runs",
+  RunFilterLabels: ["Client", "Session", "Project path"],
+  ApplyFilters: "Filter runs",
+  ClearFilters: "Clear filters",
+  EmptyRunPage: "No runs in this page",
+  AllMeasurements: "All measurements",
+  RunNumbers: "Run numbers",
+  RunContext: "Execution",
+  Artifacts: "Verified artifacts",
+  Configuration: "Run configuration",
+  ConfigurationSettings: "Frozen settings",
+  ConfigurationSources: "Setting sources",
+  ConfigurationCommitment: "Configuration SHA-256",
+  BackToRun: "Back to run",
+  ArtifactColumns: ["File", "Bytes", "Executable", "SHA-256"],
+  ArtifactOutputs: "Step outputs",
+  ArtifactEmpty: "This delivery contains no files",
+  ArtifactNext: "Next file page",
+  ArtifactStart: "First file page",
+  ArtifactBinary: "Binary content shown as base64",
+  ArtifactRange: (offset: number, next: number, total: number): string =>
+    `Bytes ${offset}–${next} of ${total}`,
+  AgentCapacity: "Agent capacity",
+  CapacityActive: (active: number, limit: number): string =>
+    `${active} of ${limit} agent slots active`,
+  CapacityPending: (pending: number, limit: number): string =>
+    `${pending} of ${limit} queue slots waiting`,
+  CapacityBackend: (backend: string, active: number, limit: number | null): string =>
+    `${backend} · ${active} active · ${limit === null ? "shared agent limit" : `${limit} slots`}`,
+  RunContextLabels: ["Project", "Backend", "Runtime version", "Run parallel limit", "Artifacts"],
+  Dependencies: (needs: readonly string[]): string => `Depends on ${needs.join(", ")}`,
+  PhaseRecovery: (phase: string, executions: number, retries: number): string =>
+    `${phase} · ${executions} executions · ${retries} recovery retries`,
+  RetryTime: (time: number): string => `Next retry ${new Date(time).toISOString()}`,
+  CapturePending: "Received result retained. File capture needs recovery.",
+  EmptyRuns: "No runs yet. Start a workflow with titan run in your terminal.",
+  StreamConnecting: "Connecting to live events…",
+  StreamLive: "Live events connected",
+  StreamInterrupted: "Reconnecting to live events…",
+  EmptyRequests: "No open requests",
+  EmptySteps: "No steps yet",
+  KnowledgeAll: "All entries",
+  KnowledgeScopes: "Scopes",
+  KnowledgeKinds: "Kinds",
+  KnowledgeStates: "States",
+  KnowledgePending: (
+    run: string,
+    step: string,
+    candidate: string,
+    attempt: number,
+    operation: string,
+  ): string =>
+    `pending ${operation} · run ${run} · step ${step} · candidate ${candidate} · attempt ${attempt}`,
+  KnowledgeDates: (oldest: string | null, newest: string | null): string =>
+    `Oldest: ${oldest ?? "none"}; newest: ${newest ?? "none"}`,
+  KnowledgeKindCounts: (
+    kind: string,
+    entries: number,
+    bytes: number,
+    unread: number,
+    oldest: string | null,
+    newest: string | null,
+  ): string =>
+    `${kind}: ${entries} entries, ${bytes} bytes, ${unread} never read; Oldest: ${oldest ?? "none"}; newest: ${newest ?? "none"}`,
+  KnowledgeOpen: " · Open entry",
+  Runs: "All runs",
+  Filter: (value: string): string => ` · ${value}`,
+  KnowledgeReadOnly:
+    "Read-only inspection of project and home knowledge; counts describe committed entries",
+  KnowledgeEarlier: "Earlier versions",
+  KnowledgeEmpty: "No entries in this view",
+  KnowledgeTruncated: "More entries exist than this view can list",
+  KnowledgeReady: "Meaning search is ready",
+  KnowledgeUnavailable: "Meaning search is unavailable",
+  KnowledgeEntry: (scope: string, kind: string, title: string, version: number): string =>
+    `${scope} · ${kind} · ${title} · version ${version}`,
+  KnowledgeCounts: (scope: string, entries: number, bytes: number, unread: number): string =>
+    `${scope}: ${entries} entries, ${bytes} bytes, ${unread} never read`,
+  KnowledgeRelation: (scope: string, title: string, relation: string): string =>
+    `${scope} · ${title} · ${relation}`,
+  KnowledgeHistory: (earlier: number, promoted: string | null): string =>
+    `${earlier} earlier versions; promoted from ${promoted ?? "none"}`,
+  Login: "The login code is wrong, old or already used",
+  Cookie: "The dashboard needs a session cookie from a login link",
+  Origin: "The dashboard refuses calls that name another site",
+  Method: "The dashboard only answers GET",
+  Route: "The dashboard has no such page",
+  Cursor: "The Last-Event-ID header must be a nonnegative whole number",
+  Person: "Only the person token can ask for a dashboard login code",
+  Client: "The server returned a dashboard login link that does not match its code",
+  Capacity: "The dashboard holds too many login codes or sessions",
+  Page: "The dashboard page could not be built",
+  Unavailable: "The dashboard could not read this run",
+  NotReported: "not reported",
+  Partial: "partial subtotal",
+  Complete: "complete",
+  AnswerHint: "To answer an open request, run titan answer in a terminal",
+  MissingContribution: (missing: number): string =>
+    `${missing} contribution${missing === 1 ? "" : "s"} missing`,
+  AnswerCommand: (run: string, request: string, version: number): string =>
+    `titan answer ${run} ${request} approve --request-version ${version}`,
+  Measure: (value: number, label: string): string => `${value} (${label})`,
+  EventLine: (id: number, type: string, data: string): string => `${id} ${type} ${data}`,
+  StepTitle: (id: string, persona: string, state: string): string => `${id} (${persona}) ${state}`,
+  AttemptTitle: (attempt: number, verdict: string): string => `attempt ${attempt}: ${verdict}`,
+  CheckLine: (phase: string, answer: string): string => `${phase}: ${answer}`,
+  RequestLine: (id: string, kind: string, command: string): string => `${id} ${kind}: ${command}`,
+  RunTitle: (id: string, state: string): string => `${id} ${state}`,
+  PartialLabel: (missing: number): string =>
+    `${DashboardMessage.Partial}, ${DashboardMessage.MissingContribution(missing)}`,
+  Frame: (id: number, name: string, data: string): string =>
+    `id: ${id}\nevent: ${name}\ndata: ${data}\n\n`,
+  LoginLink: (origin: string, code: string): string =>
+    `${origin}${DashboardRoute.Login}?code=${code}`,
+} as const;

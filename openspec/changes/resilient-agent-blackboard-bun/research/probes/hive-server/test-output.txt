@@ -1,0 +1,12 @@
+PASS agents add steps: 4 steps, steps 2-4 added by s1 (the planner)
+PASS other steps run while one waits: coder and tester done, deploy is "waiting"
+PASS request goes to the human: request r1 to human, kind approve_deploy
+PASS main agent cannot answer for the human: status 403
+PASS state survives a crash: steps after restart equal (12 board lines)
+PASS two answers at once: statuses 200 and 409
+PASS approved step runs: all 4 steps done
+PASS events resume without gaps: 15 of 15 events, in order, no duplicates
+PASS no token: status 401
+PASS foreign web page: status 403
+PASS runaway agent is stopped: 10 steps, 41 refused, 1 request to the main agent to raise the limit
+11 passed, 0 failed

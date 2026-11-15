@@ -1,0 +1,46 @@
+name: Fix tests fixv
+goal: |-
+  Fix exactly these gate failures, changing nothing else. Several titan runs for tasks 5.2, 5.3, 5.4, 11.3, 11.4 were merged and left the tree inconsistent. `bun run typecheck` reports:
+  packages/constants/src/persona-lifecycle.ts(74,3): error TS1117: An object literal cannot have multiple properties with the same name.
+  packages/knowledge/src/improved-file.ts(3,10): error TS2305: Module '"@titan/constants"' has no exported member 'ImprovedFile'.
+  packages/knowledge/src/index.ts(12,3): error TS2305: Module '"./persona-lifecycle.ts"' has no exported member 'recordPersonaRun'.
+  testing/cases/improved-file.ts(1,10): error TS2724: '"@titan/constants"' has no exported member named 'ImprovedFixture'. Did you mean 'ImproveRoundsFixture'?
+  testing/cases/persona-lifecycle.ts(98,7): error TS2451: Cannot redeclare block-scoped variable 'investigator'.
+  testing/cases/persona-lifecycle.ts(229,7): error TS2451: Cannot redeclare block-scoped variable 'investigator'.
+  testing/factories/improve-rounds.ts(1,10): error TS2305: Module '"@titan/knowledge"' has no exported member 'runImproveRounds'.
+  testing/factories/improve-rounds.ts(7,56): error TS7006: Parameter 'round' implicitly has an 'any' type.
+  testing/factories/improve-rounds.ts(11,39): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+  testing/factories/improved-file.ts(4,10): error TS2724: '"@titan/constants"' has no exported member named 'ImprovedFixture'. Did you mean 'ImproveRoundsFixture'?
+  Known causes: packages/constants/src/improved-files.ts (exports ImprovedFile and ImprovedFixture) is not exported from packages/constants/src/index.ts (add `export * from "./improved-files.ts";` in sorted position); packages/knowledge/src/improve-rounds.ts exports runImproveRounds but packages/knowledge/src/index.ts does not export it; packages/knowledge/src/persona-lifecycle.ts must export recordPersonaRun (index.ts line 12 imports it): read packages/knowledge/src/index.ts and persona-lifecycle.ts and find where the function that records the persona history after a run is, and the candidates in testing for what the tests call (Grep recordPersonaRun in testing and packages); packages/constants/src/persona-lifecycle.ts line 74 has a duplicate property name (keep one, check which value the tests use); testing/cases/persona-lifecycle.ts declares const investigator twice (lines 98 and 229): keep one declaration and make all uses work. After the fixes also Grep that every test file in testing/unit that imports from these modules still matches. No comments. You have no shell.
+personas:
+  builder:
+    description: Writes code, tests and spec updates for assigned tasks.
+    model: sonnet
+    role: >-
+      Follow CLAUDE.md and DEV_RULES.md in the repo. Literals go in packages/constants, messages in
+      packages/messages, schemas and types in packages/types. No comments. Tests use unit(factory, cases)
+      with at least 2 positive and 2 negative cases. Edit only files that your task needs. Report only what
+      you did, never what you assume passed. Use Glob and Grep with simple relative patterns only: no braces,
+      no absolute paths, no paths outside the working folder.
+    tools: [Read, Grep, Write, Edit]
+    outputs:
+      summary:
+        type: string
+  skeptic:
+    description: Tries to refute the claimed delivery.
+    model: sonnet
+    role: >-
+      Read the changed files. Refute when a named scenario has no test, a test cannot fail, a literal sits
+      outside constants, or a claim is unbacked. Otherwise survive and list what you read. Use only Grep with simple relative patterns: no braces, never an absolute path. There is no Glob. Do not refute because nothing was run: a later gate runs every test; judge only by reading code and tests.
+    tools: [Read, Grep]
+steps:
+  - id: fixv
+    do:
+      persona: builder
+      task: Fix the two named type errors.
+    falsify:
+      - persona: skeptic
+        task: Check the two named type errors are fixvd by reading the lines, and that no unrelated change was made.
+limits:
+  max_parallel: 1
+  max_minutes: 40

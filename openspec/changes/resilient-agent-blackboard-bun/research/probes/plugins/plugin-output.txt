@@ -1,0 +1,11 @@
+$ cd apps/cli && bun src/main.ts titan-plugin-good titan-plugin-old titan-plugin-missing titan-plugin-good
+{
+ "backends": [
+  "mistral-api"
+ ],
+ "errors": [
+  "titan-plugin-old: wants titan-plugin-v0, titan has titan-plugin-v1",
+  "titan-plugin-missing: not installed (Cannot find package 'titan-plugin-missing' from '/tmp/claude-1000/-home-thecharge-workspace-titan-nano/0e69de29-e1f2-4498-a1f7-e5f6d38fc2f8/scratchpad/pluginprobe/apps/cli')",
+  "titan-plugin-good: backend mistral-api already registered"
+ ]
+}

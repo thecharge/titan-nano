@@ -1,0 +1,23 @@
+pre-commit:
+  jobs:
+    - name: format-code
+      run: bunx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      glob: "*.{ts,tsx,js,json,jsonc}"
+      stage_fixed: true
+    - name: format-docs
+      run: bun run format:docs
+      glob: "*.{md,yaml,yml}"
+      stage_fixed: true
+    - name: staged-snapshot
+      run: bun tooling/scripts/check-hook.ts commit
+
+commit-msg:
+  jobs:
+    - name: message-policy
+      run: bun tooling/scripts/check-message.ts "{1}"
+
+pre-push:
+  jobs:
+    - name: outgoing-snapshots
+      run: bun tooling/scripts/check-hook.ts push
+      use_stdin: true

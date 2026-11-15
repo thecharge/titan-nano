@@ -1,0 +1,60 @@
+export const StatementLock = {
+  Directory: "locked",
+  Operation: "lock_statement",
+  Goal: "goal",
+  HashKey: "statement",
+  RequestPrefix: "lock-",
+  IdLength: 32,
+  Separator: "-",
+  Mode: 0o444,
+  ExpiresMs: 604800000,
+  Start: 0,
+} as const;
+
+export enum StatementFixture {
+  Waiting = "waiting",
+  Linked = "linked",
+  LinkedParent = "linked_parent",
+  Oversized = "oversized",
+  Executable = "executable",
+  ChangedLink = "changed_link",
+  LockedParent = "locked_parent",
+  Twice = "twice",
+  Long = "long",
+  Goal = "goal",
+  Approved = "approved",
+  ApprovedGoal = "approved_goal",
+  Denied = "denied",
+  Edited = "edited",
+  Changed = "changed",
+  Deleted = "deleted",
+  Unchanged = "unchanged",
+  Lowered = "lowered",
+  Repeated = "repeated",
+}
+
+export const StatementTesting = {
+  Path: "spec/statement.lean",
+  Folder: "spec",
+  Text: "def sumTo (n : Nat) : Nat := n",
+  Edit: "def sumTo (n : Nat) : Nat := 0",
+  LongLength: 9000,
+  LongUnit: "x",
+  StepId: "prove",
+  Theorem: "sumTo_formula",
+  Client: "statement-test",
+  Submission: "statement-lock",
+  Person: "person",
+  Main: "main",
+  Reason: "Read the statement",
+  Home: "home",
+  Starts: 0,
+  RequestCount: 1,
+  ReadOnlyMask: 0o222,
+} as const;
+
+export enum StatementState {
+  Ready = "ready",
+  Waiting = "waiting",
+  Denied = "denied",
+}

@@ -1,0 +1,3 @@
+{ "compilerOptions": { "strict": true, "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true,
+  "module": "preserve", "moduleResolution": "bundler", "target": "esnext", "noEmit": true,
+  "types": ["bun"], "skipLibCheck": true }, "include": ["src", "test"] }

@@ -1,0 +1,50 @@
+name: Diagnose and fix a reproducible code defect
+goal:
+  Produce a small candidate fix and regression test in the shared live project. Record the demonstrated
+  defect, changed files and the evidence available for review.
+personas:
+  author:
+    description: Develops a focused candidate patch.
+    role:
+      Inspect the available source and existing project rules. Use file tools to produce a minimal
+      patch and a regression test. Write REVIEW.md with the reproduction and the checks actually performed.
+      Return a summary of the kept candidate.
+    tools:
+      - Read
+      - Glob
+      - Grep
+      - Write
+      - Edit
+    outputs:
+      summary:
+        type: string
+  reviewer:
+    description: Independently challenges the proposed diagnosis and patch.
+    role:
+      Read the candidate and supplied inputs. Seek a concrete counterexample, a violated project rule
+      or a missing regression case. Return refuted with evidence for a demonstrated defect, otherwise
+      survived with the checks performed.
+    tools:
+      - Read
+      - Glob
+      - Grep
+steps:
+  - id: cause
+    do:
+      persona: author
+      task: Identify one reproducible defect and record its cause in REVIEW.md.
+    falsify:
+      - persona: reviewer
+        task: Try to disprove the stated defect using the source and a concrete input.
+  - id: fix
+    do:
+      persona: author
+      task: Apply the smallest fix for the diagnosed defect and add a regression test.
+    falsify:
+      - persona: reviewer
+        task: Seek a concrete regression or an input that defeats the proposed fix.
+    inputs:
+      cause: cause.summary
+limits:
+  max_parallel: 2
+  max_minutes: 10
