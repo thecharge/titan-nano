@@ -1330,3 +1330,13 @@ Installed acceptance session 13703 exited zero against that exact tree. Log /tmp
 Normal push session 12805 exited zero using an exact remote lease. Actions was disabled immediately before the push. Its outgoing hook reused the exact verified tree. The old commit and document API endpoints remained accessible afterward, and the old document still contained its original personal filesystem path. The repository remains private. The owner was asked to authorize a fresh private publication repository while retaining this remote privately. GitHub object retention remains the publication blocker.
 
 The original working copy is being synchronized to the cleaned main while preserving local runtime data, private local branches and unrelated source work. A verified complete original Git bundle, worktree patch and private recovery records remain outside the repository.
+
+## 2026-11-15 fresh publication repository inspection
+
+The owner authorized preserving the existing private remote and creating a fresh standalone private publication repository. The original repository is now thecharge/titan-nano-private-history-20261115, identifier 1446629079. The replacement thecharge/titan-nano has identifier 1459003959 and fork false. Both remain private. Both have Actions disabled. The replacement has Issues enabled, pull requests disabled and Apache-2.0 recognized.
+
+Normal first push session 90349 exited zero at b1c56a29b2ddda61ab17f7c8eb95c23a471ef9e5. Actions was independently confirmed disabled before pushing. The outgoing hook inspected both clean publication snapshots and reused their existing verification evidence. Log /tmp/titan-fresh-repository-push.log retains the output.
+
+The replacement commit endpoint rejects original commit 60fe17af30c76534f22364f480d7166001de2787 with status 422 and no commit found. Its old document endpoint returns 404. An independent single-branch clone contains only the two cleaned publication commits and cannot resolve that original object. The source privacy audit passes in that clone, including all twelve sanitized export digests. This resolves the old repository object-retention blocker for the replacement. Visibility remains private for the owner to change.
+
+The original working copy has been synchronized to clean main while preserving ignored runtime data, private local branches and the unrelated untracked model-offline-probe test. The complete original bundle passed verification and the private runtime archive completed successfully. Archive restoration has not been exercised. Source acceptance and installed-package results remain those recorded above. This repository split changes publication records and hosting, with broader product acceptance still open.
