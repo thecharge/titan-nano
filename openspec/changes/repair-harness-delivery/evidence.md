@@ -1318,3 +1318,15 @@ The expanded reachable-history scan at 31c20d3 inspected 8,534 UTF-8 text object
 ## 2026-11-15 privacy cleanup preparation
 
 The owner authorized sanitation and history rewriting after reviewing the remaining personal paths, native session identifiers and Git identity exposure. The [privacy cleanup record](research/privacy-cleanup.md) records the authorized scope, retained sanitized example, image review and GitHub object-retention limitation. Normal verification and final remote inspection remain required. Original runtime data and unrelated worktree changes remain in the private working copy and external recovery copy.
+
+## 2026-11-15 privacy cleanup verification and remote retention
+
+Remote main independently confirmed sanitized publication baseline f3a1798d5c544f861ef416191f461078789e152f with no parents and public Git author identity. Its exact tree is a21cbe40129d95588ed22abe6fe68c6fb6c2b999. The original complete history is retained privately. Accumulated runtime data and historical Bun caches are absent from the public branch. The [sanitized run export](../../../docs/examples/self-development/README.md) retains the requested parallel workers, independent reviewers, script evidence and recovery history. Its twelve public file digests match.
+
+Normal commit session 73862 exited zero with 6,882 passes, one skipped live gate and zero failures. Coverage checked 485 product sources with zero measured gaps. The full hook took 918.34 seconds. Log /tmp/titan-privacy-commit.log retains the output. The public baseline preserves that exact verified tree. Product, testing and tooling source contents were unchanged by sanitation. The five-minute target remains unmet.
+
+Installed acceptance session 13703 exited zero against that exact tree. Log /tmp/titan-privacy-package.log retains the complete installed probe. The public-branch secret-pattern scan inspected 2,500 text objects and fourteen PNG objects were excluded from text scanning after visual review. It found zero matches and zero scanner errors. Source privacy checks found zero original personal Git identities, personal filesystem prefixes or native session identifiers. Seventeen historical image objects were reviewed during preparation. The current public tree retains fourteen of those images. No additional paid model calls occurred.
+
+Normal push session 12805 exited zero using an exact remote lease. Actions was disabled immediately before the push. Its outgoing hook reused the exact verified tree. The old commit and document API endpoints remained accessible afterward, and the old document still contained its original personal filesystem path. The repository remains private. The owner was asked to authorize a fresh private publication repository while retaining this remote privately. GitHub object retention remains the publication blocker.
+
+The original working copy is being synchronized to the cleaned main while preserving local runtime data, private local branches and unrelated source work. A verified complete original Git bundle, worktree patch and private recovery records remain outside the repository.
