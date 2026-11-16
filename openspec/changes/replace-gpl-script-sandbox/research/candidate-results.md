@@ -96,3 +96,9 @@ A concurrent installed-package run failed a stale-project configuration assertio
 The separate final installed-package invocation exited successfully. It passed all four configuration race cases, four managed-update cases, 52 host-lease boundary cases, four installed script-scope cases and four installed read-claim cases alongside the existing suite. No paid provider calls were used. The earlier concurrent failure remains recorded above.
 
 Final archive inspection found 29 files and 359 normalized source entries, no removed Syd artifacts and no builder-home path in the helper. The helper SHA-256 is 3d63d087e788866ebf548e6b5a4561e2ea8ebe959fff78444c47b3e1336e2237. Source entries have numeric owner and group zero, empty owner names and timestamp zero. Full staged verification and push remain pending.
+
+## Delivered repair
+
+The complete staged-snapshot gate exited successfully with 7,104 passing tests, one skipped live-provider registration and zero failures across 361 files. Coverage checked 492 product sources with zero line or function gaps. The offline test stage took 760,560 milliseconds. Static source, policy, documentation, spelling, specification and secret checks passed. The normal commit and push hooks accepted the exact verified tree.
+
+Repair commit e6cd610cd59de4664eb49a84cfe9d23a882246ef was pushed to main. A direct remote-reference lookup matched that full commit identity. GitHub repository Actions permissions reported enabled=false before the push. The project remains Apache-2.0. The shipped Linux sandbox uses the pinned Apache-2.0 replacement with its permissive native component inventory and notices. Linux 6.12 and the documented kernel facilities are required. Native macOS execution remains unverified.

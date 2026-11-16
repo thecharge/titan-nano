@@ -14,4 +14,4 @@
 
 - [x] 3.1 Add a blocking distribution check with fixtures that reject the removed helper and incomplete component inventories.
 - [x] 3.2 Run the complete source boundary cases and installed-package script and read-claim cases with the replacement.
-- [ ] 3.3 Run the required local delivery checks, inspect the final archive and diff, and push through normal hooks after verifying GitHub Actions is disabled.
+- [x] 3.3 Run the required local delivery checks, inspect the final archive and diff, and push through normal hooks after verifying GitHub Actions is disabled.
