@@ -18,6 +18,7 @@ import {
   NativeTool,
   NativeToolAudit,
   NativeToolOutcome,
+  NativeToolRole,
   PathPart,
   PersonaDecisionStage,
   PersonaRule,
@@ -31,6 +32,7 @@ import {
   RunFormat,
   RunResultFormat,
   RunStatus,
+  RuntimeLimit,
   StatementState,
   StepCap,
   StepStatus,
@@ -51,7 +53,7 @@ import {
   stepsDropped,
 } from "@titan/messages";
 import { RequestLedger, requestExecutionMatches } from "@titan/requests";
-import { BoundedStore } from "@titan/store";
+import { BoundedStore, KeyedQueue } from "@titan/store";
 import { atomicWriteStream } from "@titan/streams";
 import type {
   BackendFactory,
@@ -60,6 +62,7 @@ import type {
   EngineServices,
   EventPage,
   EventQueryInput,
+  NativeFileChange,
   NativeToolAuditRecord,
   NativeToolScope,
   NodeState,
@@ -107,6 +110,7 @@ import {
   nativeFileRoot,
   readNativeFile,
   retainNativeRead,
+  writeNativeFile,
 } from "./native-files.ts";
 import { AgentPhases } from "./phases.ts";
 import { writeProofReport } from "./proof-report.ts";
@@ -120,6 +124,7 @@ import { summarizeUsage } from "./usage.ts";
 const terminal = [RunStatus.Passed, RunStatus.Failed, RunStatus.Cancelled, RunStatus.TimedOut];
 const journaled = [...terminal, RunStatus.Blocked];
 export class Engine {
+  private nativeWrites = new KeyedQueue(RuntimeLimit.PendingOperations);
   private active: BoundedStore<string, Promise<void>>;
   private controllers: BoundedStore<string, AbortController>;
   private timers: BoundedStore<string, ReturnType<typeof setTimeout>>;
@@ -612,14 +617,48 @@ export class Engine {
     return listNativeFiles(run, nativeFileRoot(run, scope), directory);
   }
 
-  private async nativeFileRun(scope: NativeToolScope): Promise<Run> {
+  writeNativeFile(scope: NativeToolScope, change: NativeFileChange) {
+    return this.nativeWrites.use(this.get(scope.run_id).project, () =>
+      this.changeNativeFile(scope, change),
+    );
+  }
+
+  private async changeNativeFile(scope: NativeToolScope, change: NativeFileChange) {
+    if (scope.role !== NativeToolRole.Worker)
+      throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+    const run = await this.nativeFileRun(scope, [AgentTool.Write, AgentTool.Edit]);
+    const step = run.plan.nodes.find((node) => node.id === scope.step_id);
+    const phase = Object.entries(run.nodes[scope.step_id]?.phases ?? {}).find(
+      ([, value]) => value.execution_id === scope.execution_id,
+    );
+    if (!step || !phase)
+      throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+    this.files.validate(run, {
+      run_id: run.run_id,
+      step_id: step.id,
+      attempt: scope.attempt,
+      phase: phase[0],
+      execution_id: scope.execution_id,
+      file_claim: phase[1].file_claim,
+    });
+    return writeNativeFile(run, step, nativeFileRoot(run, scope), change);
+  }
+
+  private async nativeFileRun(
+    scope: NativeToolScope,
+    tools: readonly AgentTool[] = [AgentTool.Read],
+  ): Promise<Run> {
     const run = this.get(scope.run_id);
     const identity = nativeToolBoard(run, scope, {
       tool: NativeTool.Ready,
       outcome: NativeToolOutcome.Returned,
       entry_ids: [],
     });
-    if (resolvedPersona(run.plan.workflow, identity.from).tools.includes(AgentTool.Read))
+    if (
+      resolvedPersona(run.plan.workflow, identity.from).tools.some((tool) =>
+        tools.some((allowed) => allowed === tool),
+      )
+    )
       return run;
     const phase = Object.entries(run.nodes[scope.step_id]?.phases ?? {}).find(
       ([, value]) => value.execution_id === scope.execution_id,
@@ -633,7 +672,7 @@ export class Engine {
         pending?.waiting === false &&
         pending.request_ids.includes(request.request_id) &&
         request.kind === RequestKind.Tool &&
-        request.scope.resource === AgentTool.Read &&
+        tools.some((tool) => request.scope.resource === tool) &&
         request.answer?.decision === RequestDecision.Approve &&
         request.origin.client_id === run.client_id &&
         request.origin.harness_session_id === phase?.[1].session_id &&

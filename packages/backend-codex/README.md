@@ -37,3 +37,7 @@ Transport registrations live in testing/integration/codex-transport.test.ts. Sha
 An optional volatile execution binding is separate from the agent specification. It selects the bundled tool command and strict host connection. The adapter requires a configuration-owned environment factory and keeps the credential out of command arguments. Focused native binding and readiness cases live in testing/integration/native-runtime-binding.test.ts, native-runtime-readiness.test.ts and native-binding-contract.test.ts. They use pinned SDKs with versioned vendor stubs and actual local MCP processes. Automatic runner registration, checkpoint guarding, audit and installed native acceptance remain open.
 
 Session admission copies the complete invocation specification. Later caller edits cannot replace the output schema or change the admitted directory, role and runtime policy before dispatch or resume.
+
+## Scoped filesystem permissions
+
+Scoped calls select the pinned native permission profile through raw overrides and omit the later sandbox-mode argument. The profile keeps the root readable and grants writes to a bounded set of existing ordinary files within the claim. Runtime omissions, protected metadata, symlinks and multiply linked files receive no write grant. Exact-file grants include the pinned launcher metadata workaround after file validation. Managed file writes handle creation and editor replacement with a version check and retained inode. Caller-supplied clients retain their own native configuration.

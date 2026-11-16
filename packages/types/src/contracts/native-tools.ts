@@ -1,4 +1,4 @@
-import type { NativeFileListResult, NativeFileResult } from "../native-files.ts";
+import type { NativeFileChange, NativeFileListResult, NativeFileResult } from "../native-files.ts";
 import type { NativeToolAuditRecord } from "../native-tool-audit.ts";
 import type { NativeToolConnection } from "../native-tool-connection.ts";
 import type { NativeToolBinding } from "../native-tool-launch.ts";
@@ -22,6 +22,10 @@ export interface NativeToolLease {
 
 export type NativeToolCurrent = () => boolean;
 export type NativeFileReader = (scope: NativeToolScope, path: string) => Promise<NativeFileResult>;
+export type NativeFileWriter = (
+  scope: NativeToolScope,
+  change: NativeFileChange,
+) => Promise<NativeFileResult>;
 export type NativeFileLister = (
   scope: NativeToolScope,
   directory: string,

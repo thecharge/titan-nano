@@ -18,6 +18,8 @@ Optional:
 - The `claude` command (Claude Code) or the `codex` command (Codex). You can install Titan before them.
 - Python 3, Lean 4, Z3 and Podman. Titan uses them only for some checks and for the test suite.
 
+Scoped Claude shell commands on Linux also use bubblewrap and `socat`. Install both with your system package manager and enable supported user namespaces. `titan doctor` reports missing commands. A missing sandbox refuses the command. Managed file tools remain available.
+
 `titan install` checks the required tools first. If Bun is too old or Git is missing, it stops with exit code 2, names the tool, and writes no file. If only optional tools are missing, it finishes and lists them.
 
 ## The short way

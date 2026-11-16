@@ -22,20 +22,58 @@ const nativeTools = nativeModule
   : undefined;
 const value = (flag) => args[args.indexOf(flag) + 1];
 const cwd = value("--cd");
+const scoped = args.includes('default_permissions="titan-scoped"');
+let scopedPaths;
+if (scoped) {
+  if (
+    args.includes("--sandbox") ||
+    !args.includes("permissions.titan-scoped.network.enabled=false")
+  )
+    throw new Error("Invalid scoped sandbox contract");
+  const setting = args.find((arg) => arg.startsWith("permissions.titan-scoped.filesystem="));
+  if (!setting) throw new Error("Missing scoped filesystem contract");
+  const permissions = Bun.TOML.parse(setting).permissions["titan-scoped"].filesystem;
+  scopedPaths = permissions[":workspace_roots"];
+  if (permissions[":root"] !== "read" || permissions[":workspace_roots"]?.["."] !== "read")
+    throw new Error("Scoped root must be read-only");
+  for (const [path, mode] of Object.entries(permissions[":workspace_roots"])) {
+    if (path === ".") continue;
+    if (mode !== "write" || path.startsWith("/") || path.split("/").includes(".."))
+      throw new Error("Invalid scoped write contract");
+  }
+}
 let prompt = Buffer.alloc(0);
 for await (const chunk of process.stdin) {
   prompt = Buffer.concat([prompt, chunk]);
   if (prompt.length > 262144) throw new Error("Stub input exceeds contract limit");
 }
 const raw = prompt.toString().split("\n").at(-1);
+const writePolicy =
+  "Project writes must stay within the declared file scope. Use titan_file_read to obtain a version and titan_file_write with that expected_version to create or replace a file when a native editor is refused. Use null only for a missing file. A changed version requires a fresh read and reconciliation. Shell commands cannot create, rename or remove project files.";
 const role = prompt.toString().slice(0, prompt.toString().lastIndexOf("\n\n"));
 const task = raw?.startsWith("{") ? JSON.parse(raw).task : raw;
+const schema = JSON.parse(await readFile(value("--output-schema"), "utf8"));
+if (schema.type !== "object" || !["ok", "verdict", "result"].includes(schema.required?.[0]))
+  throw new Error("Missing output schema");
+const resultSchema = turnSchema(schema);
+const writable =
+  value("--sandbox") === "workspace-write" || (scoped && !resultSchema.properties.verdict);
+if (task === "native_file_write" || task === "native_file_write_refused") {
+  const expected = { ".": "read" };
+  if (task === "native_file_write" && role.endsWith(writePolicy)) {
+    expected["source.txt"] = "write";
+    for (const metadata of [".git", ".agents", ".codex", ".aws"])
+      expected[`source.txt/${metadata}`] = "write";
+  }
+  if (JSON.stringify(scopedPaths) !== JSON.stringify(expected))
+    throw new Error("Declared file scope changed in the pinned SDK launch");
+}
 const delivery = deliveryTask(task);
 let mode = delivery
   ? "delivery"
   : task === "delayed_recover_once"
     ? "recover_once"
-    : await nativeTask(task, nativeTools, raw, cwd, value("--sandbox") === "workspace-write");
+    : await nativeTask(task, nativeTools, raw, cwd, writable);
 const resume = args.includes("resume");
 await appendFile(
   await stateFile(cwd, "calls.jsonl"),
@@ -45,7 +83,7 @@ if (
   args[0] !== "exec" ||
   args[1] !== "--experimental-json" ||
   !args.includes("--ignore-user-config") ||
-  !["read-only", "workspace-write"].includes(value("--sandbox")) ||
+  (!scoped && !["read-only", "workspace-write"].includes(value("--sandbox"))) ||
   value("--model") !== "stub-model" ||
   !args.includes('approval_policy="never"') ||
   !args.includes("sandbox_workspace_write.network_access=false") ||
@@ -58,10 +96,6 @@ if (
   !prompt.toString().startsWith("Transport contract role")
 )
   throw new Error("Codex 0.167.0 request contract mismatch");
-const schema = JSON.parse(await readFile(value("--output-schema"), "utf8"));
-if (schema.type !== "object" || !["ok", "verdict", "result"].includes(schema.required?.[0]))
-  throw new Error("Missing output schema");
-const resultSchema = turnSchema(schema);
 await appendFile(
   await stateFile(cwd, `${resultSchema.properties.verdict ? "checker" : "worker"}-calls.jsonl`),
   `${JSON.stringify({ pid: process.pid, resume })}\n`,
@@ -135,7 +169,7 @@ else if (mode !== "truncated" && !(mode === "recover_once" && native.turn === 1)
     (await readFile(join(cwd, "DELIVERED.txt"), "utf8")) !== "Delivered by SDK stub"
   )
     throw new Error("Candidate file changed");
-  else if (!resultSchema.properties.verdict && value("--sandbox") === "workspace-write")
+  else if (!resultSchema.properties.verdict && writable)
     await writeFile(join(cwd, "DELIVERED.txt"), "Delivered by SDK stub");
   const fallback = resultSchema.properties.verdict
     ? {

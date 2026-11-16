@@ -155,6 +155,7 @@ export async function claudeScopedWrite(
   readonly: boolean,
   mutate = false,
   resumed = false,
+  excluded: string[] = [],
 ) {
   const result = await claudeToolPolicy(
     [tool],
@@ -163,7 +164,11 @@ export async function claudeScopedWrite(
     mutate,
     { file_path: path },
     SymlinkFixture.None,
-    { mode: readonly ? FileAccessMode.Read : FileAccessMode.Write, paths },
+    {
+      mode: readonly ? FileAccessMode.Read : FileAccessMode.Write,
+      paths,
+      ...(excluded.length ? { exclude_paths: excluded } : {}),
+    },
     resumed,
   );
   const hook = "hookSpecificOutput" in result.hook ? result.hook.hookSpecificOutput : undefined;

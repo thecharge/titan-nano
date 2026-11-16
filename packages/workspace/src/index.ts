@@ -28,7 +28,7 @@ import { copyContents, sourceChunks } from "./source.ts";
 import { assertManifestBounds, readTree } from "./tree.ts";
 
 export { assertRelative } from "./paths.ts";
-export { sourceChunks, sourceVersion, verifiedChunks } from "./source.ts";
+export { fileVersion, sourceChunks, sourceVersion, verifiedChunks } from "./source.ts";
 export { assertManifestBounds, readTree } from "./tree.ts";
 
 async function assertFileParents(root: string, path: string): Promise<void> {
@@ -274,3 +274,5 @@ export async function createWorkspace(
 }
 
 export { LocalModelStore } from "./model-store.ts";
+
+export { writeWorkspaceFile } from "./write-file.ts";

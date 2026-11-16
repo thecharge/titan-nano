@@ -43,6 +43,8 @@ async function emit(event) {
   await Bun.sleep(1);
   process.stdout.write(bytes.subarray(5));
 }
+const writePolicy =
+  "Project writes must stay within the declared file scope. Use titan_file_read to obtain a version and titan_file_write with that expected_version to create or replace a file when a native editor is refused. Use null only for a missing file. A changed version requires a fresh read and reconciliation. Shell commands cannot create, rename or remove project files.";
 let initialized = false;
 async function handleLine(line) {
   if (Buffer.byteLength(line) > 262144) throw new Error("Stub input exceeds contract limit");
@@ -50,8 +52,10 @@ async function handleLine(line) {
   if (message.type === "control_request" && message.request.subtype === "initialize") {
     if (
       initialized ||
-      message.request.systemPrompt?.[0] !==
-        (schema.required?.[0] === "result" ? requestTurnRole : "Transport contract role") ||
+      ![
+        schema.required?.[0] === "result" ? requestTurnRole : "Transport contract role",
+        `${schema.required?.[0] === "result" ? requestTurnRole : "Transport contract role"}\n\n${writePolicy}`,
+      ].includes(message.request.systemPrompt?.[0]) ||
       message.request.hooks?.PreToolUse?.[0]?.onFailure !== "block"
     )
       throw new Error("Invalid initialization contract");

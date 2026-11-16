@@ -32,6 +32,7 @@
     "@titan/logger": "workspace:*",
     "@titan/knowledge": "workspace:*",
     "@openai/codex-sdk": "catalog:",
-    "@titan/process": "workspace:*"
+    "@titan/process": "workspace:*",
+    "@anthropic-ai/sandbox-runtime": "catalog:"
   }
 }

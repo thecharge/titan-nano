@@ -5,6 +5,8 @@ export enum PrerequisiteName {
   Lean = "lean",
   Z3 = "z3",
   Podman = "podman",
+  Bubblewrap = "bwrap",
+  Socat = "socat",
 }
 
 export const MinimumBunVersion = "1.3.10";
@@ -16,4 +18,6 @@ export const OptionalPrerequisites = [
   PrerequisiteName.Lean,
   PrerequisiteName.Z3,
   PrerequisiteName.Podman,
+  PrerequisiteName.Bubblewrap,
+  PrerequisiteName.Socat,
 ] as const;

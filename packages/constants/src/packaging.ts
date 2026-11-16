@@ -79,6 +79,7 @@ export enum VendorPackage {
   Codex = "@openai/codex-sdk",
   CodexCli = "@openai/codex",
   Claude = "@anthropic-ai/claude-agent-sdk",
+  Sandbox = "@anthropic-ai/sandbox-runtime",
   Transformers = "@huggingface/transformers",
 }
 export const PackageProbeEnvironment = "TITAN_PACKAGE_PROBE";

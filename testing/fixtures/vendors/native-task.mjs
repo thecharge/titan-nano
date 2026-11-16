@@ -3,6 +3,11 @@ import { join } from "node:path";
 import { stateFile } from "./state.mjs";
 
 export async function nativeTask(task, tools, prompt, cwd, writable) {
+  if (task === "native_file_write" || task === "native_file_write_refused") {
+    if (!tools) throw new Error("Native tools were required by the scripted task");
+    await tools.executeFileWrite(writable, task === "native_file_write_refused");
+    return "complete";
+  }
   const input = typeof prompt === "string" && prompt.startsWith("{") ? JSON.parse(prompt) : null;
   if (
     writable &&

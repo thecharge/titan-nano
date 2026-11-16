@@ -142,6 +142,7 @@ export const SpellingConfiguration = {
     "setuid",
     "simu",
     "smol",
+    "socat",
     "sqlw",
     "stigmergy",
     "subgradient",

@@ -30,7 +30,7 @@
 
 - [x] 5.1 Classify every remaining product task as applicable to Claude Code and Codex or explicitly deferred for another backend; record dependencies without removing requirements.
 - [x] 5.2 Expand each remaining applicable feature into session-sized implementation tasks in the owning product backlog; preserve its acceptance scenarios and execute in dependency order.
-- [ ] 5.3 Verify Claude Code and Codex adapters against pinned primary documentation and strict offline vendor contracts; leave paid live-call proof pending until explicitly authorized.
+- [x] 5.3 Verify Claude Code and Codex adapters against pinned primary documentation and strict offline vendor contracts; leave paid live-call proof pending until explicitly authorized.
 
 ## 6. Verify delivery
 

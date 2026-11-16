@@ -7,9 +7,9 @@ import {
   SignalEvent,
   TextSymbol,
 } from "@titan/constants";
-import { emptyUsage, nativeBinding, requireProgram } from "@titan/core";
+import { emptyUsage, nativeBinding, nativeWritableFiles, requireProgram } from "@titan/core";
 import { OperationalError } from "@titan/errors";
-import { codexPrompt, NativeToolBridgeMessage } from "@titan/messages";
+import { codexPrompt, NativeToolBridgeMessage, nativeWriteRole } from "@titan/messages";
 import type {
   AgentBackend,
   AgentSession,
@@ -36,7 +36,11 @@ export class CodexBackend implements AgentBackend {
   ) {
     this.client = client;
   }
-  private session(input: AgentSpec, id: string | null, binding?: NativeToolBinding): AgentSession {
+  private async session(
+    input: AgentSpec,
+    id: string | null,
+    binding?: NativeToolBinding,
+  ): Promise<AgentSession> {
     const spec = structuredClone(input);
     const bound = nativeBinding(spec, binding);
     const preflight = this.preflight;
@@ -45,10 +49,12 @@ export class CodexBackend implements AgentBackend {
       throw new OperationalError(ErrorCode.PermissionDenied, NativeToolBridgeMessage.Startup);
     if (bound && this.client)
       throw new OperationalError(ErrorCode.PermissionDenied, NativeToolBridgeMessage.Startup);
-    const role = spec.role;
+    const role = spec.writable && spec.file_scope && bound ? nativeWriteRole(spec.role) : spec.role;
     const options = codexThreadOptions(spec);
+    const files = spec.file_scope ? await nativeWritableFiles(spec) : [];
     const client =
-      this.client ?? new Codex(codexClientOptions(spec, this.launch, bound, this.environment));
+      this.client ??
+      new Codex(codexClientOptions(spec, this.launch, bound, this.environment, files));
     const cancellation = new AbortController();
     let session_id = id;
     return {

@@ -68,7 +68,7 @@ export async function nativeCallRecord(
   );
   if (!reply.success || reply.data.result.isError) return refused;
   const value: unknown = JSON.parse(reply.data.result.content[0]?.text ?? TextSymbol.Empty);
-  if (tool === NativeTool.ReadFile)
+  if (tool === NativeTool.ReadFile || tool === NativeTool.WriteFile)
     return {
       tool,
       outcome: NativeToolOutcome.Returned,

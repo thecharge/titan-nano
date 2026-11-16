@@ -80,6 +80,7 @@ export const AgentFileScopeSchema = z.strictObject({
     .min(1)
     .max(AgentHost.MaximumClaims),
   read_paths: FileReadPathsSchema.optional(),
+  exclude_paths: FileReadPathsSchema.optional(),
 });
 export type AgentFileScope = z.infer<typeof AgentFileScopeSchema>;
 

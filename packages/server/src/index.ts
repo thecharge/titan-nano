@@ -174,6 +174,7 @@ async function startOwnedServer(
     },
     (scope, path) => engine.readNativeFile(scope, path),
     (scope, directory) => engine.listNativeFiles(scope, directory),
+    (scope, change) => engine.writeNativeFile(scope, change),
   );
   resources.defer(() => nativeAuthority.close());
   const nativeTools = options.nativeTools

@@ -4,6 +4,16 @@ import { positive, rejected } from "@titan/test-factories";
 export const nativeRuntimeBindingCases = {
   positive: [
     positive(
+      "scoped Codex worker receives managed-write role instructions across resume",
+      [Backend.Codex, NativeToolRole.Worker, false, false, NativeToolTransport.Stdio, true, true],
+      true,
+    ),
+    positive(
+      "scoped Claude worker receives managed-write role instructions across resume",
+      [Backend.Claude, NativeToolRole.Worker, false, false, NativeToolTransport.Stdio, true, true],
+      true,
+    ),
+    positive(
       "HTTP Codex worker uses scoped tools across resume",
       [Backend.Codex, NativeToolRole.Worker, false, false, NativeToolTransport.Http],
       true,

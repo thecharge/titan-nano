@@ -1,5 +1,6 @@
 import { type Options, type Query, query } from "@anthropic-ai/claude-agent-sdk";
 import {
+  AgentTool,
   Backend,
   BackendContractVersion,
   ClaudePermission,
@@ -11,7 +12,7 @@ import {
 } from "@titan/constants";
 import { nativeBinding, requireProgram } from "@titan/core";
 import { OperationalError } from "@titan/errors";
-import { ClaudeMessage, NativeToolBridgeMessage } from "@titan/messages";
+import { ClaudeMessage, NativeToolBridgeMessage, nativeWriteRole } from "@titan/messages";
 import type {
   AgentBackend,
   AgentSession,
@@ -24,6 +25,7 @@ import type {
 import { claudeTurn } from "./events.ts";
 import { claudeNativePrompt, claudeNativeReady, claudeNativeTools } from "./native-tools.ts";
 import { claudeHooks, claudePermission } from "./options.ts";
+import { ClaudeShellSandbox } from "./sandbox.ts";
 
 export class ClaudeBackend implements AgentBackend {
   readonly id = Backend.Claude;
@@ -50,6 +52,8 @@ export class ClaudeBackend implements AgentBackend {
       throw new OperationalError(ErrorCode.PermissionDenied, ClaudeMessage.UnsupportedTools);
     const tools = spec.tools;
     const scope = spec.file_scope;
+    const sandbox =
+      scope && tools.includes(AgentTool.Bash) ? new ClaudeShellSandbox(spec) : undefined;
     const abortController = new AbortController();
     let stream: Query | null = null;
     let session_id = id;
@@ -74,12 +78,12 @@ export class ClaudeBackend implements AgentBackend {
           ...(this.launch.executable ? { pathToClaudeCodeExecutable: this.launch.executable } : {}),
           ...(this.launch.runtime ? { executable: this.launch.runtime } : {}),
           cwd: spec.cwd,
-          systemPrompt: spec.role,
+          systemPrompt: spec.writable && scope && bound ? nativeWriteRole(spec.role) : spec.role,
           tools,
           settingSources: [],
           ...native,
           strictMcpConfig: true,
-          hooks: claudeHooks(spec.cwd, tools, combined, bound, scope),
+          hooks: claudeHooks(spec.cwd, tools, combined, bound, scope, sandbox),
           permissionMode: ClaudePermission.Default,
           persistSession: true,
           abortController,
@@ -87,7 +91,7 @@ export class ClaudeBackend implements AgentBackend {
           ...(spec.model ? { model: spec.model } : {}),
           ...(session_id ? { resume: session_id } : {}),
           ...(outputFormat ? { outputFormat } : {}),
-          canUseTool: claudePermission(spec.cwd, tools, combined, bound, scope),
+          canUseTool: claudePermission(spec.cwd, tools, combined, bound, scope, sandbox),
         };
         try {
           stream = this.invoke({
@@ -116,10 +120,12 @@ export class ClaudeBackend implements AgentBackend {
       async cancel(reason) {
         abortController.abort(new Error(reason));
         closeStream();
+        await sandbox?.close();
       },
       async close() {
         abortController.abort();
         closeStream();
+        await sandbox?.close();
       },
     };
   }

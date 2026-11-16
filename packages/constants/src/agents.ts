@@ -157,3 +157,37 @@ export const FakeScriptLimit = { Version: 1, Entries: 1_024, FirstExecution: 1 }
 export enum FakeScriptField {
   Answers = "answers",
 }
+
+export const NativeWritePolicy = {
+  Profile: "titan-scoped",
+  MaximumFiles: 128,
+  MaximumGrantBytes: 65536,
+  EntryOverhead: 256,
+  Metadata: [".git", ".agents", ".codex", ".aws"],
+  Read: "read",
+  Write: "write",
+  Root: ":root",
+  Workspace: ":workspace_roots",
+  Filesystem: "permissions.titan-scoped.filesystem=",
+  Default: 'default_permissions="titan-scoped"',
+  Network: "permissions.titan-scoped.network.enabled=false",
+  Separator: ",",
+  Assignment: "=",
+  Open: "{",
+  Close: "}",
+} as const;
+
+export const ClaudeSandbox = {
+  Devices: "/dev/",
+  Prefix: "titan-shell-policy-",
+  Settings: "policy.json",
+  Cli: "./cli.js",
+  SettingsArgument: "--settings",
+  CommandArgument: "-c",
+  Quote: "'",
+  EscapedQuote: "'\\''",
+  MaximumCommands: 1024,
+  MaximumCommandBytes: 65536,
+  MaximumRegistryBytes: 4194304,
+  Space: " ",
+} as const;

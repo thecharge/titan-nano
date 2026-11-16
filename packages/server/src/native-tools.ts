@@ -11,6 +11,7 @@ import {
   McpIdentity,
   NativeTool,
   NativeToolPolicy,
+  NativeToolRole,
   ServerCredential,
   ServerLimit,
   StoreEviction,
@@ -22,10 +23,12 @@ import { NativeToolMessage } from "@titan/messages";
 import { BoundedStore, KeyedQueue } from "@titan/store";
 import {
   type KnowledgeNativeHub,
+  NativeFileChangeSchema,
   type NativeFileLister,
   NativeFileListSelectionSchema,
   type NativeFileReader,
   NativeFileSelectionSchema,
+  type NativeFileWriter,
   type NativeKnowledgeRouter,
   type NativeToolAuditWriter,
   type NativeToolCurrent,
@@ -54,6 +57,7 @@ export class NativeToolAuthority {
     private route?: NativeKnowledgeRouter,
     private readFile?: NativeFileReader,
     private listFiles?: NativeFileLister,
+    private writeFile?: NativeFileWriter,
   ) {
     const settings = NativeToolSettingsSchema.parse(input);
     this.bindings = new BoundedStore<string, NativeToolRegistration>({
@@ -201,6 +205,17 @@ export class NativeToolAuthority {
           return this.readFile(binding.scope, path);
         }),
     );
+    if (binding.scope.role === NativeToolRole.Worker)
+      server.registerTool(
+        NativeTool.WriteFile,
+        { description: NativeToolMessage.WriteFile, inputSchema: NativeFileChangeSchema },
+        async (change) =>
+          nativeToolOperation(async () => {
+            if (!this.writeFile)
+              throw new TitanError(ErrorCode.ServerUnavailable, NativeToolMessage.Unavailable);
+            return this.writeFile(binding.scope, change);
+          }),
+      );
     server.registerTool(
       NativeTool.Ready,
       { description: NativeToolMessage.Ready, inputSchema: {} },

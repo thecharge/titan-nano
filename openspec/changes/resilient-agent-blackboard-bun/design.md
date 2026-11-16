@@ -1010,6 +1010,8 @@ Use the Bun workspace with core, configuration, workflow, runner, server and sep
 
 Pin `@openai/codex-sdk` at 0.167.0, `@anthropic-ai/claude-agent-sdk` at 0.3.319 and `@modelcontextprotocol/sdk` at 1.32.2. Pin zod at 4.6.7 and Bun at 1.3.10. The installed vendor declarations are the binding reference for this implementation, rather than older probe transcripts. These pins do not establish backend readiness. Record contracts, permission checks and live evidence for these exact versions. Research and current evidence are in `research/implementation-state.md` and `research/preview-sdk-bindings.md`.
 
+Pin `@anthropic-ai/sandbox-runtime` at 0.0.83 for scoped Claude Bash commands. Generate per-session literal exact-file grants and deny its implicit non-device writable paths. Keep the shared project inode visible. The managed writer handles declared file creation and version-checked replacement. Missing sandbox prerequisites refuse shell execution. Approved workflow scripts still require their separate write boundary.
+
 The first configuration schema also owns `defaults.claude_max_turns`, default 30. This limits a Claude query. Codex has no equivalent bound in this SDK binding. It must not be presented as a shared vendor turn limit.
 
 Build a private local archive with the Titan runtime bundled and the two vendor SDKs declared as pinned dependencies. Include the guide, schemas and examples. Do not publish or advertise a public package name before ownership is verified. A generated archive alone does not satisfy the clean-install or end-to-end release gates.

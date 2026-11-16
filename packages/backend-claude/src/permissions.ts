@@ -88,6 +88,13 @@ function scopedWrite(cwd: string, file: unknown, scope?: AgentFileScope): boolea
   const parsed = WorkspacePathSchema.safeParse(file);
   if (!parsed.success || scope.mode !== FileAccessMode.Write) return false;
   const target = resolve(cwd, parsed.data);
+  if (
+    scope.exclude_paths?.some(
+      (path) =>
+        target === resolve(cwd, path) || target.startsWith(resolve(cwd, path) + PathPart.Separator),
+    )
+  )
+    return false;
   return scope.paths.some((path) => {
     const allowed = resolve(cwd, path);
     return target === allowed || target.startsWith(allowed + PathPart.Separator);

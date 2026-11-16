@@ -19,3 +19,5 @@ Run `bun run test testing/unit/concurrency.test.ts` and the complete offline sui
 ## Limits
 
 Core may depend on foundation contracts but must not import product services. Hash compatibility matters for stored plans and snapshots; changing encodings requires recovery tests.
+
+`nativeWritableFiles` expands a shared live scope into bounded existing-file grants. It omits protected component names and runtime paths, checks unlinked parents, and refuses special or multiply linked files. Native grant count and encoded size are bounded. Managed writes remain available for other declared files.

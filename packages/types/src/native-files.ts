@@ -56,3 +56,12 @@ export const NativeFileResultSchema = z
 export type NativeFileResult = z.infer<typeof NativeFileResultSchema>;
 export const NativeFileListResultSchema = z.strictObject({ observation: NativeFileListingSchema });
 export type NativeFileListResult = z.infer<typeof NativeFileListResultSchema>;
+
+export const NativeFileChangeSchema = NativeFileSelectionSchema.extend({
+  content: z
+    .string()
+    .max(NativeFileLimit.Bytes)
+    .refine((value) => Buffer.byteLength(value) <= NativeFileLimit.Bytes),
+  expected_version: z.string().min(1).max(NativeFileLimit.VersionCharacters).nullable(),
+});
+export type NativeFileChange = z.infer<typeof NativeFileChangeSchema>;

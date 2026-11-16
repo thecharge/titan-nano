@@ -105,7 +105,12 @@ export async function nativeFileService(tool: string, available: boolean) {
     );
     const response = await client.callTool({
       name: tool,
-      arguments: tool === NativeTool.ReadFile ? { path: "absent.txt" } : { directory: "." },
+      arguments:
+        tool === NativeTool.WriteFile
+          ? { path: "absent.txt", content: "Changed", expected_version: null }
+          : tool === NativeTool.ReadFile
+            ? { path: "absent.txt" }
+            : { directory: "." },
     });
     assert.equal(response.isError === true, !available);
     const value: unknown = JSON.parse(McpTextContentSchema.parse(response.content)[0]?.text ?? "");

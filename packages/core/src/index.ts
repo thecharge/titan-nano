@@ -58,6 +58,7 @@ export * from "./concurrency.ts";
 export * from "./file-access.ts";
 export { invalidJson, jsonByteLength, jsonStringChunks, ownJsonValue } from "./json.ts";
 export * from "./native-binding.ts";
+export * from "./native-files.ts";
 export * from "./programs.ts";
 export * from "./sessions.ts";
 export * from "./usage-limit.ts";

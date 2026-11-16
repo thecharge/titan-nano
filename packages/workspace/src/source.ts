@@ -28,7 +28,7 @@ function fileScanner(extra?: SecretScannerFactory): SecretScanner {
   };
 }
 
-function version(metadata: BigIntStats): string {
+export function fileVersion(metadata: BigIntStats): string {
   return [
     metadata.dev,
     metadata.ino,
@@ -42,7 +42,7 @@ function version(metadata: BigIntStats): string {
 export async function sourceVersion(source: string): Promise<string> {
   const metadata = await lstat(source, { bigint: true });
   if (!metadata.isFile()) throw new TitanError(ErrorCode.SnapshotChanged, source);
-  return version(metadata);
+  return fileVersion(metadata);
 }
 
 async function assertMode(file: FileHandle, source: string, executable: boolean): Promise<string> {
@@ -51,7 +51,7 @@ async function assertMode(file: FileHandle, source: string, executable: boolean)
     throw new TitanError(ErrorCode.UnsupportedFile, snapshotSpecialFile(source));
   if (Boolean(metadata.mode & BigInt(WorkspaceMode.ExecutableBits)) !== executable)
     throw new TitanError(ErrorCode.SnapshotChanged, WorkspaceMessage.SnapshotMode);
-  return version(metadata);
+  return fileVersion(metadata);
 }
 
 async function assertSource(source: string, expected: string): Promise<void> {

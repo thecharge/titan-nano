@@ -16,6 +16,11 @@ export const nativeFileServiceCases = {
   ],
   negative: [
     rejected(
+      "unavailable write service returns an audited refusal",
+      [NativeTool.WriteFile, false],
+      true,
+    ),
+    rejected(
       "unavailable file service returns an audited refusal",
       [NativeTool.ReadFile, false],
       true,

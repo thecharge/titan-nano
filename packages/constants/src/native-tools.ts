@@ -14,6 +14,7 @@ export const NativeTool = {
   Name: "titan",
   Ready: "titan_native_ready",
   ReadFile: "titan_file_read",
+  WriteFile: "titan_file_write",
   ListFiles: "titan_file_list",
   Route: "/native-tools",
   Version: 1,
@@ -60,6 +61,7 @@ export const NativeToolPolicy = {
   [NativeToolRole.Worker]: [
     NativeTool.Ready,
     NativeTool.ReadFile,
+    NativeTool.WriteFile,
     NativeTool.ListFiles,
     KnowledgeTool.Get,
     KnowledgeTool.Search,

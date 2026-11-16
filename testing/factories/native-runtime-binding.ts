@@ -6,6 +6,7 @@ import { nativeAgentEnvironment } from "@titan/config";
 import {
   AgentRuntime,
   Backend,
+  FileAccessMode,
   HttpMethod,
   KnowledgeKind,
   KnowledgeTool,
@@ -61,6 +62,7 @@ export async function nativeRuntimeBinding(
   forged: boolean,
   transport = NativeToolTransport.Stdio,
   preflight = true,
+  scoped = false,
 ) {
   return withTemporaryDirectory(async (home) => {
     await using resources = new AsyncDisposableStack();
@@ -103,6 +105,9 @@ export async function nativeRuntimeBinding(
       ...agentSpec(home),
       run_id: connection.scope.run_id,
       execution_id: connection.scope.execution_id,
+      ...(scoped
+        ? { writable: true, file_scope: { mode: FileAccessMode.Write, paths: ["absent.txt"] } }
+        : {}),
     };
     const backendInstance = adapter(backend, hosted, preflight);
     let completed = 0;

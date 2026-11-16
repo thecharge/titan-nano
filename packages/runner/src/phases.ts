@@ -101,6 +101,9 @@ function specification(
             ...(context.file_claim ? { claim: context.file_claim } : {}),
             mode: accessMode(context.run, context.step),
             paths: writePaths(context.run, context.step),
+            ...(context.run.runtime_paths?.length
+              ? { exclude_paths: context.run.runtime_paths }
+              : {}),
             ...(context.state.read_paths ? { read_paths: context.state.read_paths } : {}),
           },
         }

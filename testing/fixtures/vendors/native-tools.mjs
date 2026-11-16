@@ -131,6 +131,43 @@ export async function vendorNativeTools(configuration, args, resources) {
       });
       assert.equal(search.isError === true, false, JSON.stringify(search));
     },
+    async executeFileWrite(writable, refusedScope) {
+      const read = await client.callTool({
+        name: NativeTool.ReadFile,
+        arguments: { path: "source.txt" },
+      });
+      assert.equal(read.isError === true, false, JSON.stringify(read));
+      const observed = JSON.parse(read.content[0].text);
+      assert.equal(
+        Buffer.from(observed.content, "base64").toString(),
+        writable || refusedScope ? "Original project content" : "Managed native update",
+      );
+      if (!writable) {
+        assert.equal(connection.scope.role, NativeToolRole.Checker);
+        assert.equal(
+          listed.tools.some((tool) => tool.name === NativeTool.WriteFile),
+          false,
+        );
+        return;
+      }
+      for (const [path, content, expected_version, refused] of [
+        ["source.txt", "Managed native update", observed.observation.version, refusedScope],
+        ["created.txt", "Managed native creation", null, false],
+        ["outside.txt", "Unapproved", null, true],
+        ["source.txt", "Stale overwrite", observed.observation.version, true],
+      ]) {
+        const changed = await client.callTool({
+          name: NativeTool.WriteFile,
+          arguments: { path, content, expected_version },
+        });
+        assert.equal(changed.isError === true, refused, JSON.stringify(changed));
+        if (!refused)
+          assert.equal(
+            Buffer.from(JSON.parse(changed.content[0].text).content, "base64").toString(),
+            content,
+          );
+      }
+    },
     async executeWrite() {
       const file = await client.callTool({
         name: NativeTool.ReadFile,

@@ -210,6 +210,16 @@ export const claudeScopedWriteCases = {
   ],
   negative: [
     rejected(
+      "runtime omissions refuse a file in a broad declared scope",
+      [AgentTool.Write, "inside.txt", ["."], false, false, false, ["inside.txt"]],
+      pathDenied,
+    ),
+    rejected(
+      "runtime omissions refuse descendants in a broad declared scope",
+      [AgentTool.Write, "runtime/new.txt", ["."], false, false, true, ["runtime"]],
+      pathDenied,
+    ),
+    rejected(
       "another file is outside the write scope",
       [AgentTool.Write, "other.txt", ["inside.txt"], false],
       pathDenied,

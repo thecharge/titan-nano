@@ -17,6 +17,7 @@ import { NativeToolScopeSchema } from "./native-tools.ts";
 export const NativeToolNameSchema = z.enum([
   NativeTool.Ready,
   NativeTool.ReadFile,
+  NativeTool.WriteFile,
   NativeTool.ListFiles,
   NativeToolAudit.Unknown,
   ...Object.values(KnowledgeTool),
@@ -36,10 +37,12 @@ export const NativeToolBoardSchema = NativeToolAuditSchema.extend({
 })
   .refine((record) => record.outcome !== NativeToolOutcome.Refused || record.entry_ids.length === 0)
   .refine((record) =>
-    (record.tool === NativeTool.ReadFile || record.tool === NativeTool.ListFiles) &&
+    (record.tool === NativeTool.ReadFile ||
+      record.tool === NativeTool.WriteFile ||
+      record.tool === NativeTool.ListFiles) &&
     record.outcome === NativeToolOutcome.Returned
       ? record.entry_ids.length === 0 &&
-        (record.tool === NativeTool.ReadFile
+        (record.tool !== NativeTool.ListFiles
           ? NativeFileObservationSchema.safeParse(record.observation).success
           : NativeFileListingSchema.safeParse(record.observation).success)
       : record.observation === undefined,

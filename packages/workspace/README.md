@@ -23,3 +23,5 @@ The scoped-secret suite covers both capture and verified copies, credentials spl
 Symbolic links and special files are rejected. Root and ancestor race hardening, injected short-write cases and broader filesystem compatibility remain open. These helpers are not an operating-system sandbox.
 
 `readWorkspaceFile` reads a bounded regular file through validated relative paths and ordinary directory parents. Linked parents and final links are refused. Executable text remains readable. `readRetainedFile` also verifies the expected content hash before returning bytes. These checks preserve the existing host path-race limitation.
+
+The managed file writer validates relative paths and ordinary parent directories, refuses symbolic links and multiply linked targets, and checks the observed stat version before changing existing bytes. New files use exclusive creation. UTF-8 content is size-bounded and scanned before mutation. Existing writes retain the live inode, then truncate and synchronize it. An I/O failure can leave a partial change for execution recovery to reconcile.

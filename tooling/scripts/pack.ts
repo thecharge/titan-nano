@@ -39,6 +39,7 @@ const build = await Bun.build({
   external: [
     VendorPackage.CodexCli,
     VendorPackage.Claude,
+    VendorPackage.Sandbox,
     VendorPackage.Transformers,
     KnowledgeMeaningLocal.SqliteVec,
   ],
@@ -56,6 +57,7 @@ const hostBuild = await Bun.build({
   external: [
     VendorPackage.CodexCli,
     VendorPackage.Claude,
+    VendorPackage.Sandbox,
     VendorPackage.Transformers,
     KnowledgeMeaningLocal.SqliteVec,
   ],
@@ -105,6 +107,7 @@ await writeFile(
           ).href,
         ),
         [VendorPackage.Claude]: manifest.workspaces.catalog[VendorPackage.Claude],
+        [VendorPackage.Sandbox]: manifest.workspaces.catalog[VendorPackage.Sandbox],
         [VendorPackage.Transformers]: manifest.workspaces.catalog[VendorPackage.Transformers],
         [KnowledgeMeaningLocal.SqliteVec]:
           manifest.workspaces.catalog[KnowledgeMeaningLocal.SqliteVec],

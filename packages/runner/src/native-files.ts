@@ -14,6 +14,7 @@ import { OperationalError } from "@titan/errors";
 import { NativeToolMessage } from "@titan/messages";
 import { jsonBytes, readBytes } from "@titan/streams";
 import {
+  type NativeFileChange,
   type NativeFileListing,
   NativeFileListingSchema,
   type NativeFileListResult,
@@ -26,7 +27,7 @@ import {
   type Run,
   type Step,
 } from "@titan/types";
-import { readTree, sourceVersion, verifiedChunks } from "@titan/workspace";
+import { readTree, sourceVersion, verifiedChunks, writeWorkspaceFile } from "@titan/workspace";
 import { scopeCovers, writePaths } from "./file-scope.ts";
 import { isWorkerKey } from "./native-execution.ts";
 
@@ -143,4 +144,21 @@ export async function verifyNativeReads(
     if ((await currentVersion(root, observation)) !== observation.version)
       throw new OperationalError(ErrorCode.FileConflict, NativeToolMessage.ReadChanged);
   }
+}
+
+export async function writeNativeFile(
+  run: Run,
+  step: Step,
+  root: string,
+  change: NativeFileChange,
+): Promise<NativeFileResult> {
+  if (
+    !allowedWrite(run, step, change.path) ||
+    run.runtime_paths?.some(
+      (path) => scopeCovers(path, change.path) || scopeCovers(change.path, path),
+    )
+  )
+    throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+  await writeWorkspaceFile(root, change);
+  return readNativeFile(run, root, change.path);
 }

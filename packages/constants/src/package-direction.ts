@@ -28,7 +28,7 @@ export const PackageArchitecture = {
   TestOrder: ["@titan/test-framework", "@titan/test-factories", "@titan/testing"],
   AdapterVendors: {
     [TitanPackage.Codex]: [VendorPackage.Codex, VendorPackage.CodexCli],
-    [TitanPackage.Claude]: [VendorPackage.Claude],
+    [TitanPackage.Claude]: [VendorPackage.Claude, VendorPackage.Sandbox],
     [TitanPackage.EmbedderLocal]: [VendorPackage.Transformers],
   },
 } as const;
