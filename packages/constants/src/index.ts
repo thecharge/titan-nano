@@ -123,6 +123,7 @@ export * from "./run-hub.ts";
 export * from "./runner.ts";
 export * from "./runtime.ts";
 export * from "./schemas.ts";
+export * from "./script-sandbox.ts";
 export * from "./server.ts";
 export * from "./server-startup.ts";
 export * from "./source-comments.ts";

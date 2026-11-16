@@ -167,8 +167,8 @@ The [shared fabric delivery sequence](research/shared-fabric-delivery.md) expand
 
 ## 13. Control from other programs
 
-- [x] 13.1 Export `runWorkflow()`, `resumeRun()` and `answerRequest()` from `@titan/runner`, with events as an async iterator. Done when the scenario "A program runs a workflow" passes. Evidence is recorded in `../repair-harness-delivery/evidence.md` under program API acceptance.
-- [x] 13.2 Check that the HTTP API gives the same events as the command line. Done when the scenario "A program uses the HTTP API" passes. Evidence is recorded in `../repair-harness-delivery/evidence.md` under program API acceptance.
+- [x] 13.1 Export `runWorkflow()`, `resumeRun()` and `answerRequest()` from `@titan/runner`, with events as an async iterator. Done when the scenario "A program runs a workflow" passes. Evidence is recorded in `../archive/2026-11-16-repair-harness-delivery/evidence.md` under program API acceptance.
+- [x] 13.2 Check that the HTTP API gives the same events as the command line. Done when the scenario "A program uses the HTTP API" passes. Evidence is recorded in `../archive/2026-11-16-repair-harness-delivery/evidence.md` under program API acceptance.
 
 ## 14. Build the titan server
 

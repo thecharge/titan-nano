@@ -4,7 +4,9 @@ import { createSecretScanner } from "@titan/config";
 import {
   ErrorCode,
   ExecutionPhase,
+  FileAccessMode,
   GoalExecution,
+  PathPart,
   RequestKind,
   RunEventKind,
   RunFile,
@@ -18,9 +20,10 @@ import {
 import { hash } from "@titan/core";
 import { OperationalError, TitanError } from "@titan/errors";
 import { RunnerMessage } from "@titan/messages";
-import { captureCommand, ownedCommandProcesses } from "@titan/process";
+import { captureCommand, ownedCommandProcesses, scriptSandbox } from "@titan/process";
 import { Capacity, type Engine } from "@titan/runner";
 import {
+  type CommandCapture,
   type CommandProcessPort,
   type ScriptCheck,
   type ScriptExecution,
@@ -83,7 +86,17 @@ function authorized(engine: Engine, execution: ScriptExecution, script: string, 
   if (command !== script || resolve(cwd) !== resolve(directory))
     throw new TitanError(ErrorCode.PermissionDenied, RunnerMessage.ScriptApproval);
   engine.validateFileExecution(execution);
-  return { run, timeout_ms };
+  return {
+    run,
+    timeout_ms,
+    paths:
+      execution.file_claim?.mode === FileAccessMode.Read
+        ? []
+        : (execution.file_claim?.paths ??
+          [...(step.files ?? [PathPart.Current]), ...(state.write_paths ?? [])].map((path) =>
+            resolve(cwd, path),
+          )),
+  };
 }
 
 export function scopedScripts(
@@ -99,7 +112,7 @@ export function scopedScripts(
       throw new TitanError(ErrorCode.PermissionDenied, RunnerMessage.ScriptApproval);
     const execution = parsed.data;
     const engine = owner();
-    const { run, timeout_ms } = authorized(engine, execution, script, cwd);
+    const { run, timeout_ms, paths } = authorized(engine, execution, script, cwd);
     const scope = {
       operation: Script.Operation,
       resource: execution.step_id,
@@ -128,13 +141,18 @@ export function scopedScripts(
         await ledger.approved(run.run_id, id, RequestKind.Action, scope);
         signal.throwIfAborted();
         await engine.recordScript(execution, RunEventKind.ScriptStarted, { request_id: id });
-        const result = await captureCommand(
-          [...Script.Shell, script],
+        const sandbox = await scriptSandbox(
           cwd,
-          { timeout_ms },
-          signal,
-          processes,
+          paths,
+          (run.runtime_paths ?? []).map((path) => resolve(run.project, path)),
+          script,
         );
+        let result: CommandCapture;
+        try {
+          result = await captureCommand(sandbox.command, cwd, { timeout_ms }, signal, processes);
+        } finally {
+          await sandbox.close();
+        }
         const scanner = createSecretScanner();
         scanner.accept(result.stdout);
         scanner.accept(result.stderr);

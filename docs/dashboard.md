@@ -58,4 +58,4 @@ The overview and mobile captures use the actual local server with a controlled f
 
 The installed package includes its built browser assets. Opening the dashboard uses those assets directly. Source-checkout execution builds the browser page from source.
 
-Configuration inspection and persisted overview measures are implemented. The [dashboard specification](../openspec/changes/resilient-agent-blackboard-bun/specs/run-dashboard/spec.md) records their acceptance contract. The combined product production acceptance remains open. See the [repair record](../openspec/changes/repair-harness-delivery/HANDOFF.md) for verification evidence and remaining delivery work.
+Configuration inspection and persisted overview measures are implemented. The [dashboard specification](../openspec/changes/resilient-agent-blackboard-bun/specs/run-dashboard/spec.md) records their acceptance contract. The combined product production acceptance remains open. See the [repair record](../openspec/changes/archive/2026-11-16-repair-harness-delivery/HANDOFF.md) for verification evidence and remaining delivery work.

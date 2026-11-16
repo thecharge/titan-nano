@@ -8,7 +8,7 @@
 
 - [x] 2.1 Reproduce concurrent-edit loss during rollback with shared case tables, covering retained edits, creation, deletion and refusal; link product task 33.12.
 - [x] 2.2 Repair restoration to preserve concurrent user changes and report conflicts; pass the rollback cases and document any remaining host race limitation.
-- [ ] 2.3 Coordinate shared live file scopes across runs through durable board intent, automatic yielding and retry; negotiate changed scope and external edits without silently overwriting them; pass contention, cancellation and protected-path cases for tasks 33.12 and 33.19.
+- [x] 2.3 Coordinate shared live file scopes across runs through durable board intent, automatic yielding and retry; negotiate changed scope and external edits without silently overwriting them; pass contention, cancellation and protected-path cases for tasks 33.12 and 33.19.
 - [x] 2.4 Repair snapshot handling of disappearing files and changing SQLite companion files; pass concurrent-change and interrupted-run cases for task 33.12.
 - [x] 2.5 Verify backend authorization across start, retry, limits, resume and restart; prove no unapproved vendor dispatch for task 33.15.
 

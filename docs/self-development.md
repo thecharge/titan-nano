@@ -2,7 +2,7 @@
 
 The repository retains a [sanitized export of run 5306657b-61fe-4294-8c5a-9adfdc53caa6](examples/self-development/README.md). It includes the executed workflow, journal, state, reviewer outcomes and script results. Session identifiers are deterministic aliases, paths describe a generic workspace and usage totals are omitted. The public export is for file inspection. Recovery requires the private original records, full workspace snapshots and matching runtime.
 
-Read the [delivery evidence](../openspec/changes/repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) for the delivered implementation and observed verification.
+Read the [delivery evidence](../openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) for the delivered implementation and observed verification.
 
 ## Inspect the published files
 

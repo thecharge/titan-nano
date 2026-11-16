@@ -12,7 +12,7 @@ For each implementation session, inspect the existing normal entry points, imple
 
 Paid live calls require their existing explicit authorization. Other-backend deferrals remain visible below and retain all specifications. Cross-platform scenarios need the named platforms. Offline contracts preserve their existing distinction from real vendor execution.
 
-The source acceptance map remains the authority for scenario status. This session plan adds delivery order and implementation boundaries without changing those statuses. See [owning tasks](../tasks.md), [acceptance ownership](acceptance-map.tsv) and [repair dependencies](../../repair-harness-delivery/research/product-backlog.tsv).
+The source acceptance map remains the authority for scenario status. This session plan adds delivery order and implementation boundaries without changing those statuses. See [owning tasks](../tasks.md), [acceptance ownership](acceptance-map.tsv) and [repair dependencies](../../archive/2026-11-16-repair-harness-delivery/research/product-backlog.tsv).
 
 ## 1. Shared files and native permissions
 

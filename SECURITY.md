@@ -10,4 +10,4 @@ If a credential was exposed, revoke or rotate it with its provider. Report the a
 
 Titan workers and scripts operate in the shared project directory. File claims coordinate cooperating work. Complete native write enforcement, human-only credential isolation across vendor tools and supported data migrations remain open in [OpenSpec](openspec/changes/resilient-agent-blackboard-bun/tasks.md). The [usage guide](docs/preview.md) describes current permissions and recovery behavior.
 
-Version-specific verification is recorded in the [delivery evidence](openspec/changes/repair-harness-delivery/evidence.md). Security fixes are maintained on the current main branch. Earlier tagged versions have no separate maintenance commitment.
+Version-specific verification is recorded in the [delivery evidence](openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md). Security fixes are maintained on the current main branch. Earlier tagged versions have no separate maintenance commitment.

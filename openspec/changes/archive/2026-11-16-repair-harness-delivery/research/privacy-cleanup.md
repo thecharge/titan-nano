@@ -6,7 +6,7 @@ The owner authorized review, sanitation, history rewriting and pushing the clean
 
 ## Publication changes
 
-Accumulated run state, installation-specific configuration, the generated MCP registration, attribution bookkeeping and historical Bun cache files are removed from the reachable publication history. The self-development example remains under [docs/examples/self-development](../../../../docs/examples/self-development/README.md). It is labeled as a sanitized inspection export. Native session identifiers use deterministic UUID aliases, personal filesystem paths use generic replacements and usage totals are omitted. The original private records retain exact execution evidence and recovery data.
+Accumulated run state, installation-specific configuration, the generated MCP registration, attribution bookkeeping and historical Bun cache files are removed from the reachable publication history. The self-development example remains under [docs/examples/self-development](../../../../../docs/examples/self-development/README.md). It is labeled as a sanitized inspection export. Native session identifiers use deterministic UUID aliases, personal filesystem paths use generic replacements and usage totals are omitted. The original private records retain exact execution evidence and recovery data.
 
 The public branch begins with the sanitized current tree as a clean publication baseline. The complete original development history remains in the private recovery copy. Public Git author and committer identities use the GitHub handle and GitHub no-reply email address. Revision references in current Markdown were updated during sanitation. Source identities retained in older evidence describe private historical revisions.
 

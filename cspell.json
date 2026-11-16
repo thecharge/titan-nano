@@ -157,7 +157,25 @@
     "vllm",
     "vsock",
     "worktrees",
-    "Xenova"
+    "Xenova",
+    "cpath",
+    "dpath",
+    "eventfd",
+    "eventpoll",
+    "fattr",
+    "fown",
+    "libseccomp",
+    "poff",
+    "RUSTFLAGS",
+    "Rustup",
+    "signalfd",
+    "spath",
+    "timerfd",
+    "tpath",
+    "uring",
+    "wpath",
+    "nopie",
+    "libc"
   ],
   "overrides": [
     {

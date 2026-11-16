@@ -38,7 +38,7 @@ Use [the dashboard guide](docs/dashboard.md) for run inspection, retained files,
 
 ## Inspect a real run
 
-The repository retains a real Codex SDK run in which Titan changed its own version checks and wrote an inspection guide. The workflow includes a parallel group, independent reviewers and a script step. The sanitized export includes the journal, pseudonymous session identifiers, results and recovery history. Personal paths and usage totals were removed. Manual recovery and a reviewer-schema repair were required. Read the [self-development record](docs/examples/self-development/README.md) and the later [delivery evidence](openspec/changes/repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit).
+The repository retains a real Codex SDK run in which Titan changed its own version checks and wrote an inspection guide. The workflow includes a parallel group, independent reviewers and a script step. The sanitized export includes the journal, pseudonymous session identifiers, results and recovery history. Personal paths and usage totals were removed. Manual recovery and a reviewer-schema repair were required. Read the [self-development record](docs/examples/self-development/README.md) and the later [delivery evidence](openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit).
 
 ## Current support
 
@@ -46,7 +46,7 @@ Codex and Claude Code adapters, local knowledge, structured questions, run inspe
 
 Custom skill selection and arbitrary MCP inheritance, full native write enforcement, supported data migrations and several recovery contracts remain incomplete. Declared file scopes coordinate cooperating workers. They do not establish a complete operating-system boundary. These requirements remain visible in OpenSpec.
 
-Read the [usage guide](docs/preview.md) for commands and current limits. The active product change is [resilient-agent-blackboard-bun](openspec/changes/resilient-agent-blackboard-bun/proposal.md). The [delivery record](openspec/changes/repair-harness-delivery/evidence.md) retains observed verification and remaining requirements.
+Read the [usage guide](docs/preview.md) for commands and current limits. The active product change is [resilient-agent-blackboard-bun](openspec/changes/resilient-agent-blackboard-bun/proposal.md). The [delivery record](openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md) retains observed verification and remaining requirements.
 
 ## Contribute through issues
 

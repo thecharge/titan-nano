@@ -192,6 +192,7 @@ export * from "./prerequisites.ts";
 export * from "./requests.ts";
 export * from "./run-hub.ts";
 export * from "./runner.ts";
+export * from "./script-sandbox.ts";
 export * from "./server.ts";
 export * from "./source-comments.ts";
 export * from "./spelling.ts";

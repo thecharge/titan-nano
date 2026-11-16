@@ -2,7 +2,7 @@ capability	requirement	scenario	task	stage	test_level	status
 harness-delivery	Delivery records match observed acceptance	A checked rollback task has a counterexample	6.3	release	integration	implemented
 harness-delivery	Delivery records match observed acceptance	A production service has only component proof	3.2	release	integration	implemented
 harness-delivery	Refused attempts preserve user work	User changes a file before rollback	2.3	release	integration	implemented
-harness-delivery	Refused attempts preserve user work	Worker tries an unlisted write	2.3	release	integration	pending
+harness-delivery	Refused attempts preserve user work	Worker tries an unlisted write	2.3	release	integration	implemented
 harness-delivery	Refused attempts preserve user work	Runs negotiate overlapping live scopes	2.3	release	integration	implemented
 harness-delivery	Refused attempts preserve user work	Independent file scopes continue	2.3	release	integration	implemented
 harness-delivery	Refused attempts preserve user work	A waiting claim is cancelled	2.3	release	integration	implemented

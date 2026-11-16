@@ -20,6 +20,8 @@ import {
   type LeanRun,
 } from "@titan/types";
 
+export { scriptSandbox } from "./script-sandbox.ts";
+
 export const ownedCommandProcesses = Object.freeze<CommandProcessPort>({
   spawn(command, cwd) {
     return Bun.spawn([...command], {

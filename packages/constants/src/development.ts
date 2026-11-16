@@ -20,7 +20,8 @@ export const Development = {
   CodexSkills: ".agents/skills",
   ClaudeSkills: ".titan/plugin/skills",
   AcceptanceMap: "openspec/changes/resilient-agent-blackboard-bun/research/acceptance-map.tsv",
-  RepairAcceptanceMap: "openspec/changes/repair-harness-delivery/research/acceptance-map.tsv",
+  RepairAcceptanceMap:
+    "openspec/changes/archive/2026-11-16-repair-harness-delivery/research/acceptance-map.tsv",
   PendingSuffix: "\tpending",
   ReleaseFlag: "--release",
   BoundaryVariable: "TITAN_TEST_BOUNDARY",

@@ -291,7 +291,11 @@ export async function scriptWorkerFlow(exit: number, checks: boolean) {
       },
       stop() {},
     });
-    const engine = new Engine(() => new FakeBackend(), {}, { scripts });
+    const engine = new Engine(
+      () => new FakeBackend(),
+      {},
+      { scripts, runtimePaths: [resolve(root, "runtime")] },
+    );
     const run = await engine.create({
       project: root,
       config: await resolveConfig({ home: resolve(root, "home"), project: root }),
@@ -312,6 +316,7 @@ export async function scriptWorkerFlow(exit: number, checks: boolean) {
       client_id: "scripts",
       submission_id: "scripts",
     });
+    assert.deepEqual(run.runtime_paths, ["runtime"]);
     await engine.start(run.run_id);
     for (let round = 0; round < 3 && run.state === RunStatus.Waiting; round++) {
       const request = (await engine.requests.list(run.run_id)).find(
@@ -523,7 +528,8 @@ export async function scopedScriptAdmission(
     let code: string | number = exit;
     const processes: CommandProcessPort = {
       spawn(command, cwd) {
-        assert.deepEqual(command, ["/bin/sh", "-c", "printf checked"]);
+        assert.deepEqual(command.slice(-3), ["/bin/sh", "-c", "printf checked"]);
+        assert.ok(command[0]?.endsWith("/syd"));
         assert.ok(cwd.startsWith(root));
         starts++;
         return {

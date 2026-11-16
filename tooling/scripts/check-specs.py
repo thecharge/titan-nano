@@ -121,7 +121,11 @@ def check_change(change):
 def main():
     failed = False
     changes = ROOT / "openspec/changes"
-    for change in sorted(changes.iterdir()):
+    candidates = list(changes.iterdir())
+    archive = changes / "archive"
+    if archive.exists():
+        candidates.extend(archive.iterdir())
+    for change in sorted(candidates):
         if change.is_dir() and (change / "proposal.md").exists():
             print(f"Checking {change.name}")
             failed = check_change(change) or failed

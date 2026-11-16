@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   ApprovalLevel,
@@ -95,7 +95,7 @@ export async function nativeReconciliation(
                     ...step,
                     do: {
                       script:
-                        "mkdir -p .titan/vendor-fixture; printf 'original\\n' >> .titan/vendor-fixture/original-calls.jsonl; printf 'Received worker edit' > source.txt; ln -s source.txt unsafe-link; printf 'Script result'",
+                        "printf 'original\\n' >> original-calls.jsonl; printf 'Received worker edit' > source.txt; while [ ! -f script-release ]; do sleep 0.01; done; printf 'Script result'",
                     },
                     reconcile: { ...step.do, task: "Merge retained script files" },
                   },
@@ -106,6 +106,9 @@ export async function nativeReconciliation(
         client_id: "native-reconciliation",
         submission_id: "received",
       });
+      const originalCalls = script
+        ? "original-calls.jsonl"
+        : ".titan/vendor-fixture/original-calls.jsonl";
       if (script) {
         assert.ok(
           await waitUntil(
@@ -118,10 +121,7 @@ export async function nativeReconciliation(
           (entry) => entry.request.answer === null,
         )?.request;
         assert.ok(pending);
-        await assert.rejects(
-          readFile(resolve(project, ".titan/vendor-fixture/original-calls.jsonl")),
-          { code: "ENOENT" },
-        );
+        await assert.rejects(readFile(resolve(project, originalCalls)), { code: "ENOENT" });
         await requests.answer(
           {
             run_id: run.run_id,
@@ -133,6 +133,14 @@ export async function nativeReconciliation(
           },
           ApprovalLevel.Human,
         );
+        assert.ok(
+          await waitUntil(
+            () => Bun.file(resolve(project, originalCalls)).exists(),
+            SdkProcessFixture.ObserveAttempts,
+          ),
+        );
+        await symlink("source.txt", resolve(project, "unsafe-link"));
+        await writeFile(resolve(project, "script-release"), "Continue");
       }
       assert.equal(
         await waitUntil(
@@ -198,7 +206,7 @@ export async function nativeReconciliation(
       assert.equal(node.refutations, 0);
       assert.equal(await readFile(resolve(project, "source.txt"), "utf8"), "External edit");
       assert.equal(
-        await readFile(resolve(project, ".titan/vendor-fixture/original-calls.jsonl"), "utf8"),
+        await readFile(resolve(project, originalCalls), "utf8"),
         split ? "original\noriginal\n" : "original\n",
       );
       assert.equal(

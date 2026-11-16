@@ -17,4 +17,4 @@ The earlier run recorded in `record.json` started both workers concurrently. Sna
 
 ## Subsequent delivery
 
-The delivered implementation passed 6,882 tests with zero failures, one skipped live gate and zero measured coverage gaps across 485 product sources. Installed-package acceptance also passed. Read the [delivery evidence](../../../openspec/changes/repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) for the observed results and remaining production requirements.
+The delivered implementation passed 6,882 tests with zero failures, one skipped live gate and zero measured coverage gaps across 485 product sources. Installed-package acceptance also passed. Read the [delivery evidence](../../../openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) for the observed results and remaining production requirements.

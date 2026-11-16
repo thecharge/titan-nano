@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-16",
+  "source_sha256": {
+    "packages/constants/src/script-sandbox.ts": "0aa6bd5557b7350cdea48bd0c4a396cc8676f5244cb709dc5488ccd6764866e4",
+    "packages/messages/src/script-sandbox.ts": "7eb3967f2ac843e5bb286aeeabf3e3376d2a6d849090dd68644f3a208f694b3c",
+    "packages/process/src/script-sandbox.ts": "4cad3d924e6a3f25105562175c4c7fc1d17f1b060560ee8cf37819c6f10b064d",
+    "packages/process/src/index.ts": "c043b8531b246d7efc0a226c7deac30466c739248409dbc711092a8396ead8b5",
+    "packages/server/src/scripts.ts": "3461ac4b990e2d388e301d10ce0a9013d592f34fc39994a1021169fdb21b48c2",
+    "tooling/scripts/prepare-script-sandbox.ts": "930b4e1592830fae0e1c1b92b0e93d8d1693cfef6198738e28888d3ef5f1f324",
+    "tooling/scripts/pack.ts": "f1eb3815a1103ed22c4b02de42bd25d28c248cfce018245e350124a027c6fe4f",
+    "tooling/scripts/test-image.ts": "826ce0e3d40481d16fb2ddd44a4875f132f4318234859b3e8c6e03b87bc29f99",
+    "tooling/scripts/probe-package.ts": "3f264cd1d4108a6a91b0e254c4b2adf3e8ef4536d47ed4af4f32628a502c96eb",
+    "testing/support/guard.ts": "43d2a3461396799c1783588529e6be746a0deb22a7e52907b532eae19b4ac0ec",
+    "testing/cases/script-sandbox.ts": "8c53acbc5f5076f7a07eb1799049f413aca1a440a62736652d10ad1ed6345e0a",
+    "testing/factories/script-sandbox.ts": "ba162d65273baac06057db596cb4bdf846d988e243acc11131c14adbd8a8249d",
+    "testing/factories/native-reconciliation.ts": "0998802cd3db710161bd2273dee91e37ec1f96ee265876841121a19ffe1e38c7",
+    "testing/factories/server-scripts.ts": "1a571d6309b4fb74331a6780a88fbf3808599b8f4b3622560296b94f4ae84a89",
+    "testing/integration/script-sandbox.test.ts": "c90fe842e05407b156da2a3af18dd25b1f1ca4330cba38b6b95a53ff01eb5bdb",
+    "testing/e2e/script-sandbox.test.ts": "ee0e55feef5181a6a3bd218afed103c33639426f70f60c830b2737d0694739d6"
+  },
+  "production_counterexample": {
+    "run_id": "083f6ef1-c827-431a-b88c-372903ed0eb9",
+    "state": "passed",
+    "allowed": "allowed",
+    "outside": "Original",
+    "declared_files": [
+      "allowed.txt"
+    ]
+  },
+  "observed_preflight": {
+    "script_service_and_boundary": {
+      "passes": 73,
+      "failures": 0,
+      "log": "/tmp/titan-script-focused-final.log"
+    },
+    "boundary_and_lifecycle": {
+      "passes": 35,
+      "failures": 0,
+      "log": "/tmp/titan-script-lifecycle-final.log"
+    },
+    "native_reconciliation": {
+      "passes": 20,
+      "failures": 0,
+      "log": "/tmp/titan-script-reconciliation-final.log"
+    },
+    "installed_package": {
+      "exit_code": 0,
+      "script_scope_cases": 4,
+      "host_lease_boundary_cases": 52,
+      "log": "/tmp/titan-script-installed-final.log"
+    },
+    "boundary_scratch_and_lifecycle": {
+      "passes": 39,
+      "failures": 0,
+      "log": "/tmp/titan-script-scratch-final.log"
+    },
+    "read_claim_production_server": {
+      "passes": 8,
+      "failures": 0,
+      "log": "/tmp/titan-script-read-claim-focused-final.log"
+    },
+    "complete_gate_attempt": {
+      "passes": 7085,
+      "skips": 1,
+      "test_failures": 0,
+      "coverage_gaps": 1,
+      "sources": 491,
+      "seconds": 845.03,
+      "log": "/tmp/titan-script-repair-complete-gate-final-2.log"
+    },
+    "installed_package_final": {
+      "exit_code": 0,
+      "script_scope_cases": 4,
+      "script_read_claim_cases": 4,
+      "host_lease_boundary_cases": 52,
+      "log": "/tmp/titan-script-repair-package-final-2.log"
+    },
+    "server_runtime_exclusions": {
+      "passes": 85,
+      "failures": 0,
+      "script_service_functions_found": 10,
+      "script_service_functions_hit": 10,
+      "log": "/tmp/titan-script-server-coverage-final.log"
+    }
+  },
+  "limits": [
+    "Focused fast tests do not establish whole-product coverage.",
+    "No paid provider calls were made.",
+    "Native macOS execution remains unverified.",
+    "Private Rust installation on a host without Cargo remains unverified.",
+    "One installed managed-update validation attempt failed. Its unchanged assertions passed on retry. The cause remains unconfirmed.",
+    "Final complete verification is required before commit and push. Its result is retained in the commit message.",
+    "A staged gate was stopped before correcting private temporary link compatibility. Complete verification is restarted for the corrected source.",
+    "A second staged gate was stopped before correcting read-claim write escalation. Final complete verification must pass the corrected snapshot."
+  ]
+}

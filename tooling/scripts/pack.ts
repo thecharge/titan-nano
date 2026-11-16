@@ -15,6 +15,7 @@ import {
   Packaging,
   PackagingAssets,
   ProcessIo,
+  ScriptSandbox,
   VendorPackage,
 } from "@titan/constants";
 import { readFileBytes } from "@titan/streams";
@@ -25,12 +26,14 @@ import {
 } from "@titan/types";
 import { packageOutput } from "./package-output.ts";
 import { nativeCodexVersion } from "./package-vendors.ts";
+import { prepareScriptSandbox } from "./prepare-script-sandbox.ts";
 
 const root = resolve(import.meta.dir, HookFile.RepositoryRoot);
 const distribution = resolve(root, process.argv[2] ?? Packaging.Distribution);
 const destination = resolve(distribution, basename(Packaging.Destination));
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
+await prepareScriptSandbox(root, destination);
 const build = await Bun.build({
   entrypoints: [resolve(root, Packaging.CliSource)],
   outdir: destination,
@@ -98,8 +101,13 @@ await writeFile(
         Packaging.Answers,
         Packaging.Assets,
         ...Packaging.LegalFiles,
+        ScriptSandbox.Binary,
+        ScriptSandbox.Source.LicenseOutput,
+        ScriptSandbox.Source.Archive,
       ],
       engines: { bun: Packaging.BunEngine },
+      os: [process.platform],
+      cpu: [process.arch],
       dependencies: {
         [VendorPackage.CodexCli]: await nativeCodexVersion(
           pathToFileURL(

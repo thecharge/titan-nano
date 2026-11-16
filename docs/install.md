@@ -4,7 +4,7 @@ Titan is a tool that your coding agent (Claude Code or Codex) uses. You do not w
 
 ## What the package is
 
-Titan Nano is distributed as `titan-cli-0.1.0-alpha.1.tgz`, built from this repository. The archive installs `@titan/cli` with the `titan` command, agent guide, input schemas, example workflows, license notices and pinned Codex and Claude runtime dependencies. Registry publication remains pending.
+Titan Nano is distributed as `titan-cli-0.1.0-alpha.1.tgz`, built from this repository. The archive installs `@titan/cli` with the `titan` command, agent guide, input schemas, example workflows, license notices and pinned Codex and Claude runtime dependencies. Registry publication remains pending. Linux archives also include the pinned Syd script sandbox, its license and complete source cache. Archives target their build operating system and CPU architecture.
 
 ## What you need first
 
@@ -94,6 +94,12 @@ CLI run and request clients and MCP run and request tools use this same compatib
 
 ## Verification and current limits
 
-Complete local source and installed-package acceptance use pinned SDKs with vendor stubs. A retained [real Codex self-development run](../docs/examples/self-development/README.md) exercised workers, independent reviewers and scripts. It required manual recovery and a reviewer-schema repair. The later [delivery evidence](../openspec/changes/repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) records the committed implementation and complete verification. Complete live Claude acceptance and native permission and recovery contracts remain open.
+Complete local source and installed-package acceptance use pinned SDKs with vendor stubs. A retained [real Codex self-development run](../docs/examples/self-development/README.md) exercised workers, independent reviewers and scripts. It required manual recovery and a reviewer-schema repair. The later [delivery evidence](../openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) records the committed implementation and complete verification. Complete live Claude acceptance and native permission and recovery contracts remain open.
 
 The installed command checks the daemon version and exact runtime bundle hash. An idle daemon from another build is replaced through the existing graceful handoff. A busy daemon keeps its work and reports the handoff refusal. Source development commands retain version-only discovery.
+
+## Linux script sandbox
+
+Approved scripts require Linux 5.19 or newer and libseccomp 2.5 or newer. The installer prepares the pinned Syd 3.59.0 helper while building the package. The first source build requires a C compiler. When Cargo is missing, preparation installs checksum-pinned Rustup 1.29.3 and Rust 1.96.0 in Titan's private dependency cache. It leaves shell profiles unchanged. Later source builds reuse that cache. Direct archive installations contain the ready executable and need no Rust toolchain or C compiler. Preparation failures preserve the existing managed release.
+
+Run `bun run test:prepare` before source tests or script workflows. The same preparation runs during `bun run pack:preview`. Read the [script boundary and source rebuild instructions](preview.md#approved-script-filesystem-boundaries) for policy behavior, third-party licensing and platform verification limits.

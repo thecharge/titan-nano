@@ -3730,3 +3730,16 @@ TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY
 YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
 PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGES.
+
+========================================================================
+Syd 3.59.0
+Declared license: GPL-3.0-only
+Distribution: separate Linux executable, launched as an external process
+Source: https://gitlab.exherbo.org/sydbox/sydbox
+
+The Linux archive includes syd, its COPYING license as SYD_LICENSE and
+syd-source.tar.gz containing the pinned source and locked Rust dependency
+sources. These components retain their own licenses. Build instructions
+are in the archive README under Approved script filesystem boundaries.
+The separate helper does not change Titan's Apache-2.0 license.
+The helper uses the host libseccomp library under its own distribution terms.

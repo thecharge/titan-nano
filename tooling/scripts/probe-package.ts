@@ -136,6 +136,10 @@ import { requestTurnParallelCases } from "../../testing/cases/request-turn-paral
 import { requestTurnProcessCases } from "../../testing/cases/request-turn-process.ts";
 import { runCompatibilityCases } from "../../testing/cases/run-compatibility.ts";
 import { runtimePinProcessCases } from "../../testing/cases/runtime-pin.ts";
+import {
+  scriptReadClaimCases,
+  scriptScopeProcessCases,
+} from "../../testing/cases/script-sandbox.ts";
 import { sdkMixedDeliveryCases } from "../../testing/cases/sdk-plan.ts";
 import { sdkProcessRecoveryCases } from "../../testing/cases/sdk-process.ts";
 import { daemonMaintenanceCases } from "../../testing/cases/server-maintenance.ts";
@@ -203,6 +207,7 @@ import { requestTurnParallel } from "../../testing/factories/request-turn-parall
 import { requestTurnProcess } from "../../testing/factories/request-turn-process.ts";
 import { runCompatibility } from "../../testing/factories/run-compatibility.ts";
 import { runtimePinProcess } from "../../testing/factories/runtime-pin.ts";
+import { scriptReadClaim, scriptScopeProcess } from "../../testing/factories/script-sandbox.ts";
 import { sdkMixedDelivery } from "../../testing/factories/sdk-plan.ts";
 import { sdkProcessRecovery } from "../../testing/factories/sdk-process.ts";
 import { daemonMaintenance } from "../../testing/factories/server-maintenance.ts";
@@ -1598,3 +1603,25 @@ await all(
   TestScheduling.Maximum,
 );
 console.log(JSON.stringify({ installed_candidate_commitment_cases: 4 }));
+
+await all(
+  [...scriptScopeProcessCases.positive, ...scriptScopeProcessCases.negative].map(
+    (scenario) => async () => {
+      const result = await Reflect.apply(scriptScopeProcess, undefined, [...scenario.args, cli]);
+      assert.deepEqual(result, scenario.expected, scenario.name);
+    },
+  ),
+  TestScheduling.Maximum,
+);
+console.log(JSON.stringify({ installed_script_scope_cases: 4 }));
+
+await all(
+  [...scriptReadClaimCases.positive, ...scriptReadClaimCases.negative].map(
+    (scenario) => async () => {
+      const result = await Reflect.apply(scriptReadClaim, undefined, [...scenario.args, cli]);
+      assert.deepEqual(result, scenario.expected, scenario.name);
+    },
+  ),
+  TestScheduling.Maximum,
+);
+console.log(JSON.stringify({ installed_script_read_claim_cases: 4 }));

@@ -37,7 +37,7 @@ class SpecificationCheckTests(unittest.TestCase):
             self.rows = list(reader)
 
     def add_repair_change(self):
-        relative = Path("openspec/changes/repair-harness-delivery")
+        relative = Path("openspec/changes/archive/2026-11-16-repair-harness-delivery")
         destination = self.root / relative
         shutil.copytree(ROOT / relative, destination)
         return destination / "research/acceptance-map.tsv"

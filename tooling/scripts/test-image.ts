@@ -11,6 +11,7 @@ import {
 } from "@titan/constants";
 import { LocalModelStore } from "@titan/workspace";
 import { commandStatus } from "./hook-process.ts";
+import { prepareScriptSandbox } from "./prepare-script-sandbox.ts";
 
 export const root = resolve(import.meta.dir, HookFile.RepositoryRoot);
 export const containerfile = resolve(root, OfflineTest.Containerfile);
@@ -22,6 +23,7 @@ export async function imageName(directory: string = root): Promise<string> {
 }
 
 if (import.meta.main) {
+  await prepareScriptSandbox(root);
   await new LocalModelStore(resolve(root, LocalModel.TestHome)).fetch();
   process.exitCode = await commandStatus(
     [
