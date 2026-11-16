@@ -28,6 +28,7 @@ import {
   NativeFileResultSchema,
   NativeToolBoardSchema,
   type NativeToolConnection,
+  type SdkProbePaths,
 } from "@titan/types";
 import { sourceVersion, writeWorkspaceFile } from "@titan/workspace";
 import { nativeValue } from "./native-tools.ts";
@@ -76,15 +77,19 @@ export function nativeWorkspaceWrite(mode: string, refused: boolean) {
   });
 }
 
-export function nativeManagedSdkWrite(backend: NativeBackendId, refused: boolean) {
+export function nativeManagedSdkWrite(
+  backend: NativeBackendId,
+  refused: boolean,
+  paths: SdkProbePaths = {},
+) {
   return withTemporaryDirectory(async (root) => {
-    const { home, project } = await prepareSdkProject(root, backend, 0);
+    const { home, project } = await prepareSdkProject(root, backend, 0, false, paths.vendors);
     const file = resolve(home, ConfigFile.User);
     const config = ConfigSchema.parse(JSON.parse(await readFile(file, "utf8")));
     config.workspace = { ...config.workspace, mode: WorkspaceModeSetting.Live };
     config.defaults.max_attempts = 1;
     await writeFile(file, JSON.stringify(config));
-    const child = spawnServer(home, undefined, SdkProcessFixture.DaemonTimeout);
+    const child = spawnServer(home, paths.cli, SdkProcessFixture.DaemonTimeout);
     try {
       assert.ok(
         await waitUntil(() => serverReady(home, child.pid), SdkProcessFixture.ObserveAttempts),

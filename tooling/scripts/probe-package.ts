@@ -117,6 +117,7 @@ import {
   nativeProjectWorkflowCases,
   nativeWorkflowCases,
 } from "../../testing/cases/native-workflow.ts";
+import { nativeManagedSdkWriteCases } from "../../testing/cases/native-write.ts";
 import {
   cliConfiguredStartupCases,
   cliObserverProcessCases,
@@ -186,6 +187,7 @@ import {
 } from "../../testing/factories/native-reconciliation.ts";
 import { nativeSetupProcess } from "../../testing/factories/native-setup-process.ts";
 import { nativeProjectWorkflow, nativeWorkflow } from "../../testing/factories/native-workflow.ts";
+import { nativeManagedSdkWrite } from "../../testing/factories/native-write.ts";
 import { cliObserverProcess } from "../../testing/factories/observer-process.ts";
 import { serverOpenCallProcess } from "../../testing/factories/open-call.ts";
 import { operationalPeer } from "../../testing/factories/operational-peer.ts";
@@ -963,6 +965,25 @@ console.log(
   JSON.stringify({
     installed_native_project_write_cases:
       nativeProjectWriteCases.positive.length + nativeProjectWriteCases.negative.length,
+  }),
+);
+
+await all(
+  [...nativeManagedSdkWriteCases.positive, ...nativeManagedSdkWriteCases.negative].map(
+    (scenario) => async () => {
+      const result = await Reflect.apply(nativeManagedSdkWrite, undefined, [
+        ...scenario.args,
+        { cli, vendors: resolve(Packaging.VendorStubs) },
+      ]);
+      assert.deepEqual(result, scenario.expected, scenario.name);
+    },
+  ),
+  TestScheduling.Maximum,
+);
+console.log(
+  JSON.stringify({
+    installed_native_managed_write_cases:
+      nativeManagedSdkWriteCases.positive.length + nativeManagedSdkWriteCases.negative.length,
   }),
 );
 

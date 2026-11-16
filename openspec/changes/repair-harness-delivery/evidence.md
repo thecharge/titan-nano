@@ -1386,3 +1386,21 @@ Installed-package acceptance passed the exact committed tree a29e16a2d2e533e40c0
 The repair now has twenty complete tasks out of twenty-two. Tasks 2.3 and 5.3 retain the native protected-write acceptance gap. The change remains active and archival waits for that acceptance. The product session plan records the dependency order for subsequent clustered delivery. This delivery contains the lease repair and scheduling evidence, plus completion of planning task 5.2 and verification task 6.2.
 
 The evidence-only commit was first refused by the spelling check for an unknown word. Its wording was corrected before the final documentation gate. Log /tmp/titan-repair-evidence-commit.log retains that refusal.
+
+## 2026-11-16 native write enforcement delivery
+
+Commit d66fef89b6565093a44a8ff1d70c09582720fe36 contains tree 17d44081ae684ad2e23f7ea6f6336adb62302483. The ordinary commit gate observed 7,038 passes, one skipped live gate and zero failures across 358 files. Coverage checked 488 product sources with zero measured line or function gaps. Tests took 806.71 seconds. The full pre-commit hook took 858.80 seconds, exceeding the five-minute target. Log /tmp/titan-native-boundary-commit-gate-final.log retains the output.
+
+The first commit attempt failed spelling. The next passed the complete source gate and then failed commit-message attribution formatting. Repeating the hand-change prefix for each path corrected the message. Normal hooks reused their existing exact-tree verification record and the commit succeeded. No hook, assertion, coverage requirement or security setting was bypassed.
+
+The production server now exposes version-checked managed file updates and creation to workers. Both pinned SDK executable fixtures exercise declared updates and creation, stale and undeclared refusal, and retained audit results on the shared live tree. Scoped Codex sessions use exact existing-file grants. Scoped Claude Bash commands use literal file grants through sandbox-runtime 0.0.83. Its implicit non-device writable directories are explicitly denied. Managed creation preserves absence until the operation executes. Existing file updates preserve their inode.
+
+Installed-package acceptance exited zero in /tmp/titan-native-boundary-package.log. That build preceded final spelling and documentation corrections. It covered the installed native tool and project-write baseline. The new managed-file operation still required its dedicated installed cases, which are being added to the normal package probe. Paid provider calls remain unverified and were not made.
+
+GitHub Actions was confirmed disabled immediately before the ordinary push. Push session 41571 exited zero. An independent git ls-remote confirmed main at d66fef89b6565093a44a8ff1d70c09582720fe36. The unrelated model-offline-probe test remains untracked and excluded.
+
+Repair task 5.3 is complete for the pinned primary-source review and offline SDK contracts. Task 2.3 remains open. Approved workflow scripts still execute without the required operating-system write boundary. The repair acceptance map therefore retains its unlisted-write scenario as pending, and the change remains active. Complete formal checks, migrations, live provider evidence and the wider product backlog also remain open.
+
+Dedicated installed acceptance subsequently exited zero in session 2032. Log /tmp/titan-managed-write-installed.log reports installed_native_managed_write_cases as four. Both pinned SDK libraries use their strict executable fixtures against the installed bundle. The cases update and create declared live files and retain refusals for unlisted and stale writes. The remaining installed suite also passed, including all 52 host lease boundary cases. Product source matches d66fef89b6565093a44a8ff1d70c09582720fe36. Test support adds the established optional installed executable and vendor paths.
+
+The initial dedicated package command was refused before installation because the default tool sandbox made the Podman runtime directory read-only. The approved escalated retry retained the existing offline container settings and passed. Independent document content and plain-language checks passed. A spelling check found one word in the new continuation record, which was replaced with plain wording.
