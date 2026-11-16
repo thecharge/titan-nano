@@ -12,9 +12,9 @@ The full source gate observed 7,038 passes, one skipped live gate and zero failu
 
 The cluster implements managed version-checked worker file creation and updates, exact existing-file Codex grants, and scoped Claude Bash wrapping with sandbox-runtime 0.0.83. Runtime-owned paths remain omitted. Refusal audit records and both pinned SDK control paths are exercised without provider calls. Existing updates preserve the live inode. Missing files use the managed writer. See evidence.md and research/shared-write-boundary.md for commands and limits.
 
-## Current local continuation
+## Installed managed-write delivery
 
-Two tracked files extend nativeManagedSdkWrite with the established optional installed CLI and vendor fixture paths. The package probe now runs its four positive and negative Codex and Claude cases against the installed bundle. Typechecking passed. The complete package suite exited zero in session 2032 with log /tmp/titan-managed-write-installed.log. Its installed_native_managed_write_cases marker reports four passing cases. Its first attempt was refused by the default tool sandbox at the Podman runtime directory. The approved escalated retry uses the existing offline boundary. All 52 installed host lease boundary cases also passed.
+Commit 049861ad258281718d588b26a222b02c1339fcfc extends nativeManagedSdkWrite with the established optional installed CLI and vendor fixture paths. The package probe now runs its four positive and negative Codex and Claude cases against the installed bundle. Typechecking passed. The complete package suite exited zero in session 2032 with log /tmp/titan-managed-write-installed.log. Its installed_native_managed_write_cases marker reports four passing cases. Its first attempt was refused by the default tool sandbox at the Podman runtime directory. The approved escalated retry uses the existing offline boundary. All 52 installed host lease boundary cases also passed.
 
 The earlier complete package suite exited zero in /tmp/titan-native-boundary-package.log. It built before final spelling and documentation corrections. It covered the installed baseline and does not establish the four new dedicated managed-write cases.
 
@@ -28,6 +28,12 @@ Disposable artifacts include /tmp/titan-script-boundary-probe.mjs, /tmp/titan-sc
 
 ## Next actions
 
-Commit and push the installed probe and current evidence through normal hooks. Confirm Actions disabled immediately before each push and independently confirm the remote SHA. Never change staged files during a running hook.
+Push the verified installed probe and current evidence through normal hooks. Confirm Actions disabled immediately before each push and independently confirm the remote SHA. Never change staged files during a running hook.
 
 Finish script containment with supported-platform installation, declared creation and replacement, protected paths, cancellation, restart and shared-tree acceptance. Then close task 2.3, synchronize delta specifications and archive the repair. The broader product still has formal execution, proof recheck, migrations and other applicable requirements pending. No production-ready claim is supported.
+
+## Latest source gate and concrete remaining failure
+
+Commit 049861ad258281718d588b26a222b02c1339fcfc passed its normal gate with 7,038 passes, one skip, zero failures and 488 sources with zero measured coverage gaps. The complete hook took 772.80 seconds. Log /tmp/titan-managed-write-installed-commit-final.log.
+
+The production-server counterexample declares only allowed.txt, writes an outside sibling and ends passed. Its probe exited two to identify the containment failure. No provider calls were made. Reproduction details are in research/approved-script-counterexample.md. Keep task 2.3 and its acceptance scenario open until this is repaired through the normal production and installed entry points.
