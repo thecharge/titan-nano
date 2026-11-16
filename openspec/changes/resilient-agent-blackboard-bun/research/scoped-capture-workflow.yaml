@@ -1,0 +1,171 @@
+{
+  "name": "Titan improves scoped shared-file capture",
+  "goal": "Complete a bounded shared-live-filesystem snapshot capture improvement for Titan, with independent reviews and adversarial concurrency cases. Preserve arbitrary-read safety and sealed-result recovery. Keep the scope aligned with resilient-agent-blackboard-bun tasks 26.3, 26.4, 33.12 and 31.5. Close only acceptance proven by this delivery.",
+  "harness": "codex",
+  "workspace": {
+    "mode": "live",
+  },
+  "limits": {
+    "max_parallel": 2,
+    "max_minutes": 60,
+  },
+  "defaults": {
+    "backend": "codex-sdk",
+    "max_attempts": 2,
+  },
+  "recovery": {
+    "max_retries": 2,
+  },
+  "approvals": {
+    "tool": "main",
+    "resource": "main",
+  },
+  "personas": {
+    "implementer": {
+      "description": "Implement safe scoped live capture",
+      "role": "Read DEV_RULES.md and applicable repository instructions before editing. Preserve unrelated work, including testing/integration/model-offline-probe.test.ts. Work on the shared live project filesystem. Follow existing public package APIs, schemas, constants, messages and flat test patterns. Do not commit, push, install dependencies, change licenses, weaken checks, access secrets, start other agents or run broad test suites. The controller owns complete verification. Report exact changed files, counterexamples and limits. ",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Write",
+        "Edit",
+      ],
+    },
+    "acceptance_author": {
+      "description": "Build adversarial scoped capture acceptance",
+      "role": "Read DEV_RULES.md and applicable repository instructions before editing. Preserve unrelated work, including testing/integration/model-offline-probe.test.ts. Work on the shared live project filesystem. Follow existing public package APIs, schemas, constants, messages and flat test patterns. Do not commit, push, install dependencies, change licenses, weaken checks, access secrets, start other agents or run broad test suites. The controller owns complete verification. Report exact changed files, counterexamples and limits. ",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Write",
+        "Edit",
+      ],
+    },
+    "code_reviewer": {
+      "description": "Challenge scoped capture implementation",
+      "role": "Remain read-only. Inspect delivered source and acceptance cases against the task. Seek concrete counterexamples, stale or missing dependencies, unsafe path handling, mixed file versions, lost receipts, incorrect rollback and hidden unsupported behavior. A survived verdict requires actual inspected evidence. Do not run broad suites or change files. ",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+      ],
+    },
+    "acceptance_reviewer": {
+      "description": "Challenge concurrency acceptance cases",
+      "role": "Remain read-only. Inspect delivered source and acceptance cases against the task. Seek concrete counterexamples, stale or missing dependencies, unsafe path handling, mixed file versions, lost receipts, incorrect rollback and hidden unsupported behavior. A survived verdict requires actual inspected evidence. Do not run broad suites or change files. ",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+      ],
+    },
+    "integrator": {
+      "description": "Integrate independently reviewed live capture changes",
+      "role": "Read DEV_RULES.md and applicable repository instructions before editing. Preserve unrelated work, including testing/integration/model-offline-probe.test.ts. Work on the shared live project filesystem. Follow existing public package APIs, schemas, constants, messages and flat test patterns. Do not commit, push, install dependencies, change licenses, weaken checks, access secrets, start other agents or run broad test suites. The controller owns complete verification. Report exact changed files, counterexamples and limits. ",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Write",
+        "Edit",
+      ],
+    },
+    "integration_reviewer": {
+      "description": "Challenge the complete delivered cluster",
+      "role": "Remain read-only. Inspect delivered source and acceptance cases against the task. Seek concrete counterexamples, stale or missing dependencies, unsafe path handling, mixed file versions, lost receipts, incorrect rollback and hidden unsupported behavior. A survived verdict requires actual inspected evidence. Do not run broad suites or change files. ",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+      ],
+    },
+  },
+  "steps": [
+    {
+      "parallel": [
+        {
+          "id": "scope_capture",
+          "files": [
+            "packages/runner/src",
+            "packages/workspace/src",
+            "packages/types/src",
+            "packages/messages/src",
+            "packages/constants/src",
+          ],
+          "do": {
+            "persona": "implementer",
+            "task": "Inspect packages/runner/src/{steps,phases,live,reconciliation,write-inputs}.ts and packages/workspace/src/tree.ts. readTree already accepts selected paths. Eliminate avoidable full-project capture from operations whose contract is only the negotiated write set, especially live restore-point preparation, rollback comparisons and expanded write baselines. Preserve full readable-view invalidation wherever arbitrary shell or native reads remain unobserved. Never infer complete read observation merely because a phase has some managed observations. Preserve candidate manifests, receipt hashes, observed dependencies, protected paths, byte/entry limits, exact missing files, parent scopes and original usage accounting. Reuse existing claim revision and reconciliation. Add a cohesive safe improvement through normal runtime entry points. Independent unrelated continuous writes must not break scope-only restore-point or rollback operations. If broader candidate capture cannot safely become scoped with current read guarantees, retain its conservative path and report that precise limit. Coordinate with the acceptance task through the shared files. Only change declared product package source directories.",
+          },
+          "falsify": [
+            {
+              "persona": "code_reviewer",
+              "task": "Inspect packages/runner/src/{steps,phases,live,reconciliation,write-inputs}.ts and packages/workspace/src/tree.ts. readTree already accepts selected paths. Eliminate avoidable full-project capture from operations whose contract is only the negotiated write set, especially live restore-point preparation, rollback comparisons and expanded write baselines. Preserve full readable-view invalidation wherever arbitrary shell or native reads remain unobserved. Never infer complete read observation merely because a phase has some managed observations. Preserve candidate manifests, receipt hashes, observed dependencies, protected paths, byte/entry limits, exact missing files, parent scopes and original usage accounting. Reuse existing claim revision and reconciliation. Add a cohesive safe improvement through normal runtime entry points. Independent unrelated continuous writes must not break scope-only restore-point or rollback operations. If broader candidate capture cannot safely become scoped with current read guarantees, retain its conservative path and report that precise limit. Coordinate with the acceptance task through the shared files. Only change declared product package source directories. Independently inspect the implementation and produce concrete counterexamples.",
+            },
+          ],
+        },
+        {
+          "id": "capture_acceptance",
+          "files": [
+            "testing/cases/scoped-capture.ts",
+            "testing/factories/scoped-capture.ts",
+            "testing/integration/scoped-capture.test.ts",
+          ],
+          "do": {
+            "persona": "acceptance_author",
+            "task": "Create focused regression cases for scope-only live snapshot operations through normal runner entry points. Inspect existing live-workspace, write-claims and capture-recovery factories. Add shared flat cases in testing/cases/scoped-capture.ts, factories in testing/factories/scoped-capture.ts and registration in testing/integration/scoped-capture.test.ts. Use existing constants and public APIs where possible. Include at least two positive and two negative cases. Prove a stable claimed file can prepare and roll back while an unrelated peer changes continuously, an admitted or observed dependency change is still detected, parent/child scopes and exact missing files are handled, and existing received-result recovery avoids repeating the original worker command. Preserve the conservative arbitrary-read consistency checks. Do not assert unsupported complete managed read observation. Use bounded deterministic coordination instead of flaky sleeps. Read the implementation task changes before finalizing the tests. Only change the three declared testing files. Do not invent mocks that bypass normal runner behavior.",
+          },
+          "falsify": [
+            {
+              "persona": "acceptance_reviewer",
+              "task": "Create focused regression cases for scope-only live snapshot operations through normal runner entry points. Inspect existing live-workspace, write-claims and capture-recovery factories. Add shared flat cases in testing/cases/scoped-capture.ts, factories in testing/factories/scoped-capture.ts and registration in testing/integration/scoped-capture.test.ts. Use existing constants and public APIs where possible. Include at least two positive and two negative cases. Prove a stable claimed file can prepare and roll back while an unrelated peer changes continuously, an admitted or observed dependency change is still detected, parent/child scopes and exact missing files are handled, and existing received-result recovery avoids repeating the original worker command. Preserve the conservative arbitrary-read consistency checks. Do not assert unsupported complete managed read observation. Use bounded deterministic coordination instead of flaky sleeps. Read the implementation task changes before finalizing the tests. Only change the three declared testing files. Do not invent mocks that bypass normal runner behavior. Independently inspect whether the cases can pass a broken or globally serialized implementation.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      "id": "integrate_capture",
+      "files": [
+        "packages/runner/src",
+        "packages/workspace/src",
+        "packages/types/src",
+        "packages/messages/src",
+        "packages/constants/src",
+        "testing/cases/scoped-capture.ts",
+        "testing/factories/scoped-capture.ts",
+        "testing/integration/scoped-capture.test.ts",
+        "openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md",
+      ],
+      "inputs": {
+        "implementation": "scope_capture.summary",
+        "acceptance": "capture_acceptance.summary",
+      },
+      "do": {
+        "persona": "integrator",
+        "task": "Inspect both completed task outputs and integrate the scoped capture improvement with its focused tests. Resolve mismatches and concrete defects within the declared paths. Verify existing public API behavior, no extra unobserved-read assumption, no weakening of full-view candidate guards, no duplicate received worker command, protected paths, finite budgets and installed package compatibility. Update openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md with actual implementation scope, known limits and pending controller verification. Do not check off broad parent tasks or claim tests passed before observed output. Do not run broad suites.",
+      },
+      "falsify": [
+        {
+          "persona": "integration_reviewer",
+          "task": "Inspect both completed task outputs and integrate the scoped capture improvement with its focused tests. Resolve mismatches and concrete defects within the declared paths. Verify existing public API behavior, no extra unobserved-read assumption, no weakening of full-view candidate guards, no duplicate received worker command, protected paths, finite budgets and installed package compatibility. Update openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md with actual implementation scope, known limits and pending controller verification. Do not check off broad parent tasks or claim tests passed before observed output. Do not run broad suites. Inspect the combined diff and report concrete remaining defects.",
+        },
+      ],
+    },
+    {
+      "id": "verify_capture",
+      "files": [
+        "testing/integration/scoped-capture.test.ts",
+      ],
+      "do": {
+        "script": "bun run typecheck && bun x --no-install biome check packages/runner/src packages/workspace/src packages/types/src packages/messages/src packages/constants/src testing/cases/scoped-capture.ts testing/factories/scoped-capture.ts testing/integration/scoped-capture.test.ts",
+      },
+      "falsify": [
+        {
+          "script": "test -s testing/integration/scoped-capture.test.ts && test -s openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md && git diff --check -- packages testing openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md",
+        },
+      ],
+    },
+  ],
+}

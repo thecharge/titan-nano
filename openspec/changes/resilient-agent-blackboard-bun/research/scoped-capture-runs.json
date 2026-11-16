@@ -1,0 +1,1634 @@
+{
+  "schema_version": 1,
+  "scope": "project",
+  "publication": {
+    "format": "sanitized-inspection-summary",
+    "paths": "generic workspace paths",
+    "native_sessions": "deterministic UUID aliases",
+    "recovery": "requires retained private journal and creating runtime",
+    "historical_hashes": "SHA-256 fingerprints of original private journals"
+  },
+  "runs": [
+    {
+      "run_id": "dd1ab67b-f40a-42d3-a7f9-87b04f8f889a",
+      "state": "cancelled",
+      "backend": "codex-sdk",
+      "workflow_revision": "7dfb7c581f0bfe4cec4ed9b052dca822a94847ab10af0eb71b9eaca3664db776",
+      "runtime_build": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "journal_sha256": "bbf33754052f9a6957534c2293aa45d5b9eb880a7b87bb45af6c3e5375e03270",
+      "nodes": {
+        "scope_capture": {
+          "state": "pending",
+          "attempt": 1,
+          "refutations": 0
+        },
+        "capture_acceptance": {
+          "state": "pending",
+          "attempt": 2,
+          "refutations": 1
+        },
+        "integrate_capture": {
+          "state": "pending",
+          "attempt": 1,
+          "refutations": 0
+        },
+        "verify_capture": {
+          "state": "pending",
+          "attempt": 1,
+          "refutations": 0
+        }
+      },
+      "completed_phases": [
+        {
+          "step": "capture_acceptance",
+          "phase": "worker",
+          "attempt": 1,
+          "completed": true,
+          "session_alias": "d1780397-d439-5c19-93a2-c44c4e29268a",
+          "answer": "I couldn’t add the regression tests. The read-only sandbox rejected the native editor, and Titan’s versioned file tools returned “MCP tool call requires approval, but approval policy is never.”\n\nI changed no files and ran no tests. The three requested testing files remain absent, and the last inspection showed no product implementation diff to review. `testing/integration/model-offline-probe.test.ts` was untouched.\n\nThe source inspection identified two deterministic counterexamples for the controller:\n\n- After `Engine.create`, keep an unrelated peer file over the workspace byte limit and append to it during attempt preparation. Remove it when the worker starts, then recreate it inside the falsifier after full candidate verification. The claimed file should still prepare and roll back. An accidental full-tree scan would fail at either point. A parent-plus-child claim can also verify that rollback removes an exact file that was absent at preparation.\n- Leave the oversized peer in place when a script worker returns. Full candidate capture should block after recording the worker result. Remove the peer, reload the run, and resume. The original command count should remain one. The existing managed-read and delayed-check fixtures can separately verify that changed dependencies still invalidate evidence.\n\nThese are proposed assertions. No acceptance items were closed.",
+          "usage": [
+            {
+              "input_tokens": 713759,
+              "output_tokens": 3837,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "capture_acceptance",
+          "phase": "falsifier-0",
+          "attempt": 1,
+          "completed": true,
+          "session_alias": "0eb97a10-2630-5795-9d7d-8592da96e62b",
+          "answer": {
+            "verdict": "refuted",
+            "evidence": "All three required files are absent: testing/cases/scoped-capture.ts, testing/factories/scoped-capture.ts, and testing/integration/scoped-capture.test.ts. The existing liveRefute fixture checks rollback and preservation of an outside edit but introduces that edit before the worker returns. The existing script capture-recovery fixture checks that the command runs once across reload and resume, but expects the run to remain blocked. Neither establishes the missing scoped-capture behavior under continuous peer writes or rules out a globally serialized implementation. The delivery note records implementation and verification as pending. No files changed and no tests ran during this review.",
+            "failure": "disobey-task"
+          },
+          "usage": [
+            {
+              "input_tokens": 89598,
+              "output_tokens": 679,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "capture_acceptance",
+          "phase": "worker",
+          "attempt": 2,
+          "completed": true,
+          "session_alias": "8e8562c7-5194-502c-9732-3f83b323452f",
+          "answer": "Blocked before editing. The native editor rejected the write because the workspace is read-only. Titan’s versioned file read and write calls also returned “MCP tool call requires approval, but approval policy is never.”\n\nChanged files: none. The three requested test files remain absent. `testing/integration/model-offline-probe.test.ts` was untouched. No tests ran.\n\nI inspected the live-workspace, write-claims, and capture-recovery fixtures and the runner and workspace sources. The shared tree showed no implementation diff. Expanded write baselines already use selected paths. Restore-point preparation and rollback still read the full project before filtering to the write scope.\n\nA deterministic counterexample for both remaining full-tree reads is a disjoint peer that keeps changing a file larger than the subject run’s snapshot byte budget. Gate the peer before preparation and again from the refuting checker through rollback, and suspend its writes during candidate capture and validation. The old implementation fails the budget check in either scope-only window. A globally serialized implementation cannot reach the preparation gate while the peer holds its claim. The existing delayed-check and sealed-script fixtures can supply the dependency-invalidation and no-repeat recovery assertions. Those cases remain unverified.",
+          "usage": [
+            {
+              "input_tokens": 404861,
+              "output_tokens": 2039,
+              "cost_usd": null
+            }
+          ]
+        }
+      ],
+      "timeline": [
+        {
+          "id": 1,
+          "time": 1794849177207,
+          "type": "run_created",
+          "data": {}
+        },
+        {
+          "id": 2,
+          "time": 1794849177242,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 3,
+          "time": 1794849177286,
+          "type": "hub_read",
+          "data": {}
+        },
+        {
+          "id": 6,
+          "time": 1794849177821,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1
+          }
+        },
+        {
+          "id": 8,
+          "time": 1794849177839,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 9,
+          "time": 1794849177847,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 10,
+          "time": 1794849177952,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1
+          }
+        },
+        {
+          "id": 12,
+          "time": 1794849177967,
+          "type": "execution_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 13,
+          "time": 1794849177973,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 67,
+          "time": 1794849320368,
+          "type": "phase_received",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 68,
+          "time": 1794849323506,
+          "type": "phase_captured",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 69,
+          "time": 1794849323518,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 71,
+          "time": 1794849324743,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 72,
+          "time": 1794849324749,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 98,
+          "time": 1794849351418,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 99,
+          "time": 1794849351434,
+          "type": "result_judged",
+          "data": {
+            "results": [
+              {
+                "persona": "acceptance_author@1",
+                "run": "dd1ab67b-f40a-42d3-a7f9-87b04f8f889a",
+                "step": "capture_acceptance",
+                "part": "worker",
+                "candidate": "9f7fdbc06a48b133c021cf3a352039dcbfe5458e7cf0d38765f06bf79711fc77",
+                "attempt": 1,
+                "generation": 0,
+                "role": "worker",
+                "verdict": "refuted"
+              },
+              {
+                "persona": "acceptance_reviewer@1",
+                "run": "dd1ab67b-f40a-42d3-a7f9-87b04f8f889a",
+                "step": "capture_acceptance",
+                "part": "falsifier-0",
+                "candidate": "9f7fdbc06a48b133c021cf3a352039dcbfe5458e7cf0d38765f06bf79711fc77",
+                "attempt": 1,
+                "generation": 0,
+                "role": "checker",
+                "verdict": "refuted"
+              }
+            ]
+          }
+        },
+        {
+          "id": 100,
+          "time": 1794849352073,
+          "type": "hub_wrote",
+          "data": {
+            "step_id": "capture_acceptance"
+          }
+        },
+        {
+          "id": 101,
+          "time": 1794849352080,
+          "type": "result_refuted",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2
+          }
+        },
+        {
+          "id": 104,
+          "time": 1794849352371,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2
+          }
+        },
+        {
+          "id": 106,
+          "time": 1794849352393,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 107,
+          "time": 1794849352399,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 152,
+          "time": 1794849427237,
+          "type": "phase_received",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 153,
+          "time": 1794849430490,
+          "type": "phase_captured",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 154,
+          "time": 1794849430501,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 156,
+          "time": 1794849431765,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 157,
+          "time": 1794849431771,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 165,
+          "time": 1794849442947,
+          "type": "pause_requested",
+          "data": {}
+        },
+        {
+          "id": 168,
+          "time": 1794849442976,
+          "type": "run_paused",
+          "data": {}
+        },
+        {
+          "id": 169,
+          "time": 1794851170385,
+          "type": "run_cancelled",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "run_id": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+      "state": "cancelled",
+      "backend": "codex-sdk",
+      "workflow_revision": "7dfb7c581f0bfe4cec4ed9b052dca822a94847ab10af0eb71b9eaca3664db776",
+      "runtime_build": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "journal_sha256": "c97c43d6ae6e1fb32561472e37b1798118a6ac56f96ac00a995074170366f2f8",
+      "nodes": {
+        "scope_capture": {
+          "state": "blocked",
+          "attempt": 2,
+          "refutations": 1
+        },
+        "capture_acceptance": {
+          "state": "failed",
+          "attempt": 2,
+          "refutations": 2
+        },
+        "integrate_capture": {
+          "state": "skipped_dependency",
+          "attempt": 1,
+          "refutations": 0
+        },
+        "verify_capture": {
+          "state": "skipped_dependency",
+          "attempt": 1,
+          "refutations": 0
+        }
+      },
+      "completed_phases": [
+        {
+          "step": "capture_acceptance",
+          "phase": "worker",
+          "attempt": 1,
+          "completed": true,
+          "session_alias": "80a5d82a-2641-50ae-b2cf-65a654d8354a",
+          "answer": "Added 12 focused runner cases in [testing/cases/scoped-capture.ts](/workspace/titan-nano/testing/cases/scoped-capture.ts), [testing/factories/scoped-capture.ts](/workspace/titan-nano/testing/factories/scoped-capture.ts), and [testing/integration/scoped-capture.test.ts](/workspace/titan-nano/testing/integration/scoped-capture.test.ts). These were the only files I changed.\n\nThe original runner failed both new positive cases. Preparation rejected an out-of-scope sibling symlink before dispatch, and rollback blocked after sealing the parent-scope candidate. All 12 cases passed after the scoped preparation and rollback changes landed. The cases cover overlapping parent and child scopes, removal of an exact file absent from the restore point, changed or deleted dependencies, and sealed-result restart without repeating the worker command.\n\nType checking and the scoped Biome check passed. The focused offline command still exited nonzero because it enforces whole-product coverage. Peer writes run during preparation and rollback and pause for full-view candidate capture and validation. Complete read observation and broader acceptance remain unverified.",
+          "usage": [
+            {
+              "input_tokens": 3113352,
+              "output_tokens": 9548,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "capture_acceptance",
+          "phase": "falsifier-0",
+          "attempt": 1,
+          "completed": true,
+          "session_alias": "e185c0ad-b9a8-5a61-9f23-5751749a6719",
+          "answer": {
+            "verdict": "refuted",
+            "evidence": "Both rollback positives run a single Titan step. The peer in testing/factories/scoped-capture.ts:25 is a raw writeFile loop outside Titan admission. A runner that globally serializes all steps can still pass all 12 cases. The loop starts before the operation and checks its total writes at cleanup, so it also does not establish that a write overlaps either scoped capture. The rollback assertions at lines 151–173 omit the peer file on the refutation path. A regression that restores the claimed files correctly but also overwrites the unrelated peer file can pass both positives. I traced the existing observation and sealed-recovery factories and confirmed that they assert dependency invalidation and no worker redispatch, respectively. This was a read-only source review with no test execution.",
+            "failure": "incomplete-verification"
+          },
+          "usage": [
+            {
+              "input_tokens": 222128,
+              "output_tokens": 1081,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "capture_acceptance",
+          "phase": "worker",
+          "attempt": 2,
+          "completed": true,
+          "session_alias": "8fed68c7-f339-5ec6-a25d-67336d3b89e4",
+          "answer": "Added 12 focused integration cases through Titan’s normal runner entry points. Changed exactly three files.\n\n- [testing/cases/scoped-capture.ts](/workspace/titan-nano/testing/cases/scoped-capture.ts)\n- [testing/factories/scoped-capture.ts](/workspace/titan-nano/testing/factories/scoped-capture.ts)\n- [testing/integration/scoped-capture.test.ts](/workspace/titan-nano/testing/integration/scoped-capture.test.ts)\n\nThe rollback cases require a second Titan run to hold a disjoint write claim and complete writes during the preparation and rollback windows. An unrelated symlink makes a whole-project snapshot fail in both windows. The cases also check the peer’s edited file before releasing its claim, restore files under exact and parent/child scopes, and remove a file that was missing at preparation.\n\nThe negative cases detect both observed dependency changes and an unobserved peer edit. The recovery cases reuse the existing sealed-result fixture to check that restart does not repeat the original worker command.\n\nAll 12 cases passed inside the offline boundary. Typechecking and Biome passed. The focused test command exited 1 because its repository-wide coverage gate still applies to a one-file selection. The concurrency assertions measure runner-level windows. Exact filesystem interleavings, expanded write-baseline acceptance, and complete verification remain with the controller.",
+          "usage": [
+            {
+              "input_tokens": 1682787,
+              "output_tokens": 9521,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "capture_acceptance",
+          "phase": "falsifier-0",
+          "attempt": 2,
+          "completed": true,
+          "session_alias": "8cb28354-9db9-568c-9142-b707f2fa1fbf",
+          "answer": {
+            "verdict": "refuted",
+            "evidence": "The rollback cases can pass an implementation that restores the baseline and deletes worker-created files without checking whether a claimed file changed after candidate capture. The peer edits only a disjoint marker in testing/factories/scoped-capture.ts:81–101, so the conflict checks in packages/runner/src/live.ts:73–75 and the reconciliation path in packages/runner/src/file-reconciliation.ts:22–57 can regress without failing these cases. The write counters at testing/factories/scoped-capture.ts:117 and :223 bracket runner activity. They reject whole-run serialization and, with the symlink assertions, whole-project reads during preparation and rollback. They can still pass if peer writes are paused during the actual snapshot I/O and resume before the counters are checked. The sealed-result fixture does verify one original worker execution and retained receipt fields after replay. Findings are from read-only source inspection. No tests were run.",
+            "failure": "incomplete-verification"
+          },
+          "usage": [
+            {
+              "input_tokens": 214381,
+              "output_tokens": 1324,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "scope_capture",
+          "phase": "worker",
+          "attempt": 1,
+          "completed": true,
+          "session_alias": "b2956b7f-2f16-56aa-a71a-ef9c669413eb",
+          "answer": "Live restore-point preparation, rollback comparison, and rollback approval hashing now capture only the negotiated write scope. Expanded write baselines already used selected paths. Full candidate and reconciliation captures remain in place because shell and native reads can observe files outside the write scope.\n\nChanged files:\n\n- [packages/runner/src/live.ts](/workspace/titan-nano/packages/runner/src/live.ts)\n- [packages/runner/src/steps.ts](/workspace/titan-nano/packages/runner/src/steps.ts)\n- [packages/runner/src/file-reconciliation.ts](/workspace/titan-nano/packages/runner/src/file-reconciliation.ts)\n\nAn unrelated changing file or symlink previously could abort a scope-only capture before the runner filtered the results. The selected-path read excludes that peer. A change outside the write scope can still invalidate a candidate, even when the phase recorded some managed reads. Whole-project claims and path lists beyond the selected-read limit still use full capture.\n\nBiome and `git diff --check` passed. A filtered run reported 12 passing recovery cases, including sealed script recovery without a repeated command, but exited unsuccessfully at the Podman boundary guard. Podman could not initialize in this sandbox. The adversarial concurrency cases and installed-package verification remain pending with the controller. No OpenSpec acceptance was closed.",
+          "usage": [
+            {
+              "input_tokens": 2132722,
+              "output_tokens": 3853,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "scope_capture",
+          "phase": "falsifier-0",
+          "attempt": 1,
+          "completed": true,
+          "session_alias": "eb4cfd01-0783-530e-8480-c24efff4a9c0",
+          "answer": {
+            "verdict": "refuted",
+            "evidence": "Rollback fails when an outside edit replaces a parent directory with a regular file. Declare `dir/a` in the write scope, let the worker delete it and seal the candidate, then replace the empty `dir` with a regular file before rollback. The selected capture sees the parent, but `scoped` drops it. Rollback treats `dir/a` as missing in both the candidate and the live tree, then `putBack` fails while trying to create `dir`. The existing rollback logic therefore bypasses conflict reconciliation for this case. See [live.ts](/workspace/titan-nano/packages/runner/src/live.ts:68) and [workspace/index.ts](/workspace/titan-nano/packages/workspace/src/index.ts:125). The inspected live cases cover individual outside edits, and the snapshot recovery cases cover WAL mutations during full capture. Neither proves continuous unrelated writes are tolerated during scoped preparation and rollback. Source inspection confirmed that candidate verification still compares the full readable tree even when managed reads exist, and expanded write baselines still use selected paths and verify their stored hashes. `git diff --check` passed. No files were changed and no suites were run.",
+            "failure": "incomplete-verification"
+          },
+          "usage": [
+            {
+              "input_tokens": 199306,
+              "output_tokens": 1347,
+              "cost_usd": null
+            }
+          ]
+        },
+        {
+          "step": "scope_capture",
+          "phase": "worker",
+          "attempt": 2,
+          "completed": true,
+          "session_alias": "8311b97d-838e-5834-9696-952afecca074",
+          "answer": "Live restore-point preparation, rollback, and rollback reconciliation now capture the negotiated write set. If an outside edit replaces `dir` with a regular file after the worker deletes `dir/a`, rollback reports a conflict. Approved conflict-preserving rollback leaves the replacement intact.\n\nChanged files\n\n- [live.ts](/workspace/titan-nano/packages/runner/src/live.ts)\n- [steps.ts](/workspace/titan-nano/packages/runner/src/steps.ts)\n- [file-reconciliation.ts](/workspace/titan-nano/packages/runner/src/file-reconciliation.ts)\n\nTypecheck, Biome, and `git diff --check` passed. Two temporary-filesystem probes exercised the rollback code directly. One verified restoration of an exact missing file and reproduced the parent replacement conflict. The other recorded 547 unrelated writes overlapping selected capture and rollback while the claimed file was restored. The integration run failed the required Podman boundary check, so end-to-end verification remains pending.\n\nCandidate capture and validation still use the full readable view because shell and native reads can be unobserved even when managed reads exist. Retained reconciliation snapshots keep their full hash checks, and expanded write baselines already use selected capture. Unrestricted scopes and selections above the existing selected-path limit still use full capture. The acceptance files and delivery record were outside the writable scope. No OpenSpec tasks were closed.",
+          "usage": [
+            {
+              "input_tokens": 1555404,
+              "output_tokens": 5301,
+              "cost_usd": null
+            }
+          ]
+        }
+      ],
+      "timeline": [
+        {
+          "id": 1,
+          "time": 1794849723389,
+          "type": "run_created",
+          "data": {}
+        },
+        {
+          "id": 2,
+          "time": 1794849723418,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 3,
+          "time": 1794849723462,
+          "type": "hub_read",
+          "data": {}
+        },
+        {
+          "id": 6,
+          "time": 1794849724017,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1
+          }
+        },
+        {
+          "id": 8,
+          "time": 1794849724040,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 9,
+          "time": 1794849724048,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 10,
+          "time": 1794849724145,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1
+          }
+        },
+        {
+          "id": 12,
+          "time": 1794849724159,
+          "type": "execution_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 13,
+          "time": 1794849724166,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 258,
+          "time": 1794850231345,
+          "type": "phase_received",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 259,
+          "time": 1794850234480,
+          "type": "phase_captured",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 260,
+          "time": 1794850234486,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 262,
+          "time": 1794850235740,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 263,
+          "time": 1794850235747,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 1,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 290,
+          "time": 1794850279346,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 291,
+          "time": 1794850279361,
+          "type": "result_judged",
+          "data": {
+            "results": [
+              {
+                "persona": "acceptance_author@1",
+                "run": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+                "step": "capture_acceptance",
+                "part": "worker",
+                "candidate": "397271958d14a3bb91039d1764be2575653c67fbd8b459ce932b031f8e28b728",
+                "attempt": 1,
+                "generation": 0,
+                "role": "worker",
+                "verdict": "refuted"
+              },
+              {
+                "persona": "acceptance_reviewer@1",
+                "run": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+                "step": "capture_acceptance",
+                "part": "falsifier-0",
+                "candidate": "397271958d14a3bb91039d1764be2575653c67fbd8b459ce932b031f8e28b728",
+                "attempt": 1,
+                "generation": 0,
+                "role": "checker",
+                "verdict": "refuted"
+              }
+            ]
+          }
+        },
+        {
+          "id": 292,
+          "time": 1794850279954,
+          "type": "hub_wrote",
+          "data": {
+            "step_id": "capture_acceptance"
+          }
+        },
+        {
+          "id": 293,
+          "time": 1794850279963,
+          "type": "result_refuted",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2
+          }
+        },
+        {
+          "id": 296,
+          "time": 1794850280263,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2
+          }
+        },
+        {
+          "id": 298,
+          "time": 1794850280285,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 299,
+          "time": 1794850280290,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 455,
+          "time": 1794850596589,
+          "type": "phase_received",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 456,
+          "time": 1794850600187,
+          "type": "phase_captured",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 457,
+          "time": 1794850600195,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 459,
+          "time": 1794850601523,
+          "type": "execution_started",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 460,
+          "time": 1794850601531,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "capture_acceptance",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 484,
+          "time": 1794850650124,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "capture_acceptance",
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 485,
+          "time": 1794850650138,
+          "type": "result_judged",
+          "data": {
+            "results": [
+              {
+                "persona": "acceptance_author@1",
+                "run": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+                "step": "capture_acceptance",
+                "part": "worker",
+                "candidate": "1d49a62de3a038f95b36e9ec1b36886e0cb1fe6678296d08d721a0f9587c34e8",
+                "attempt": 2,
+                "generation": 0,
+                "role": "worker",
+                "verdict": "refuted"
+              },
+              {
+                "persona": "acceptance_reviewer@1",
+                "run": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+                "step": "capture_acceptance",
+                "part": "falsifier-0",
+                "candidate": "1d49a62de3a038f95b36e9ec1b36886e0cb1fe6678296d08d721a0f9587c34e8",
+                "attempt": 2,
+                "generation": 0,
+                "role": "checker",
+                "verdict": "refuted"
+              }
+            ]
+          }
+        },
+        {
+          "id": 486,
+          "time": 1794850650760,
+          "type": "hub_wrote",
+          "data": {
+            "step_id": "capture_acceptance"
+          }
+        },
+        {
+          "id": 487,
+          "time": 1794850650768,
+          "type": "step_failed",
+          "data": {
+            "step_id": "capture_acceptance"
+          }
+        },
+        {
+          "id": 489,
+          "time": 1794850650779,
+          "type": "step_skipped",
+          "data": {
+            "step_id": "integrate_capture"
+          }
+        },
+        {
+          "id": 490,
+          "time": 1794850650787,
+          "type": "step_skipped",
+          "data": {
+            "step_id": "verify_capture"
+          }
+        },
+        {
+          "id": 499,
+          "time": 1794850744134,
+          "type": "phase_received",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 500,
+          "time": 1794850747176,
+          "type": "phase_captured",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 501,
+          "time": 1794850747186,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "scope_capture",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 503,
+          "time": 1794850748378,
+          "type": "execution_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 504,
+          "time": 1794850748385,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 1,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 527,
+          "time": 1794850798513,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "scope_capture",
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 528,
+          "time": 1794850798528,
+          "type": "result_judged",
+          "data": {
+            "results": [
+              {
+                "persona": "implementer@1",
+                "run": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+                "step": "scope_capture",
+                "part": "worker",
+                "candidate": "4087a8922f6dc90b407dcdb319873e38bd05597597b6fe84ca14826aab03c374",
+                "attempt": 1,
+                "generation": 0,
+                "role": "worker",
+                "verdict": "refuted"
+              },
+              {
+                "persona": "code_reviewer@1",
+                "run": "f5c99573-f9c1-4810-94a0-1fc76aad63eb",
+                "step": "scope_capture",
+                "part": "falsifier-0",
+                "candidate": "4087a8922f6dc90b407dcdb319873e38bd05597597b6fe84ca14826aab03c374",
+                "attempt": 1,
+                "generation": 0,
+                "role": "checker",
+                "verdict": "refuted"
+              }
+            ]
+          }
+        },
+        {
+          "id": 529,
+          "time": 1794850799152,
+          "type": "hub_wrote",
+          "data": {
+            "step_id": "scope_capture"
+          }
+        },
+        {
+          "id": 530,
+          "time": 1794850799161,
+          "type": "result_refuted",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2
+          }
+        },
+        {
+          "id": 533,
+          "time": 1794850799568,
+          "type": "attempt_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2
+          }
+        },
+        {
+          "id": 535,
+          "time": 1794850799582,
+          "type": "execution_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 536,
+          "time": 1794850799590,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 604,
+          "time": 1794851607738,
+          "type": "phase_received",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 605,
+          "time": 1794851610767,
+          "type": "phase_captured",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 606,
+          "time": 1794851610776,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "scope_capture",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 608,
+          "time": 1794851611977,
+          "type": "execution_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 609,
+          "time": 1794851611983,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 617,
+          "time": 1794851620861,
+          "type": "execution_blocked",
+          "data": {
+            "step_id": "scope_capture",
+            "phase": "falsifier-0",
+            "reason": "protocol_json: Agent host message exceeds its byte budget"
+          }
+        },
+        {
+          "id": 619,
+          "time": 1794851620872,
+          "type": "step_blocked",
+          "data": {
+            "step_id": "scope_capture",
+            "error": "Agent host message exceeds its byte budget"
+          }
+        },
+        {
+          "id": 620,
+          "time": 1794851620879,
+          "type": "run_blocked",
+          "data": {}
+        },
+        {
+          "id": 621,
+          "time": 1794851727014,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 622,
+          "time": 1794851727069,
+          "type": "hub_read",
+          "data": {}
+        },
+        {
+          "id": 625,
+          "time": 1794851729582,
+          "type": "execution_started",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 626,
+          "time": 1794851729589,
+          "type": "execution_dispatching",
+          "data": {
+            "step_id": "scope_capture",
+            "attempt": 2,
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 633,
+          "time": 1794851737204,
+          "type": "execution_blocked",
+          "data": {
+            "step_id": "scope_capture",
+            "phase": "falsifier-0",
+            "reason": "protocol_json: Agent host message exceeds its byte budget"
+          }
+        },
+        {
+          "id": 635,
+          "time": 1794851737215,
+          "type": "step_blocked",
+          "data": {
+            "step_id": "scope_capture",
+            "error": "Agent host message exceeds its byte budget"
+          }
+        },
+        {
+          "id": 636,
+          "time": 1794851737220,
+          "type": "run_blocked",
+          "data": {}
+        },
+        {
+          "id": 637,
+          "time": 1794851885529,
+          "type": "run_cancelled",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "run_id": "6f1d472c-208d-42dd-8cac-01976239f372",
+      "state": "cancelled",
+      "backend": "codex-sdk",
+      "workflow_revision": "5213d3023fd885fa32865a6d4ea15323bee67e62adbe54802a4b6621cc19a2d0",
+      "runtime_build": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "journal_sha256": "548615594ae69b26ec03c5ae6356e9ebf74388c517ef3ab5da5f5d4c4efa6425",
+      "nodes": {
+        "verify_capture": {
+          "state": "blocked",
+          "attempt": 1,
+          "refutations": 0
+        }
+      },
+      "completed_phases": [],
+      "timeline": [
+        {
+          "id": 1,
+          "time": 1794852080306,
+          "type": "run_created",
+          "data": {}
+        },
+        {
+          "id": 2,
+          "time": 1794852080316,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 9,
+          "time": 1794852080688,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 11,
+          "time": 1794852508392,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 15,
+          "time": 1794852508465,
+          "type": "script_started",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "worker",
+            "attempt": 1,
+            "request_id": "script-50681abad3aefe3373f61aa9f7e81df928f057d8ece6f7f72ce9f96a0ccd5a40"
+          }
+        },
+        {
+          "id": 16,
+          "time": 1794852517389,
+          "type": "script_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "worker",
+            "attempt": 1,
+            "request_id": "script-50681abad3aefe3373f61aa9f7e81df928f057d8ece6f7f72ce9f96a0ccd5a40",
+            "exit_code": 2
+          }
+        },
+        {
+          "id": 18,
+          "time": 1794852517412,
+          "type": "step_blocked",
+          "data": {
+            "step_id": "verify_capture",
+            "error": "apps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/formats.ts(1,35): error TS2307: Cannot find module 'node:util' or its corresponding type declarations.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/index.ts(64,22): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/index.ts(112,4): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/index.ts(113,36): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/index.ts(113,48): error TS2868: Cannot find name 'Bun'. Do you need to install type definitions for Bun? Try `npm i --save-dev @types/bun` and then add 'bun' to the types field in your tsconfig.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/index.ts(117,17): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/statements.ts(1,26): error TS2307: Cannot find module 'node:fs/promises' or its corresponding type declarations.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/node_modules/@titan/workflow/src/statements.ts(2,47): error TS2307: Cannot find module 'node:path' or its corresponding type declarations.\napps/cli/node_modules/@titan/artifacts/node_modules/@titan/board/src/events.ts(20,15): error TS2591: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\napps/cli/node_modules/@tit"
+          }
+        },
+        {
+          "id": 19,
+          "time": 1794852517423,
+          "type": "run_blocked",
+          "data": {}
+        },
+        {
+          "id": 20,
+          "time": 1794852953484,
+          "type": "run_cancelled",
+          "data": {}
+        }
+      ],
+      "native_agent_calls": 0
+    },
+    {
+      "run_id": "b65259ec-34ec-4e3b-a626-9d97163e1d24",
+      "state": "cancelled",
+      "backend": "codex-sdk",
+      "workflow_revision": "5213d3023fd885fa32865a6d4ea15323bee67e62adbe54802a4b6621cc19a2d0",
+      "runtime_build": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "journal_sha256": "af28c46a10e71c72928cdea031f28cef0a094599b2953c386defffdba3718b4a",
+      "nodes": {
+        "verify_capture": {
+          "state": "blocked",
+          "attempt": 1,
+          "refutations": 0
+        }
+      },
+      "completed_phases": [],
+      "timeline": [
+        {
+          "id": 1,
+          "time": 1794853034770,
+          "type": "run_created",
+          "data": {}
+        },
+        {
+          "id": 2,
+          "time": 1794853034812,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 9,
+          "time": 1794853035305,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 11,
+          "time": 1794853057741,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 15,
+          "time": 1794853057841,
+          "type": "script_started",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "worker",
+            "attempt": 1,
+            "request_id": "script-50681abad3aefe3373f61aa9f7e81df928f057d8ece6f7f72ce9f96a0ccd5a40"
+          }
+        },
+        {
+          "id": 17,
+          "time": 1794853067967,
+          "type": "step_blocked",
+          "data": {
+            "step_id": "verify_capture",
+            "error": "The owned command exceeded its deadline"
+          }
+        },
+        {
+          "id": 18,
+          "time": 1794853067975,
+          "type": "run_blocked",
+          "data": {}
+        },
+        {
+          "id": 19,
+          "time": 1794853126382,
+          "type": "run_cancelled",
+          "data": {}
+        }
+      ],
+      "native_agent_calls": 0
+    },
+    {
+      "run_id": "43fdf53c-bb52-4f4a-9d2c-7a36f758e65e",
+      "state": "passed",
+      "backend": "codex-sdk",
+      "workflow_revision": "5658f8e0a9343d33554a19c847ea79e3d4e938a705e1035312934628b00505ae",
+      "runtime_build": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "journal_sha256": "f24a1472bf459e4af114d54acc8a0443b7647cc91fd91a134ec9cfe5f9513767",
+      "nodes": {
+        "verify_capture": {
+          "state": "passed",
+          "attempt": 1,
+          "refutations": 0
+        }
+      },
+      "completed_phases": [
+        {
+          "step": "verify_capture",
+          "phase": "worker",
+          "attempt": 1,
+          "completed": true,
+          "script_exit_code": 0,
+          "usage": []
+        },
+        {
+          "step": "verify_capture",
+          "phase": "proof-0-0",
+          "attempt": 1,
+          "completed": true,
+          "script_exit_code": 0,
+          "usage": []
+        },
+        {
+          "step": "verify_capture",
+          "phase": "proof-0-1",
+          "attempt": 1,
+          "completed": true,
+          "script_exit_code": 0,
+          "usage": []
+        },
+        {
+          "step": "verify_capture",
+          "phase": "falsifier-0",
+          "attempt": 1,
+          "completed": true,
+          "script_exit_code": 0,
+          "usage": []
+        }
+      ],
+      "timeline": [
+        {
+          "id": 1,
+          "time": 1794853139611,
+          "type": "run_created",
+          "data": {}
+        },
+        {
+          "id": 2,
+          "time": 1794853139628,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 9,
+          "time": 1794853140024,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 11,
+          "time": 1794853165753,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 15,
+          "time": 1794853165830,
+          "type": "script_started",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "worker",
+            "attempt": 1,
+            "request_id": "script-821f6f519bfb6a1a46f2e0b7fd50d3a5006a5ce89480f7b54fb7a1ff103bf43a"
+          }
+        },
+        {
+          "id": 16,
+          "time": 1794853165900,
+          "type": "script_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "worker",
+            "attempt": 1,
+            "request_id": "script-821f6f519bfb6a1a46f2e0b7fd50d3a5006a5ce89480f7b54fb7a1ff103bf43a",
+            "exit_code": 0
+          }
+        },
+        {
+          "id": 19,
+          "time": 1794853167831,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "worker"
+          }
+        },
+        {
+          "id": 23,
+          "time": 1794853168451,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 24,
+          "time": 1794853175521,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 29,
+          "time": 1794853176186,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 31,
+          "time": 1794853206762,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 35,
+          "time": 1794853207421,
+          "type": "script_started",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "proof-0-0",
+            "attempt": 1,
+            "request_id": "script-6f6f413ff2a3de230ba8bbc252cd06d68fe38e7ca8c8ffac0300478cc8a26350"
+          }
+        },
+        {
+          "id": 36,
+          "time": 1794853217776,
+          "type": "script_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "proof-0-0",
+            "attempt": 1,
+            "request_id": "script-6f6f413ff2a3de230ba8bbc252cd06d68fe38e7ca8c8ffac0300478cc8a26350",
+            "exit_code": 0
+          }
+        },
+        {
+          "id": 37,
+          "time": 1794853217795,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "proof-0-0"
+          }
+        },
+        {
+          "id": 41,
+          "time": 1794853218432,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 43,
+          "time": 1794853249879,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 47,
+          "time": 1794853250526,
+          "type": "script_started",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "proof-0-1",
+            "attempt": 1,
+            "request_id": "script-f0a7c74bba74d5e1de33b91d4e60cd9aaa3206b2a1bbb2ad15b538568ec1ba03"
+          }
+        },
+        {
+          "id": 48,
+          "time": 1794853260760,
+          "type": "script_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "proof-0-1",
+            "attempt": 1,
+            "request_id": "script-f0a7c74bba74d5e1de33b91d4e60cd9aaa3206b2a1bbb2ad15b538568ec1ba03",
+            "exit_code": 0
+          }
+        },
+        {
+          "id": 49,
+          "time": 1794853260775,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "proof-0-1"
+          }
+        },
+        {
+          "id": 54,
+          "time": 1794853262152,
+          "type": "run_waiting",
+          "data": {}
+        },
+        {
+          "id": 56,
+          "time": 1794853298922,
+          "type": "run_started",
+          "data": {}
+        },
+        {
+          "id": 60,
+          "time": 1794853300200,
+          "type": "script_started",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "falsifier-0",
+            "attempt": 1,
+            "request_id": "script-057afb00e5b61e2b1bc9222441052e51b46b115a005578dec3cbae6d95059f0c"
+          }
+        },
+        {
+          "id": 61,
+          "time": 1794853300273,
+          "type": "script_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "falsifier-0",
+            "attempt": 1,
+            "request_id": "script-057afb00e5b61e2b1bc9222441052e51b46b115a005578dec3cbae6d95059f0c",
+            "exit_code": 0
+          }
+        },
+        {
+          "id": 62,
+          "time": 1794853300280,
+          "type": "phase_completed",
+          "data": {
+            "step_id": "verify_capture",
+            "phase": "falsifier-0"
+          }
+        },
+        {
+          "id": 65,
+          "time": 1794853301568,
+          "type": "step_passed",
+          "data": {
+            "step_id": "verify_capture",
+            "attempt": 1
+          }
+        },
+        {
+          "id": 67,
+          "time": 1794853305035,
+          "type": "run_passed",
+          "data": {}
+        }
+      ],
+      "native_agent_calls": 0
+    }
+  ],
+  "controller_changes": [
+    "Bound Codex MCP approval overrides to the execution role tool allow list.",
+    "Restored the second acceptance candidate after refutation and cancellation.",
+    "Added four normal-engine rollback conflict cases with approvals and denials, including replaced parents and an unrelated symlink.",
+    "Removed unreachable over-capacity fallback because execution claims and selected reads share the same path bound.",
+    "Preserved the operating system readlink error code in the pinned sandbox patch and added two non-link regression cases.",
+    "Kept the exact owner-authorized commands and moved TypeScript/Biome into the supported 120-second deterministic script verification.",
+    "Verified two adopted runner files match their retained Titan candidate byte for byte before recording run authorship."
+  ],
+  "observed_verification": {
+    "focused_initial": {
+      "passed": 108,
+      "failed": 0,
+      "suites": 3
+    },
+    "focused_final_scopes_and_claims": {
+      "passed": 73,
+      "failed": 0,
+      "suites": 2
+    },
+    "typecheck": "passed",
+    "biome_changed_files": "passed",
+    "flat_tests": "passed",
+    "full_staged_before_readlink": {
+      "passed": 7120,
+      "skipped": 1,
+      "failed": 0,
+      "suites": 362,
+      "product_sources": 492,
+      "coverage_gaps": 0
+    },
+    "readlink_focused_attempts": [
+      {
+        "passed": 66,
+        "failed": 1,
+        "suites": 2,
+        "failure": "sandbox child could not exec /usr/bin/env in the atomic rename case"
+      },
+      {
+        "passed": 66,
+        "failed": 1,
+        "suites": 2,
+        "failure": "sandbox child could not exec /usr/bin/env in the literal filename case"
+      }
+    ],
+    "read_only_startup_probe": {
+      "before_failures": 0,
+      "after_failures": 0,
+      "attempts_per_helper": 50
+    },
+    "script_run": "43fdf53c-bb52-4f4a-9d2c-7a36f758e65e passed; worker, two deterministic verifications and script falsifier each exited zero"
+  },
+  "limits": [
+    "The real Codex workflow required controller repair and manual completion.",
+    "Its acceptance task was refuted twice. Its second source review blocked on the one-MiB host-message limit and repeated that failure after resume.",
+    "The native workflow did not reach integration or script verification.",
+    "Peer progress is checked across preparation and rollback windows. The tests do not establish simultaneous kernel I/O.",
+    "Full candidate and received-result checks still validate the complete readable view for unobserved native reads.",
+    "No parent OpenSpec task is closed by this delivery.",
+    "The first approved script failed inside the sandbox. Its repaired-helper retry reached the ordinary ten-second command deadline. Both runs were cancelled with evidence retained.",
+    "The final script-only run used a separate local controller installation with the repaired helper. It made no additional vendor calls.",
+    "Two focused offline selections each reported an intermittent sandbox child startup failure. A read-only fifty-start comparison per helper did not reproduce it.",
+    "The CLI bundle runtime identity does not distinguish the sandbox helper change. Helper fingerprints are retained separately."
+  ],
+  "runtime_components": {
+    "native_repaired": {
+      "titan.js": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "agent-host.js": "7a7d5d82b605d57aa71485525ca80eac7e263c979ef5e57e26d54b2d96d0ea19",
+      "sandlock": "3d63d087e788866ebf548e6b5a4561e2ea8ebe959fff78444c47b3e1336e2237"
+    },
+    "script_repaired": {
+      "titan.js": "9c207e6e06880dbbfe29c39e0a49cd58618c2a58e0521bfac0b84800d50ef5d4",
+      "agent-host.js": "7a7d5d82b605d57aa71485525ca80eac7e263c979ef5e57e26d54b2d96d0ea19",
+      "sandlock": "c9e8e792d3e60e713e4457cae82affe1d1fc739e4efeaac22198b20b9173a90d"
+    }
+  }
+}

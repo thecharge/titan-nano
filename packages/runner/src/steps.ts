@@ -54,7 +54,7 @@ import type { Capacity } from "./capacity.ts";
 import type { FileAccess } from "./file-access.ts";
 import { reconcileFiles } from "./file-reconciliation.ts";
 import type { RunKnowledge } from "./knowledge.ts";
-import { liveRun, scoped, verifyLiveCandidate, workPath } from "./live.ts";
+import { liveRun, readLiveWriteTree, scoped, verifyLiveCandidate, workPath } from "./live.ts";
 import { recordPersonaQuality } from "./persona-quality.ts";
 import type { AgentPhases } from "./phases.ts";
 import { assertProofCheckers } from "./proof-checkers.ts";
@@ -116,7 +116,7 @@ export class RunSteps {
       const limits = run.config.value.limits;
       const live = liveRun(run);
       const files = live
-        ? scoped(run, step, await readTree(run.project, limits, undefined, run.runtime_paths))
+        ? scoped(run, step, await readLiveWriteTree(run, step))
         : await assembleRun(run, runParents(run, step));
       const input = resolve(folder, RunFile.Input);
       const work = workPath(run, state, folder);

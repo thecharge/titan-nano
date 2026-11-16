@@ -1,5 +1,5 @@
-import { resolve } from "node:path";
-import { ErrorCode, RunFile, WorkspaceModeSetting } from "@titan/constants";
+import { dirname, resolve } from "node:path";
+import { ErrorCode, PathPart, RunFile, WorkspaceModeSetting } from "@titan/constants";
 import { OperationalError } from "@titan/errors";
 import { liveCandidateConflict, rollbackConflict } from "@titan/messages";
 import type { FileMap, NodeState, Run, Step } from "@titan/types";
@@ -20,6 +20,20 @@ export function scoped(run: Run, step: Step, files: FileMap): FileMap {
   return Object.fromEntries(
     Object.entries(files).filter(([path]) => listed.some((entry) => scopeCovers(entry, path))),
   );
+}
+
+export async function readLiveWriteTree(run: Run, step: Step): Promise<FileMap> {
+  const paths = [...new Set(writePaths(run, step))];
+  return readTree(run.project, run.config.value.limits, undefined, run.runtime_paths, paths);
+}
+
+function hasFileParent(files: FileMap, path: string): boolean {
+  let parent = dirname(path);
+  while (parent !== PathPart.Current) {
+    if (Object.hasOwn(files, parent)) return true;
+    parent = dirname(parent);
+  }
+  return false;
 }
 
 export function workPath(run: Run, state: NodeState, folder: string): string {
@@ -52,18 +66,15 @@ export async function rollBack(
     await withWriteInputs(run, step, await readTree(restorePoint, limits)),
   );
   const after = scoped(run, step, await readTree(candidate, limits));
-  const current = scoped(
-    run,
-    step,
-    await readTree(run.project, limits, undefined, run.runtime_paths),
-  );
+  const current = await readLiveWriteTree(run, step);
   const restored: FileMap = {};
   const removals: string[] = [];
   for (const path of new Set([...Object.keys(before), ...Object.keys(after)])) {
     if (fileIdentity(before[path]) === fileIdentity(after[path])) continue;
-    if (fileIdentity(current[path]) !== fileIdentity(after[path]) && preserveConcurrent) continue;
-    if (fileIdentity(current[path]) !== fileIdentity(after[path]))
+    if (fileIdentity(current[path]) !== fileIdentity(after[path]) || hasFileParent(current, path)) {
+      if (preserveConcurrent) continue;
       throw new OperationalError(ErrorCode.FileConflict, rollbackConflict(path));
+    }
     const entry = before[path];
     if (entry) restored[path] = entry;
     else removals.push(path);

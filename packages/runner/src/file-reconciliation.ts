@@ -5,7 +5,7 @@ import { RunnerMessage } from "@titan/messages";
 import type { RequestLedger } from "@titan/requests";
 import type { NodeState, Run, Step } from "@titan/types";
 import { readTree, treeHash } from "@titan/workspace";
-import { rollBack, scoped } from "./live.ts";
+import { readLiveWriteTree, rollBack, scoped } from "./live.ts";
 import { verifyReconciliation } from "./reconciliation.ts";
 import { withWriteInputs } from "./write-inputs.ts";
 
@@ -30,9 +30,7 @@ export async function reconcileFiles(
     operation: FileReconciliation.Operation,
     resource: step.id,
     content_hashes: {
-      current: await treeHash(
-        scoped(run, step, await readTree(run.project, limits, undefined, run.runtime_paths)),
-      ),
+      current: await treeHash(await readLiveWriteTree(run, step)),
       candidate: await treeHash(scoped(run, step, await readTree(candidate, limits))),
       before: await treeHash(
         scoped(run, step, await withWriteInputs(run, step, await readTree(input, limits))),

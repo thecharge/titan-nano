@@ -41,6 +41,16 @@ export function codexNativeConfiguration(args) {
   assert.equal(settings.startup_timeout_sec, connection.timeout_ms / 1000);
   assert.equal(settings.tool_timeout_sec, connection.timeout_ms / 1000);
   assert.deepEqual(settings.enabled_tools, [...NativeToolPolicy[connection.scope.role]]);
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(settings).filter(([key]) => key.startsWith("tools."))),
+    Object.fromEntries(
+      NativeToolPolicy[connection.scope.role].map((tool) => [
+        `tools.${tool}.approval_mode`,
+        "approve",
+      ]),
+    ),
+  );
+  assert.equal(settings.default_tools_approval_mode, undefined);
   if (settings.url !== undefined) {
     assert.equal(settings.url, connection.url);
     assert.equal(settings.bearer_token_env_var, NativeToolEnvironment.Token);

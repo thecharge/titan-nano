@@ -1,4 +1,5 @@
 import {
+  CodexNativeToolApproval,
   CodexNativeToolReadiness,
   ErrorCode,
   NativeTool,
@@ -32,6 +33,12 @@ export function codexNativeTools(
       startup_timeout_sec: binding.connection.timeout_ms / 1000,
       tool_timeout_sec: binding.connection.timeout_ms / 1000,
       enabled_tools: [...NativeToolPolicy[binding.connection.scope.role]],
+      tools: Object.fromEntries(
+        NativeToolPolicy[binding.connection.scope.role].map((tool) => [
+          tool,
+          { approval_mode: CodexNativeToolApproval },
+        ]),
+      ),
     },
   };
   return { environment: environment(binding.connection), servers };

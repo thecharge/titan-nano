@@ -1,0 +1,48 @@
+{
+  "name": "Verify repaired scoped shared-file capture",
+  "goal": "Verify the controller-completed delivery retained from real Codex run f5c99573-f9c1-4810-94a0-1fc76aad63eb. Preserve that run and its refutations. Execute the declared script checks against the shared project.",
+  "harness": "codex",
+  "workspace": {
+    "mode": "live",
+  },
+  "limits": {
+    "max_parallel": 2,
+    "max_minutes": 60,
+  },
+  "defaults": {
+    "backend": "codex-sdk",
+    "max_attempts": 1,
+  },
+  "recovery": {
+    "max_retries": 2,
+  },
+  "approvals": {
+    "tool": "main",
+    "resource": "main",
+  },
+  "personas": {},
+  "steps": [
+    {
+      "id": "verify_capture",
+      "files": [
+        "testing/integration/scoped-capture.test.ts",
+      ],
+      "do": {
+        "script": "test -s testing/integration/scoped-capture.test.ts && test -s openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md && git diff --check -- packages testing openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md",
+      },
+      "falsify": [
+        {
+          "script": "test -s testing/integration/scoped-capture.test.ts && test -s openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md && git diff --check -- packages testing openspec/changes/resilient-agent-blackboard-bun/research/scoped-capture-delivery.md",
+        },
+      ],
+      "verify": [
+        {
+          "kind": "script",
+          "run": "bun run typecheck && bun x --no-install biome check packages/runner/src packages/workspace/src packages/types/src packages/messages/src packages/constants/src testing/cases/scoped-capture.ts testing/factories/scoped-capture.ts testing/integration/scoped-capture.test.ts",
+          "deterministic": true,
+          "timeout_s": 120,
+        },
+      ],
+    },
+  ],
+}

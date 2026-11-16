@@ -41,6 +41,7 @@ export const CodexDisabledFeatures = {
 } as const;
 
 export const CodexNativeToolReadiness = "connection";
+export const CodexNativeToolApproval = "approve";
 
 export enum SdkArgumentField {
   Options = "options",

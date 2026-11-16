@@ -3,6 +3,24 @@ import { positive, rejected } from "@titan/test-factories";
 export const scriptBoundaryCases = {
   positive: [
     positive(
+      "reading a regular file as a link retains its invalid-argument error",
+      [
+        "bun -e \"const fs=require('node:fs');try{fs.readlinkSync('allowed.txt');process.exit(8)}catch(e){if(e.code!=='EINVAL')throw e}fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "reading a directory as a link retains its invalid-argument error",
+      [
+        "bun -e \"const fs=require('node:fs');try{fs.readlinkSync('nested');process.exit(8)}catch(e){if(e.code!=='EINVAL')throw e}fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
       "approved scripts retain loopback network access",
       [
         "bun -e \"const server=Bun.serve({port:0,fetch(){return new Response('ok')}});try{const response=await fetch('http://127.0.0.1:'+server.port);if(await response.text()!=='ok')process.exit(8);require('node:fs').writeFileSync('allowed.txt','Changed')}finally{server.stop(true)}\"",
