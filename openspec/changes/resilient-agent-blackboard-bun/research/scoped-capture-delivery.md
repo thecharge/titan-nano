@@ -33,7 +33,7 @@ The initial offline selection passed 108 cases across three suites. After the co
 
 The 16 scoped-capture cases check disjoint Titan run admission and peer progress across preparation and rollback, preservation of peer edits, exact and parent/child claims, missing files, replaced-parent approval hashes, dependency changes and sealed-result recovery without repeated commands. An unrelated symlink makes accidental full traversal fail deterministically. The progress assertions do not establish simultaneous kernel I/O.
 
-The staged gate before the sandbox repair passed 7,120 tests with one skip across 362 suites and zero coverage gaps across 492 product sources. Two focused selections after the repair each passed 66 tests and failed one sandbox child startup in different cases. A separate read-only comparison of fifty starts per helper reported zero startup failures before and after the repair. The complete final staged gate and installed archive checks remain delivery requirements. Their observed outcome belongs in the commit and delivery response.
+The staged gate before the sandbox repair passed 7,120 tests with one skip across 362 suites and zero coverage gaps across 492 product sources. Two focused selections after the repair each passed 66 tests and failed one sandbox child startup in different cases. A separate read-only comparison of fifty starts per helper reported zero startup failures before and after the repair. The final staged gate passed 7,122 tests with one skip and zero failures across 362 suites. All 492 product sources had complete line and function coverage. The installed archive probe passed. Source commit `14820ee` records the final gate results. The earlier focused startup failures remain recorded.
 
 ## Remaining work
 
