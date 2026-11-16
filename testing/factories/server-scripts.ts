@@ -529,7 +529,7 @@ export async function scopedScriptAdmission(
     const processes: CommandProcessPort = {
       spawn(command, cwd) {
         assert.deepEqual(command.slice(-3), ["/bin/sh", "-c", "printf checked"]);
-        assert.ok(command[0]?.endsWith("/syd"));
+        assert.ok(command[0]?.endsWith("/sandlock"));
         assert.ok(cwd.startsWith(root));
         starts++;
         return {

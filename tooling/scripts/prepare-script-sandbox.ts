@@ -1,10 +1,12 @@
 import { createHash } from "node:crypto";
-import { cp, mkdir, readlink, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { delimiter, resolve } from "node:path";
 import {
   FileEncoding,
   HashAlgorithm,
   HookFile,
+  IoLimit,
   PathPart,
   ProcessIo,
   ScriptSandbox,
@@ -13,6 +15,7 @@ import {
 } from "@titan/constants";
 import { ScriptSandboxMessage } from "@titan/messages";
 import { readBytes } from "@titan/streams";
+import { ScriptSandboxInventorySchema } from "@titan/types";
 
 async function run(
   command: string[],
@@ -68,19 +71,44 @@ async function cargoProgram(
   return resolve(cache, source.CargoDirectory, source.Bin, source.Cargo);
 }
 
-async function linkerDirectory(cache: string): Promise<string> {
+async function verifyComponents(
+  root: string,
+  directory: string,
+  cargo: string,
+  environment: Record<string, string | undefined>,
+): Promise<void> {
   const source = ScriptSandbox.Source;
-  const linker = resolve(cache, source.Linker);
-  await mkdir(linker, { recursive: true });
-  for (const pattern of source.LibraryPatterns) {
-    const library = (await Array.fromAsync(new Bun.Glob(pattern).scan()))[0];
-    if (!library) continue;
-    const alias = resolve(linker, source.Library);
-    const existing = await readlink(alias).catch(() => undefined);
-    if (existing !== library) await symlink(library, alias);
-    return linker;
-  }
-  throw new Error(ScriptSandboxMessage.PrepareFailed);
+  const inventory = ScriptSandboxInventorySchema.parse(
+    await Bun.file(resolve(root, source.Inventory)).json(),
+  );
+  const lock = createHash(HashAlgorithm.Sha256)
+    .update(await readFile(resolve(directory, source.Lock)))
+    .digest(FileEncoding.Hex);
+  if (inventory.source_sha256 !== source.Sha256 || inventory.lock_sha256 !== lock)
+    throw new Error(ScriptSandboxMessage.Distribution);
+  const child = Bun.spawn([cargo, ...source.Components], {
+    cwd: directory,
+    env: environment,
+    stdout: ProcessIo.Pipe,
+    stderr: ProcessIo.Inherit,
+  });
+  const output = await readBytes(child.stdout, IoLimit.DataBytes);
+  if ((await child.exited) !== 0) throw new Error(ScriptSandboxMessage.PrepareFailed);
+  const actual = new Set(
+    output
+      .toString(FileEncoding.Utf8)
+      .trim()
+      .split(TextSymbol.Newline)
+      .map((line) => line.split(TextSymbol.Space).slice(0, 2).join(TextSymbol.Space)),
+  );
+  const expected = new Set(
+    inventory.components.map(
+      (component) =>
+        component.name + TextSymbol.Space + ScriptSandbox.Source.VersionPrefix + component.version,
+    ),
+  );
+  if (actual.size !== expected.size || [...actual].some((component) => !expected.has(component)))
+    throw new Error(ScriptSandboxMessage.Distribution);
 }
 
 export async function prepareScriptSandbox(root: string, destination?: string): Promise<void> {
@@ -94,7 +122,26 @@ export async function prepareScriptSandbox(root: string, destination?: string): 
   };
   await mkdir(cache, { recursive: true });
   const stamp = resolve(cache, source.Stamp);
-  const identity = ScriptSandbox.Version + TextSymbol.Colon + process.arch;
+  const flags = [
+    ...source.Strip,
+    source.Remap + homedir() + source.HomeRemapTarget,
+    source.Remap + cache + source.RemapTarget,
+  ].join(source.FlagSeparator);
+  const patch = resolve(root, source.Patch);
+  const patchHash = createHash(HashAlgorithm.Sha256)
+    .update(await readFile(patch))
+    .digest(FileEncoding.Hex);
+  const inventoryHash = createHash(HashAlgorithm.Sha256)
+    .update(await readFile(resolve(root, source.Inventory)))
+    .digest(FileEncoding.Hex);
+  const identity = [
+    ScriptSandbox.Version,
+    process.arch,
+    source.Sha256,
+    patchHash,
+    inventoryHash,
+    flags,
+  ].join(TextSymbol.Colon);
   const prepared = await Bun.file(stamp)
     .text()
     .catch(() => undefined);
@@ -102,30 +149,28 @@ export async function prepareScriptSandbox(root: string, destination?: string): 
     console.log(ScriptSandboxMessage.Build);
     const archive = resolve(cache, source.Crate);
     await download(source.Url, archive, source.Sha256);
+    await rm(resolve(cache, source.Directory), { recursive: true, force: true });
     await run(
       [source.Tar, ...source.Extract, archive, source.DirectoryArgument, cache],
       root,
       environment,
     );
+    const directory = resolve(cache, source.Directory);
+    await run([source.PatchProgram, ...source.PatchArguments, patch], directory, environment);
     const cargo = await cargoProgram(cache, root, environment);
-    const linker = await linkerDirectory(cache);
-    await run(
-      [
-        cargo,
-        ...source.Install,
-        resolve(cache, source.Directory),
-        source.Root,
-        cache,
-        source.BinaryArgument,
-        ScriptSandbox.Binary,
-      ],
-      root,
-      { ...environment, [source.LibraryPath]: linker, [source.RustFlags]: source.Strip },
-    );
+    await run([cargo, ...source.Install], directory, {
+      ...environment,
+      [source.RustFlags]: flags,
+    });
+    await verifyComponents(root, directory, cargo, environment);
+    await mkdir(resolve(cache, source.Bin), { recursive: true });
+    await cp(resolve(directory, source.Output), executable);
   }
   await writeFile(stamp, identity, { mode: WorkspaceMode.PrivateFile });
   if (!destination) return;
   await cp(executable, resolve(destination, ScriptSandbox.Binary));
+  await cp(resolve(root, source.Notices), resolve(destination, source.NoticesOutput));
+  await cp(resolve(root, source.Inventory), resolve(destination, source.InventoryOutput));
   await cp(
     resolve(cache, source.Directory, source.License),
     resolve(destination, source.LicenseOutput),
@@ -137,7 +182,7 @@ export async function prepareScriptSandbox(root: string, destination?: string): 
       resolve(destination, source.Archive),
       source.DirectoryArgument,
       cache,
-      ...source.Sources,
+      source.Directory,
     ],
     root,
     environment,

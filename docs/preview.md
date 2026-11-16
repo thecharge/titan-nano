@@ -505,16 +505,19 @@ Prune reports earlier versions already kept in history. Applying a plan preserve
 
 ## Approved script filesystem boundaries
 
-On Linux, approved scripts run through the separate pinned Syd 3.59.0 executable. Linux 5.19 or newer and libseccomp 2.5 or newer are required. The package contains the helper, its GPL-3.0-only license in SYD_LICENSE and its complete locked Rust source cache in syd-source.tar.gz. Titan retains Apache-2.0 licensing. Each archive targets its build operating system and CPU architecture.
+On Linux, approved scripts run through Sandlock 0.9.1 with Titan's Apache-2.0 file-claim policy patch. Linux 6.12 or newer with Landlock, seccomp user notification and parent-to-child ptrace is required. The package contains the helper, SANDLOCK_LICENSE, all native component license notices in SANDLOCK_NOTICES, the locked inventory in sandlock-components.json and the patched upstream source in sandlock-source.tar.gz. Each archive targets its build operating system and CPU architecture.
 
-The policy permits declared files, missing declared parents and a private temporary directory. It protects Git metadata, environment files and daemon state, including nested protected paths. Existing symbolic links, external hard links and special files are excluded. Private temporary links support build tools while outside writes through those links remain denied. Descendant processes inherit the boundary. Refusals appear in the retained script error stream. Claim admission, execution approval and script output limits still apply. These checks cover cooperative Titan writers. Nonparticipating host processes require separate host permissions.
+The policy permits declared files, missing declared parents and a private temporary directory. It protects Git metadata, environment files and daemon state, including nested protected paths. Existing symbolic links, external hard links and special files are excluded. Private temporary links support build tools while outside writes through those links remain denied. Descendant processes inherit the boundary. Kernel tracing ownership terminates the complete descendant tree when the supervisor exits, including detached children holding writable descriptors. Refusals appear in the retained script error stream. Claim admission, execution approval and script output limits still apply. These checks cover cooperative Titan writers. Nonparticipating host processes require separate host permissions.
 
 Scripts retain their approved environment and support ordinary filenames, shell pipes, event descriptors and JIT runtimes. Filesystem syscall mediation remains enabled and sealed. Linux source and installed-package acceptance exercise the actual helper. macOS uses the system sandbox-exec policy. Its policy generation has offline coverage, while native macOS execution remains unverified.
 
-To rebuild the Linux helper from the packaged source, use Rust 1.96.0, a C compiler and libseccomp 2.5 or newer. Extract syd-source.tar.gz into an empty directory, then run the following commands from that directory. The package source cache includes the locked dependency sources and crate archives. Set LIBSECCOMP_LIB_PATH to a directory containing libseccomp.so when your compiler cannot locate that library.
+To rebuild the Linux helper from the packaged source, use Rust 1.96.0 and a C compiler for linking. Cargo downloads dependencies identified by Cargo.lock and verifies their checksums. Extract the source archive into an empty directory and run the following commands.
 
 ```sh
-tar -xf syd-source.tar.gz
-CARGO_HOME="$PWD/cargo" RUSTFLAGS="-C strip=symbols" cargo install --offline --locked --path syd-3.59.0 --root "$PWD/rebuilt" --bin syd
-./rebuilt/bin/syd --version
+tar -xf sandlock-source.tar.gz
+cd sandlock-ca0c9f1bd6707018b948dbd6b89a478ebf40f8a7
+RUSTFLAGS="-C strip=symbols" cargo build --locked --release -p sandlock-cli --no-default-features --features profiles
+./target/release/sandlock --version
 ```
+
+The Linux script boundary refuses hard-link creation, descriptor passing through recvmsg or recvmmsg, unrecognized device-control operations and legacy timestamp syscalls. Standard file reads, declared writes, descriptor mode and timestamp updates, private scratch files and descendants use the same negotiated live filesystem. Unsupported kernels or missing security facilities fail closed.

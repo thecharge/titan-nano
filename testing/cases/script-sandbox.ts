@@ -3,6 +3,42 @@ import { positive, rejected } from "@titan/test-factories";
 export const scriptBoundaryCases = {
   positive: [
     positive(
+      "approved scripts retain loopback network access",
+      [
+        "bun -e \"const server=Bun.serve({port:0,fetch(){return new Response('ok')}});try{const response=await fetch('http://127.0.0.1:'+server.port);if(await response.text()!=='ok')process.exit(8);require('node:fs').writeFileSync('allowed.txt','Changed')}finally{server.stop(true)}\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "atomic rename preserves an existing destination when overwrite is refused",
+      [
+        'printf Changed > allowed.txt && printf Replacement > "$TMPDIR/output" && mv -n "$TMPDIR/output" allowed.txt && test -f "$TMPDIR/output"',
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "declared file descriptors permit mode changes",
+      [
+        "bun -e \"const fs=require('node:fs');const fd=fs.openSync('allowed.txt','r');fs.fchmodSync(fd,0o600);fs.closeSync(fd);fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "declared file descriptors permit timestamp changes",
+      [
+        "bun -e \"const fs=require('node:fs');const fd=fs.openSync('allowed.txt','r');fs.futimesSync(fd,1,1);fs.closeSync(fd);fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
       "private temporary links support build tools",
       [
         'ln -s "$PWD/allowed.txt" "$TMPDIR/link" && test "$(cat "$TMPDIR/link")" = Original && printf Changed > allowed.txt',
@@ -69,6 +105,42 @@ export const scriptBoundaryCases = {
     ),
   ],
   negative: [
+    rejected(
+      "read-only outside descriptors cannot change file modes",
+      [
+        "bun -e \"const fs=require('node:fs');const fd=fs.openSync('../outside.txt','r');try{fs.fchmodSync(fd,0o777);process.exit(8)}catch(e){if(e.code!=='EACCES')throw e;process.exit(9)}\"",
+        ["allowed.txt"],
+        true,
+      ],
+      true,
+    ),
+    rejected(
+      "read-only outside descriptors cannot change timestamps",
+      [
+        "bun -e \"const fs=require('node:fs');const fd=fs.openSync('../outside.txt','r');try{fs.futimesSync(fd,1,1);process.exit(8)}catch(e){if(e.code!=='EACCES')throw e;process.exit(9)}\"",
+        ["allowed.txt"],
+        true,
+      ],
+      true,
+    ),
+    rejected(
+      "read-only file opens cannot truncate an outside file",
+      [
+        "bun -e \"const fs=require('node:fs');try{fs.closeSync(fs.openSync('../outside.txt',fs.constants.O_RDONLY|fs.constants.O_TRUNC));process.exit(8)}catch(e){if(e.code!=='EACCES')throw e;process.exit(9)}\"",
+        ["allowed.txt"],
+        true,
+      ],
+      true,
+    ),
+    rejected(
+      "read-only file opens cannot create an undeclared file",
+      [
+        "bun -e \"const fs=require('node:fs');try{fs.closeSync(fs.openSync('unlisted.txt',fs.constants.O_RDONLY|fs.constants.O_CREAT));process.exit(8)}catch(e){if(e.code!=='EACCES')throw e;process.exit(9)}\"",
+        ["allowed.txt"],
+        true,
+      ],
+      true,
+    ),
     rejected(
       "a private temporary symbolic link cannot expose an outside write",
       [
@@ -251,6 +323,16 @@ export const scriptLifetimeCases = {
     ),
   ],
   negative: [
+    rejected(
+      "timeout kills detached descendants holding writable descriptors",
+      ["timeout", "exec 3>> allowed.txt; setsid /bin/sh -c 'sleep 0.5; printf Late >&3' & wait"],
+      true,
+    ),
+    rejected(
+      "cancellation kills detached descendants holding writable descriptors",
+      ["cancel", "exec 3>> allowed.txt; setsid /bin/sh -c 'sleep 0.5; printf Late >&3' & wait"],
+      true,
+    ),
     rejected(
       "timeout prevents a descendant from writing after release",
       ["timeout", "(sleep 0.5; printf Late > allowed.txt)& wait"],

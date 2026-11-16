@@ -34,14 +34,6 @@ function inside(root: string, path: string): boolean {
   return path === root || path.startsWith(root + PathPart.Separator);
 }
 
-function literal(path: string): string {
-  return path.replace(ScriptSandbox.Glob, ScriptSandbox.Escape);
-}
-
-function rule(prefix: string, pattern: string): string {
-  return prefix + Buffer.from(pattern).toString(ScriptSandbox.Hex);
-}
-
 function macRule(prefix: string, path: string, tree: boolean): string {
   return (
     prefix +
@@ -110,42 +102,15 @@ function linuxPolicy(
   structural: readonly string[],
   temporary: string,
 ): string {
-  const policy: string[] = [
-    ...ScriptSandbox.Start,
-    ScriptSandbox.Filename,
-    ...ScriptSandbox.AnonymousFiles,
-    ScriptSandbox.PassEnvironment,
-    ScriptSandbox.LibraryEnvironment,
-    ScriptSandbox.NativeExecutable,
-    ScriptSandbox.RuntimeMemory,
-  ];
-  for (const path of allow) {
-    policy.push(rule(ScriptSandbox.Allow, literal(path)));
-    policy.push(rule(ScriptSandbox.Allow, literal(path) + ScriptSandbox.Descendants));
-  }
-  for (const parent of ancestors) policy.push(rule(ScriptSandbox.Parent, literal(parent)));
-  for (const name of [
-    ...new Set([...WorkspaceExcluded, ...NativeWritePolicy.Metadata, WorkspaceFile.Environment]),
-  ]) {
-    const pattern = literal(root) + ScriptSandbox.Descendants + PathPart.Separator + literal(name);
-    policy.push(rule(ScriptSandbox.Deny, pattern));
-    policy.push(rule(ScriptSandbox.Deny, pattern + ScriptSandbox.Descendants));
-  }
-  for (const prefix of [literal(root), literal(root) + ScriptSandbox.Descendants])
-    policy.push(
-      rule(
-        ScriptSandbox.Deny,
-        prefix + PathPart.Separator + WorkspaceFile.EnvironmentPrefix + ScriptSandbox.Star,
-      ),
-    );
-  for (const path of blocked) {
-    policy.push(rule(ScriptSandbox.Deny, literal(path)));
-    policy.push(rule(ScriptSandbox.Deny, literal(path) + ScriptSandbox.Descendants));
-  }
-  for (const path of structural) policy.push(rule(ScriptSandbox.Structure, literal(path)));
-  policy.push(rule(ScriptSandbox.TemporaryLinks, literal(temporary) + ScriptSandbox.Descendants));
-  policy.push(ScriptSandbox.Seal);
-  return policy.join(TextSymbol.Newline) + TextSymbol.Newline;
+  return JSON.stringify({
+    root,
+    allow,
+    ancestors,
+    blocked,
+    structural,
+    temporary,
+    names: [...new Set([...WorkspaceExcluded, ...NativeWritePolicy.Metadata])],
+  });
 }
 
 function macPolicy(
@@ -229,7 +194,15 @@ export async function scriptSandbox(
       platform === ScriptSandbox.Linux
         ? [
             executable,
-            ScriptSandbox.Profile,
+            ScriptSandbox.Run,
+            ScriptSandbox.Root,
+            PathPart.Separator,
+            ScriptSandbox.Read,
+            PathPart.Separator,
+            ScriptSandbox.WorkingDirectory,
+            root,
+            ...ScriptSandbox.Network,
+            ...allow.flatMap((path) => [ScriptSandbox.Write, path]),
             ScriptSandbox.File,
             file,
             ScriptSandbox.Separator,

@@ -14,7 +14,10 @@ for (const key of Object.keys(process.env)) {
 }
 const local = ["127.0.0.1", "localhost", "[::1]", "::1"];
 const fixtures = resolve(import.meta.dir, "../fixtures") + sep;
-const scriptSandbox = resolve(import.meta.dir, "../../node_modules/.bun/titan-sandbox/bin/syd");
+const scriptSandbox = resolve(
+  import.meta.dir,
+  "../../node_modules/.bun/titan-sandbox/bin/sandlock",
+);
 const shellSyntax = /[;&|`$<>(){}\\\n*?]/;
 
 function hostOf(value: unknown): string | undefined {

@@ -1,0 +1,9 @@
+capability	requirement	scenario	task	stage	test_level	status
+script-sandbox-distribution	Owner-controlled Apache distribution	Distribution excludes the rejected helper	2.3	release	contract	implemented
+script-sandbox-distribution	Owner-controlled Apache distribution	Existing replacement authorization is applied	1.2	foundation	contract	implemented
+script-sandbox-distribution	Preserve shared filesystem containment	Missing claimed file is created live	2.1	local	integration	implemented
+script-sandbox-distribution	Preserve shared filesystem containment	Mutation flags cannot bypass a read claim	3.2	local	integration	implemented
+script-sandbox-distribution	Preserve shared filesystem containment	New protected names remain protected	2.1	local	integration	implemented
+script-sandbox-distribution	Preserve shared filesystem containment	Descendants keep the same boundary	3.2	local	integration	implemented
+script-sandbox-distribution	Reproducible package verification	Removed helper is reintroduced	3.1	release	contract	implemented
+script-sandbox-distribution	Reproducible package verification	Installed package preserves the boundary	3.2	release	end-to-end	implemented

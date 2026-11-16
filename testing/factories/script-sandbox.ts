@@ -51,10 +51,16 @@ export function scriptBoundary(
       const result = await captureCommand(sandbox.command, project, { timeout_ms: 3000 });
       assert.equal(result.exit_code === 0, !refused, result.stderr.toString());
       assert.equal(await readFile(resolve(root, "outside.txt"), "utf8"), "Outside");
-      assert.equal((await stat(resolve(root, "outside.txt"))).mode, before.mode);
+      const after = await stat(resolve(root, "outside.txt"));
+      assert.equal(after.mode, before.mode);
+      assert.equal(after.mtimeMs, before.mtimeMs);
+      assert.equal(after.ctimeMs, before.ctimeMs);
       assert.equal(await readFile(resolve(project, ".git/config"), "utf8"), "Protected");
       assert.equal(await readFile(resolve(project, "nested/.git/config"), "utf8"), "Protected");
       assert.equal(await readFile(resolve(project, "runtime/state"), "utf8"), "Protected");
+      assert.equal(await Bun.file(resolve(project, "unlisted.txt")).exists(), false);
+      assert.equal(await Bun.file(resolve(project, ".env.test")).exists(), false);
+      assert.equal(await Bun.file(resolve(project, "nested/.env")).exists(), false);
       if (refused)
         assert.ok(
           /"act":"deny"|Too many levels of symbolic links/.test(result.stderr.toString()),

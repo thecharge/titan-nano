@@ -4,7 +4,7 @@ Titan is a tool that your coding agent (Claude Code or Codex) uses. You do not w
 
 ## What the package is
 
-Titan Nano is distributed as `titan-cli-0.1.0-alpha.1.tgz`, built from this repository. The archive installs `@titan/cli` with the `titan` command, agent guide, input schemas, example workflows, license notices and pinned Codex and Claude runtime dependencies. Registry publication remains pending. Linux archives also include the pinned Syd script sandbox, its license and complete source cache. Archives target their build operating system and CPU architecture.
+Titan Nano is distributed as `titan-cli-0.1.0-alpha.1.tgz`, built from this repository. The archive installs `@titan/cli` with the `titan` command, agent guide, input schemas, example workflows, license notices and pinned Codex and Claude runtime dependencies. Registry publication remains pending. Linux archives also include the pinned Apache-2.0 Sandlock script sandbox, its component inventory, license notices and patched source. Archives target their build operating system and CPU architecture.
 
 ## What you need first
 
@@ -100,6 +100,6 @@ The installed command checks the daemon version and exact runtime bundle hash. A
 
 ## Linux script sandbox
 
-Approved scripts require Linux 5.19 or newer and libseccomp 2.5 or newer. The installer prepares the pinned Syd 3.59.0 helper while building the package. The first source build requires a C compiler. When Cargo is missing, preparation installs checksum-pinned Rustup 1.29.3 and Rust 1.96.0 in Titan's private dependency cache. It leaves shell profiles unchanged. Later source builds reuse that cache. Direct archive installations contain the ready executable and need no Rust toolchain or C compiler. Preparation failures preserve the existing managed release.
+Approved scripts require Linux 6.12 or newer with Landlock, seccomp user notification and parent-to-child ptrace enabled. The installer prepares Sandlock 0.9.1 with Titan's Apache-2.0 file-claim policy patch while building the package. The first source build requires Cargo or access to download the private Rust toolchain, a C compiler for linking, GNU tar and patch. When Cargo is missing, preparation installs checksum-pinned Rustup 1.29.3 and Rust 1.96.0 in Titan's private dependency cache. It leaves shell profiles unchanged. Later source builds reuse that cache. Direct archive installations contain the ready executable and need no Rust toolchain or C compiler. Preparation failures preserve the existing managed release.
 
 Run `bun run test:prepare` before source tests or script workflows. The same preparation runs during `bun run pack:preview`. Read the [script boundary and source rebuild instructions](preview.md#approved-script-filesystem-boundaries) for policy behavior, third-party licensing and platform verification limits.

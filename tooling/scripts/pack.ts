@@ -16,6 +16,7 @@ import {
   PackagingAssets,
   ProcessIo,
   ScriptSandbox,
+  TextSymbol,
   VendorPackage,
 } from "@titan/constants";
 import { readFileBytes } from "@titan/streams";
@@ -27,6 +28,7 @@ import {
 import { packageOutput } from "./package-output.ts";
 import { nativeCodexVersion } from "./package-vendors.ts";
 import { prepareScriptSandbox } from "./prepare-script-sandbox.ts";
+import { verifySandboxDistribution, verifySandboxFiles } from "./sandbox-distribution.ts";
 
 const root = resolve(import.meta.dir, HookFile.RepositoryRoot);
 const distribution = resolve(root, process.argv[2] ?? Packaging.Distribution);
@@ -104,6 +106,8 @@ await writeFile(
         ScriptSandbox.Binary,
         ScriptSandbox.Source.LicenseOutput,
         ScriptSandbox.Source.Archive,
+        ScriptSandbox.Source.NoticesOutput,
+        ScriptSandbox.Source.InventoryOutput,
       ],
       engines: { bun: Packaging.BunEngine },
       os: [process.platform],
@@ -171,6 +175,7 @@ for (const [name, args] of PackagingAssets) {
       : JSON.stringify(envelope.data ?? null),
   );
 }
+await verifySandboxDistribution(destination);
 const child = Bun.spawn(
   [
     process.execPath,
@@ -185,4 +190,16 @@ const child = Bun.spawn(
     stderr: ProcessIo.Inherit,
   },
 );
-process.exit(await child.exited);
+const code = await child.exited;
+if (code === 0) {
+  const archive = resolve(
+    distribution,
+    Packaging.ArchivePrefix + manifest.version + Packaging.ArchiveExtension,
+  );
+  const files = await packageOutput(
+    [ScriptSandbox.Source.Tar, ScriptSandbox.Source.List, archive],
+    root,
+  );
+  verifySandboxFiles(files.toString(FileEncoding.Utf8).split(TextSymbol.Newline));
+}
+process.exit(code);

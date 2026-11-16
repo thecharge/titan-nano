@@ -90,6 +90,7 @@ export * from "./requests.ts";
 export * from "./run-hub.ts";
 export * from "./schema-verification.ts";
 export * from "./script-execution.ts";
+export * from "./script-sandbox.ts";
 export * from "./setting-overrides.ts";
 export * from "./source-comments.ts";
 export * from "./spelling.ts";

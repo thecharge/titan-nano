@@ -1,0 +1,667 @@
+diff --git a/crates/sandlock-cli/src/main.rs b/crates/sandlock-cli/src/main.rs
+index 31263e3..bc0a026 100644
+--- a/crates/sandlock-cli/src/main.rs
++++ b/crates/sandlock-cli/src/main.rs
+@@ -135,6 +135,9 @@ struct RunArgs {
+     #[arg(long = "profile-file", value_name = "PATH", conflicts_with = "profile")]
+     profile_file: Option<PathBuf>,
+ 
++    #[arg(long = "titan-policy")]
++    titan_policy: Option<PathBuf>,
++
+     #[arg(long = "status-fd", value_name = "FD")]
+     status_fd: Option<i32>,
+ 
+@@ -521,6 +524,9 @@ async fn main() -> Result<()> {
+ /// `process::exit`. Calling `process::exit` here would bypass
+ /// `Sandbox::Drop`, which is where COW commit/abort runs.
+ async fn run_command(args: RunArgs) -> Result<i32> {
++    if let Some(ref path) = args.titan_policy {
++        sandlock_core::titan_policy::configure(path).map_err(|e| anyhow!("{}", e))?;
++    }
+     let pb = &args.sandbox_builder;
+ 
+     // `--no-supervisor` reaches the same `Sandbox::run` path as everything
+diff --git a/crates/sandlock-core/src/chroot/dispatch.rs b/crates/sandlock-core/src/chroot/dispatch.rs
+index 6b41513..4134847 100644
+--- a/crates/sandlock-core/src/chroot/dispatch.rs
++++ b/crates/sandlock-core/src/chroot/dispatch.rs
+@@ -137,6 +137,7 @@ impl ChrootCtx<'_> {
+ 
+     /// Check if `virtual_path` is allowed for writing.
+     fn can_write(&self, virtual_path: &Path) -> bool {
++        if !crate::titan_policy::write(virtual_path) { return false; }
+         if self.is_denied(virtual_path) {
+             return false;
+         }
+@@ -645,11 +646,12 @@ pub(crate) async fn handle_chroot_open(
+     notif_fd: RawFd,
+     ctx: &ChrootCtx<'_>,
+ ) -> NotifAction {
++    let _guard = crate::titan_policy::lock().await;
+     // Every open spelling lands here, and they do not share an argument
+     // layout: openat2 keeps flags, mode and resolve in a struct open_how in
+     // child memory, where args[2] is the pointer to it rather than the flags.
+-    let (dirfd, path_ptr, flags, resolve) = match decode_open_args(notif, notif_fd) {
+-        Some(a) => (a.dirfd, a.path_ptr, a.flags, a.resolve),
++    let (dirfd, path_ptr, flags, resolve, requested_mode) = match decode_open_args(notif, notif_fd) {
++        Some(a) => (a.dirfd, a.path_ptr, a.flags, a.resolve, a.mode),
+         None => return NotifAction::Continue,
+     };
+ 
+@@ -670,7 +672,7 @@ pub(crate) async fn handle_chroot_open(
+     };
+ 
+     // Access check: writes need can_write, reads need can_read
+-    let is_write = (flags as i32 & (libc::O_WRONLY | libc::O_RDWR)) != 0;
++    let is_write = crate::procfs::proc_open_is_write(flags);
+     if is_write {
+         if !ctx.can_write(&virtual_path) {
+             return NotifAction::Errno(libc::EACCES);
+@@ -679,6 +681,10 @@ pub(crate) async fn handle_chroot_open(
+         return NotifAction::Errno(libc::EACCES);
+     }
+ 
++    if is_write && crate::titan_policy::enabled() {
++        return crate::titan_policy::open(&host_path, flags as i32, requested_mode as u32);
++    }
++
+     // openat2 rejects a non-zero mode unless O_CREAT/O_TMPFILE is set (stricter
+     // than openat), so only supply a creation mode when the child asks to create.
+     // O_TMPFILE is a composite (__O_TMPFILE | O_DIRECTORY), so it must be matched
+@@ -1435,6 +1441,7 @@ pub(crate) async fn handle_chroot_write(
+     notif_fd: RawFd,
+     ctx: &ChrootCtx<'_>,
+ ) -> NotifAction {
++    let _guard = crate::titan_policy::lock().await;
+     let nr = notif.data.nr as i64;
+ 
+     if nr == libc::SYS_unlinkat {
+@@ -1480,7 +1487,7 @@ pub(crate) async fn handle_chroot_write(
+             Ok(r) => r,
+             Err(a) => return a,
+         };
+-        if !ctx.can_write(&vp) {
++        if !(crate::titan_policy::enabled() && crate::titan_policy::mkdir(&vp)) && !ctx.can_write(&vp) {
+             return NotifAction::Errno(libc::EACCES);
+         }
+         let mode = notif.data.args[2] as u32;
+@@ -1533,6 +1540,10 @@ pub(crate) async fn handle_chroot_write(
+             return NotifAction::Errno(libc::EACCES);
+         }
+ 
++        if crate::titan_policy::enabled() && nr == libc::SYS_renameat2 {
++            return crate::titan_policy::rename(&old_host, &new_host, notif.data.args[4] as u32);
++        }
++
+         {
+             #[cfg(feature = "cow")]
+             let mut cs = cow_state.lock().await;
+@@ -1584,7 +1595,7 @@ pub(crate) async fn handle_chroot_write(
+                 Some(r) => r,
+                 None => return NotifAction::Errno(libc::EACCES),
+             };
+-        if !ctx.can_write(&link_vp) {
++        if !crate::titan_policy::symlink(&link_vp) || !ctx.can_write(&link_vp) {
+             return NotifAction::Errno(libc::EACCES);
+         }
+ 
+@@ -1621,6 +1632,8 @@ pub(crate) async fn handle_chroot_write(
+         };
+     }
+ 
++    if nr == libc::SYS_linkat && crate::titan_policy::enabled() { return crate::titan_policy::deny(); }
++
+     if nr == libc::SYS_linkat {
+         // linkat(olddirfd, oldpath, newdirfd, newpath, flags)
+         let old_path = match read_path(notif, notif.data.args[1], notif_fd) {
+@@ -2295,6 +2308,7 @@ pub(crate) async fn handle_chroot_xattr(
+     notif_fd: RawFd,
+     ctx: &ChrootCtx<'_>,
+ ) -> NotifAction {
++    let _guard = crate::titan_policy::lock().await;
+     let (op, follow) = match classify_xattr(notif.data.nr as i64) {
+         Some(x) => x,
+         None => return NotifAction::Continue,
+@@ -2598,11 +2612,15 @@ pub(crate) async fn handle_chroot_utimensat(
+     notif_fd: RawFd,
+     ctx: &ChrootCtx<'_>,
+ ) -> NotifAction {
++    let _guard = crate::titan_policy::lock().await;
+     let dirfd = notif.data.args[0] as i64;
+     let path_ptr = notif.data.args[1];
+     let times_ptr = notif.data.args[2];
+     let flags = notif.data.args[3] as i32;
+ 
++    if path_ptr == 0 && crate::titan_policy::enabled() {
++        return crate::titan_policy::fd_time(notif, notif_fd);
++    }
+     if path_ptr == 0 {
+         return NotifAction::Continue;
+     }
+diff --git a/crates/sandlock-core/src/landlock_policy.rs b/crates/sandlock-core/src/landlock_policy.rs
+index c30df05..5433a5d 100644
+--- a/crates/sandlock-core/src/landlock_policy.rs
++++ b/crates/sandlock-core/src/landlock_policy.rs
+@@ -478,6 +478,7 @@ fn confine_inner(
+     // degraded rights cannot be reintroduced. add_path_beneath_rule further
+     // removes directory-only rights for non-directory paths.
+     for grant in &policy.fs_writable {
++        if crate::titan_policy::enabled() { continue; }
+         let path = grant_path(grant)?;
+         if served && crate::procfs::is_supervised_proc_grant(&path) {
+             continue;
+diff --git a/crates/sandlock-core/src/lib.rs b/crates/sandlock-core/src/lib.rs
+index 1418a68..1f6fd6c 100644
+--- a/crates/sandlock-core/src/lib.rs
++++ b/crates/sandlock-core/src/lib.rs
+@@ -126,3 +126,5 @@ pub fn confine(confinement: &Confinement) -> Result<(), SandlockError> {
+     // Apply Landlock filesystem rules.
+     landlock_policy::confine_filesystem(&stripped)
+ }
++
++pub mod titan_policy;
+diff --git a/crates/sandlock-core/src/sandbox.rs b/crates/sandlock-core/src/sandbox.rs
+index 8db65cf..156531f 100644
+--- a/crates/sandlock-core/src/sandbox.rs
++++ b/crates/sandlock-core/src/sandbox.rs
+@@ -2702,6 +2702,10 @@ impl Sandbox {
+         }
+ 
+         // ===== PARENT PROCESS =====
++        if crate::titan_policy::enabled() {
++            crate::titan_policy::own_lifetime(pid).map_err(SandboxRuntimeError::Io)?;
++        }
++
+         drop(pipes.notif_w);
+         drop(pipes.ready_r);
+ 
+diff --git a/crates/sandlock-core/src/seccomp/notif.rs b/crates/sandlock-core/src/seccomp/notif.rs
+index e42057c..368e00b 100644
+--- a/crates/sandlock-core/src/seccomp/notif.rs
++++ b/crates/sandlock-core/src/seccomp/notif.rs
+@@ -3088,6 +3088,12 @@ async fn decide(
+ ) {
+     let policy = &ctx.policy;
+     let nr = notif.data.nr as i64;
++    {
++        let _guard = crate::titan_policy::lock().await;
++        if let Some(verdict) = crate::titan_policy::descriptor(&notif, fd) {
++            action = verdict;
++        }
++    }
+ 
+     // A bare Continue for an open is the racy window: the kernel re-resolves
+     // the path after it, and a racing thread can swap a link to reach a
+diff --git a/crates/sandlock-core/src/seccomp_plan.rs b/crates/sandlock-core/src/seccomp_plan.rs
+index 9de4a58..0b3d021 100644
+--- a/crates/sandlock-core/src/seccomp_plan.rs
++++ b/crates/sandlock-core/src/seccomp_plan.rs
+@@ -373,6 +373,9 @@ pub(crate) fn notif_syscalls(policy: &Sandbox, sandbox_name: Option<&str>) -> Ve
+ pub(crate) fn notif_syscalls_resolved(resolved: &ResolvedSandbox) -> Vec<u32> {
+     let features = &resolved.features;
+     let mut nrs = SyscallList::with(BASE_NOTIF_SYSCALLS);
++    if crate::titan_policy::enabled() {
++        nrs.extend(&[libc::SYS_fchmod, libc::SYS_fchown, libc::SYS_ioctl, libc::SYS_fsetxattr, libc::SYS_fremovexattr]);
++    }
+     nrs.push_optional(arch::sys_vfork());
+ 
+     // Bare fork(2) creates a process like any clone: left out of the
+@@ -488,6 +491,11 @@ fn resolve_blocklist(base: &[&str], policy: &Sandbox) -> Vec<u32> {
+         .chain(extra_denies)
+         .filter_map(|n| n.parse::<Sysno>().ok())
+         .collect();
++    if crate::titan_policy::enabled() {
++        for name in ["pidfd_getfd", "recvmmsg", "utime", "utimes", "futimesat", "setxattrat", "removexattrat"] {
++            if let Ok(sysno) = name.parse::<Sysno>() { set.insert(sysno); }
++        }
++    }
+     if !policy.allows_sysv_ipc() {
+         for name in SYSV_IPC_BLOCKLIST_SYSCALLS {
+             if let Ok(sysno) = name.parse::<Sysno>() {
+diff --git a/crates/sandlock-core/src/titan_policy.rs b/crates/sandlock-core/src/titan_policy.rs
+new file mode 100644
+index 0000000..013152d
+--- /dev/null
++++ b/crates/sandlock-core/src/titan_policy.rs
+@@ -0,0 +1,440 @@
++use crate::seccomp::notif::{NotifAction, inject_open_result};
++use serde::Deserialize;
++use std::ffi::CString;
++use std::os::fd::{AsRawFd, FromRawFd, OwnedFd};
++use std::os::unix::fs::MetadataExt;
++use std::path::{Path, PathBuf};
++use std::sync::OnceLock;
++
++#[derive(Deserialize)]
++pub struct Policy {
++    pub root: PathBuf,
++    pub allow: Vec<PathBuf>,
++    pub ancestors: Vec<PathBuf>,
++    pub blocked: Vec<PathBuf>,
++    pub structural: Vec<PathBuf>,
++    pub names: Vec<String>,
++    pub temporary: PathBuf,
++}
++
++static POLICY: OnceLock<Policy> = OnceLock::new();
++
++pub fn configure(path: &Path) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
++    let bytes = std::fs::read(path)?;
++    if bytes.len() > 1048576 {
++        return Err("script policy exceeds its budget".into());
++    }
++    let policy: Policy = serde_json::from_slice(&bytes)?;
++    if !policy.root.is_absolute() || !policy.temporary.is_absolute() {
++        return Err("script policy paths must be absolute".into());
++    }
++    POLICY
++        .set(policy)
++        .map_err(|_| "script policy is already set".into())
++}
++
++pub fn enabled() -> bool {
++    POLICY.get().is_some()
++}
++
++fn protected(policy: &Policy, path: &Path) -> bool {
++    if policy.blocked.iter().any(|p| path.starts_with(p)) {
++        return true;
++    }
++    let Ok(relative) = path.strip_prefix(&policy.root) else {
++        return false;
++    };
++    relative.components().any(|c| {
++        let name = c.as_os_str().to_string_lossy();
++        name == ".env" || name.starts_with(".env.") || policy.names.iter().any(|p| p == &name)
++    })
++}
++
++fn allowed(policy: &Policy, path: &Path) -> bool {
++    if protected(policy, path) || policy.structural.iter().any(|p| p == path) {
++        return false;
++    }
++    if !policy.allow.iter().any(|p| path.starts_with(p)) {
++        return false;
++    }
++    if path == Path::new("/dev/null") {
++        return true;
++    }
++    match std::fs::symlink_metadata(path) {
++        Ok(metadata) => metadata.is_dir() || (metadata.is_file() && metadata.nlink() == 1),
++        Err(error) => error.kind() == std::io::ErrorKind::NotFound,
++    }
++}
++
++pub fn write(path: &Path) -> bool {
++    let Some(policy) = POLICY.get() else {
++        return true;
++    };
++    let answer = allowed(policy, path);
++    if !answer {
++        eprintln!("{{\"act\":\"deny\",\"operation\":\"write\"}}");
++    }
++    answer
++}
++
++pub fn mkdir(path: &Path) -> bool {
++    let Some(policy) = POLICY.get() else {
++        return true;
++    };
++    if policy.ancestors.iter().any(|p| p == path) && !protected(policy, path) {
++        return true;
++    }
++    write(path)
++}
++
++pub fn symlink(path: &Path) -> bool {
++    let Some(policy) = POLICY.get() else {
++        return true;
++    };
++    path.starts_with(&policy.temporary) && write(path)
++}
++
++pub fn deny() -> NotifAction {
++    eprintln!("{{\"act\":\"deny\",\"operation\":\"file\"}}");
++    NotifAction::Errno(libc::EACCES)
++}
++
++fn pin(path: &Path) -> Result<OwnedFd, i32> {
++    let name = CString::new(path.as_os_str().as_encoded_bytes()).map_err(|_| libc::EINVAL)?;
++    let fd = unsafe { libc::open(name.as_ptr(), libc::O_PATH | libc::O_CLOEXEC) };
++    if fd < 0 {
++        return Err(std::io::Error::last_os_error()
++            .raw_os_error()
++            .unwrap_or(libc::EIO));
++    }
++    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
++}
++
++fn real(fd: &OwnedFd) -> Result<PathBuf, i32> {
++    std::fs::read_link(format!("/proc/self/fd/{}", fd.as_raw_fd())).map_err(|_| libc::EACCES)
++}
++
++pub fn open(path: &Path, flags: i32, mode: u32) -> NotifAction {
++    if flags & libc::O_PATH != 0 {
++        return deny();
++    }
++    match pin(path) {
++        Ok(fd) => {
++            if flags & libc::O_CREAT != 0 && flags & libc::O_EXCL != 0 {
++                return NotifAction::Errno(libc::EEXIST);
++            }
++            let Ok(target) = real(&fd) else {
++                return deny();
++            };
++            if !write(&target) {
++                return deny();
++            }
++            let name = CString::new(format!("/proc/self/fd/{}", fd.as_raw_fd())).unwrap();
++            let flags = flags & !(libc::O_CREAT | libc::O_EXCL | libc::O_NOFOLLOW);
++            let result = unsafe { libc::open(name.as_ptr(), flags) };
++            inject_open_result(result, flags as u64)
++        }
++        Err(libc::ENOENT) if flags & libc::O_CREAT != 0 => {
++            let Some(parent) = path.parent() else {
++                return deny();
++            };
++            let Some(leaf) = path.file_name() else {
++                return deny();
++            };
++            let Ok(fd) = pin(parent) else {
++                return deny();
++            };
++            let Ok(parent) = real(&fd) else {
++                return deny();
++            };
++            if !write(&parent.join(leaf)) {
++                return deny();
++            }
++            let Ok(name) = CString::new(leaf.as_encoded_bytes()) else {
++                return deny();
++            };
++            let result = unsafe {
++                libc::openat(
++                    fd.as_raw_fd(),
++                    name.as_ptr(),
++                    flags | libc::O_NOFOLLOW | libc::O_EXCL,
++                    mode,
++                )
++            };
++            inject_open_result(result, flags as u64)
++        }
++        Err(error) => NotifAction::Errno(error),
++    }
++}
++
++pub fn descriptor(notif: &crate::sys::structs::SeccompNotif, notif_fd: i32) -> Option<NotifAction> {
++    if !enabled() {
++        return None;
++    }
++    let nr = notif.data.nr as i64;
++    if nr == libc::SYS_ioctl {
++        let request = notif.data.args[1] as libc::c_ulong;
++        return Some(
++            if [
++                libc::TCGETS as libc::c_ulong,
++                libc::TIOCGWINSZ as libc::c_ulong,
++                libc::FIONREAD as libc::c_ulong,
++                libc::FIONBIO as libc::c_ulong,
++            ]
++            .contains(&request)
++            {
++                NotifAction::Continue
++            } else {
++                deny()
++            },
++        );
++    }
++    if nr == libc::SYS_recvmsg {
++        return Some(deny());
++    }
++    if ![
++        libc::SYS_fchmod,
++        libc::SYS_fchown,
++        libc::SYS_fsetxattr,
++        libc::SYS_fremovexattr,
++    ]
++    .contains(&nr)
++    {
++        return None;
++    }
++    let path = PathBuf::from(format!("/proc/{}/fd/{}", notif.pid, notif.data.args[0]));
++    let Ok(fd) = pin(&path) else {
++        return Some(deny());
++    };
++    let Ok(path) = real(&fd) else {
++        return Some(deny());
++    };
++    if !write(&path) {
++        return Some(deny());
++    }
++    if nr == libc::SYS_fsetxattr || nr == libc::SYS_fremovexattr {
++        return Some(fd_attribute(notif, notif_fd, &fd, nr));
++    }
++    let empty = c"";
++    let result = if nr == libc::SYS_fchmod {
++        let target = CString::new(format!("/proc/self/fd/{}", fd.as_raw_fd())).unwrap();
++        unsafe { libc::chmod(target.as_ptr(), notif.data.args[1] as u32) as i64 }
++    } else {
++        unsafe {
++            libc::fchownat(
++                fd.as_raw_fd(),
++                empty.as_ptr(),
++                notif.data.args[1] as u32,
++                notif.data.args[2] as u32,
++                libc::AT_EMPTY_PATH,
++            ) as i64
++        }
++    };
++    Some(if result < 0 {
++        NotifAction::Errno(
++            std::io::Error::last_os_error()
++                .raw_os_error()
++                .unwrap_or(libc::EIO),
++        )
++    } else {
++        NotifAction::ReturnValue(result)
++    })
++}
++
++static SERIAL: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
++
++pub async fn lock() -> Option<tokio::sync::MutexGuard<'static, ()>> {
++    if enabled() {
++        Some(SERIAL.lock().await)
++    } else {
++        None
++    }
++}
++
++pub fn fd_time(notif: &crate::sys::structs::SeccompNotif, notif_fd: i32) -> NotifAction {
++    let path = PathBuf::from(format!("/proc/{}/fd/{}", notif.pid, notif.data.args[0]));
++    let Ok(fd) = pin(&path) else {
++        return deny();
++    };
++    let Ok(path) = real(&fd) else {
++        return deny();
++    };
++    if !write(&path) {
++        return deny();
++    }
++    let mut times: [libc::timespec; 2] = unsafe { std::mem::zeroed() };
++    let raw = if notif.data.args[2] == 0 {
++        std::ptr::null()
++    } else {
++        let Ok(bytes) = crate::seccomp::notif::read_child_mem(
++            notif_fd,
++            notif.id,
++            notif.pid,
++            notif.data.args[2],
++            std::mem::size_of_val(&times),
++        ) else {
++            return NotifAction::Errno(libc::EFAULT);
++        };
++        unsafe {
++            std::ptr::copy_nonoverlapping(
++                bytes.as_ptr(),
++                times.as_mut_ptr() as *mut u8,
++                bytes.len(),
++            );
++        }
++        times.as_ptr()
++    };
++    let result = unsafe { libc::utimensat(fd.as_raw_fd(), c"".as_ptr(), raw, libc::AT_EMPTY_PATH) };
++    if result < 0 {
++        NotifAction::Errno(
++            std::io::Error::last_os_error()
++                .raw_os_error()
++                .unwrap_or(libc::EIO),
++        )
++    } else {
++        NotifAction::ReturnValue(0)
++    }
++}
++
++fn fd_attribute(
++    notif: &crate::sys::structs::SeccompNotif,
++    notif_fd: i32,
++    fd: &OwnedFd,
++    nr: i64,
++) -> NotifAction {
++    let Some(name) = crate::seccomp::notif::read_child_cstr(
++        notif_fd,
++        notif.id,
++        notif.pid,
++        notif.data.args[1],
++        256,
++    ) else {
++        return NotifAction::Errno(libc::EFAULT);
++    };
++    let Ok(name) = CString::new(name) else {
++        return NotifAction::Errno(libc::EINVAL);
++    };
++    let path = CString::new(format!("/proc/self/fd/{}", fd.as_raw_fd())).unwrap();
++    let result = if nr == libc::SYS_fremovexattr {
++        unsafe { libc::removexattr(path.as_ptr(), name.as_ptr()) }
++    } else {
++        let size = notif.data.args[3] as usize;
++        if size > 65536 {
++            return NotifAction::Errno(libc::E2BIG);
++        }
++        let Ok(value) = crate::seccomp::notif::read_child_mem(
++            notif_fd,
++            notif.id,
++            notif.pid,
++            notif.data.args[2],
++            size,
++        ) else {
++            return NotifAction::Errno(libc::EFAULT);
++        };
++        unsafe {
++            libc::setxattr(
++                path.as_ptr(),
++                name.as_ptr(),
++                value.as_ptr().cast(),
++                size,
++                notif.data.args[4] as i32,
++            )
++        }
++    };
++    if result < 0 {
++        NotifAction::Errno(
++            std::io::Error::last_os_error()
++                .raw_os_error()
++                .unwrap_or(libc::EIO),
++        )
++    } else {
++        NotifAction::ReturnValue(0)
++    }
++}
++
++pub fn rename(from: &Path, to: &Path, flags: u32) -> NotifAction {
++    let Ok(from) = CString::new(from.as_os_str().as_encoded_bytes()) else {
++        return NotifAction::Errno(libc::EINVAL);
++    };
++    let Ok(to) = CString::new(to.as_os_str().as_encoded_bytes()) else {
++        return NotifAction::Errno(libc::EINVAL);
++    };
++    let result = unsafe {
++        libc::syscall(
++            libc::SYS_renameat2,
++            libc::AT_FDCWD,
++            from.as_ptr(),
++            libc::AT_FDCWD,
++            to.as_ptr(),
++            flags,
++        )
++    };
++    if result < 0 {
++        NotifAction::Errno(
++            std::io::Error::last_os_error()
++                .raw_os_error()
++                .unwrap_or(libc::EIO),
++        )
++    } else {
++        NotifAction::ReturnValue(0)
++    }
++}
++
++pub fn own_lifetime(pid: i32) -> std::io::Result<()> {
++    let (send, receive) = std::sync::mpsc::sync_channel(1);
++    std::thread::Builder::new()
++        .name("titan-descendants".into())
++        .spawn(move || {
++            let options = libc::PTRACE_O_EXITKILL
++                | libc::PTRACE_O_TRACEFORK
++                | libc::PTRACE_O_TRACEVFORK
++                | libc::PTRACE_O_TRACECLONE
++                | libc::PTRACE_O_TRACEEXEC;
++            let result = unsafe {
++                libc::ptrace(
++                    libc::PTRACE_SEIZE,
++                    pid,
++                    std::ptr::null_mut::<libc::c_void>(),
++                    options as usize as *mut libc::c_void,
++                )
++            };
++            if result < 0 {
++                let _ = send.send(Err(std::io::Error::last_os_error()));
++                return;
++            }
++            if send.send(Ok(())).is_err() {
++                return;
++            }
++            loop {
++                let mut status = 0;
++                let child =
++                    unsafe { libc::waitpid(-1, &mut status, libc::__WALL | libc::__WNOTHREAD) };
++                if child < 0 {
++                    if std::io::Error::last_os_error().raw_os_error() == Some(libc::EINTR) {
++                        continue;
++                    }
++                    return;
++                }
++                if !libc::WIFSTOPPED(status) {
++                    continue;
++                }
++                let signal = libc::WSTOPSIG(status);
++                let deliver = if status >> 16 != 0 || signal == libc::SIGSTOP {
++                    0
++                } else {
++                    signal
++                };
++                unsafe {
++                    libc::ptrace(
++                        libc::PTRACE_CONT,
++                        child,
++                        std::ptr::null_mut::<libc::c_void>(),
++                        deliver as usize as *mut libc::c_void,
++                    );
++                }
++            }
++        })?;
++    receive
++        .recv()
++        .map_err(|_| std::io::Error::other("descendant ownership could not start"))?
++}
