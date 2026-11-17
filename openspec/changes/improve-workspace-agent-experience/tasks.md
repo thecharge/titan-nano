@@ -24,6 +24,6 @@
 
 - [x] 4.1 Add focused regression cases for ordinary command entry points, native tools, older runs and failure paths.
 - [x] 4.2 Update public documentation and the Titan skill with concise runnable examples.
-- [ ] 4.3 Run required local checks and package acceptance and record actual results and corrections.
-- [ ] 4.4 Inspect public-safe changes, preserve unrelated work and confirm Actions is disabled before committing and pushing main.
-- [ ] 4.5 Record the remote revision and use the delivered capabilities in the separate private editorial workflow.
+- [x] 4.3 Run required local checks and package acceptance and record actual results and corrections.
+- [x] 4.4 Inspect public-safe changes, preserve unrelated work and confirm Actions is disabled before committing and pushing main.
+- [x] 4.5 Record the remote revision and use the delivered capabilities in the separate private editorial workflow.
