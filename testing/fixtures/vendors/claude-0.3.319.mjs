@@ -50,15 +50,24 @@ async function handleLine(line) {
   if (Buffer.byteLength(line) > 262144) throw new Error("Stub input exceeds contract limit");
   const message = JSON.parse(line);
   if (message.type === "control_request" && message.request.subtype === "initialize") {
+    const role = message.request.systemPrompt?.[0];
+    const baseRole = role?.split("\nAvailable workspace skills:", 1)[0];
+    const policy = `\n\n${writePolicy}`;
+    const roleWithoutSkills =
+      baseRole !== role && role?.endsWith(policy) ? baseRole + policy : baseRole;
     if (
       initialized ||
       ![
         schema.required?.[0] === "result" ? requestTurnRole : "Transport contract role",
         `${schema.required?.[0] === "result" ? requestTurnRole : "Transport contract role"}\n\n${writePolicy}`,
-      ].includes(message.request.systemPrompt?.[0]) ||
+      ].includes(roleWithoutSkills) ||
       message.request.hooks?.PreToolUse?.[0]?.onFailure !== "block"
     )
       throw new Error("Invalid initialization contract");
+    if (role?.includes("Skill linked:")) {
+      if (!nativeTools) throw new Error("Missing skill reference binding");
+      await nativeTools.verifySkills(role);
+    }
     initialized = true;
     const initializedResponse = {
       commands: [],

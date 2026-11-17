@@ -1,0 +1,16 @@
+capability	requirement	scenario	task	stage	test_level	status
+agent-web-resources	Policy-controlled public source reads	Approval is required	3.3	local	integration	pending
+agent-web-resources	Policy-controlled public source reads	Autonomous reads are configured	3.3	local	integration	pending
+agent-web-resources	Source acquisition evidence	A source redirects	3.3	local	integration	pending
+agent-web-resources	Bounded resource handling	A source exceeds its byte allowance	3.3	local	integration	pending
+agent-web-resources	Bounded resource handling	Binary source text is unavailable	3.3	local	integration	pending
+workflow-persona-authoring	Discover registered personas	Reuse an existing reviewer	2.3	local	integration	implemented
+workflow-persona-authoring	Create portable persona definitions	A destination already exists	2.3	local	integration	implemented
+workflow-persona-authoring	Create executable workflow templates	Generate a parallel delivery	2.2	local	integration	implemented
+workspace-run-inspection	Scoped run listing	Inspect running work across known homes	2.1	local	integration	implemented
+workspace-run-inspection	Compact run status	A run contains large managed file observations	2.1	local	integration	implemented
+workspace-run-inspection	Existing inspection compatibility	Inspect an older retained run	2.1	local	integration	implemented
+workspace-skill-discovery	Repository and user skill discovery	A project overrides a user skill	3.2	local	integration	implemented
+workspace-skill-discovery	Native skill access	A worker follows a linked repository skill	3.2	local	integration	implemented
+workspace-skill-discovery	Native skill access	A reference escapes its skill directory	3.2	local	integration	implemented
+workspace-skill-discovery	Retained skill evidence	The live skill changes during a paused run	3.2	local	integration	implemented

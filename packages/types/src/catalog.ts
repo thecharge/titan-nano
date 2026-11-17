@@ -1,5 +1,5 @@
 import { isAbsolute, resolve } from "node:path";
-import { EventCursor, RunStatus, ServerLimit, ServerState } from "@titan/constants";
+import { EventCursor, KnownHome, RunStatus, ServerLimit, ServerState } from "@titan/constants";
 import { z } from "zod";
 import { CallerSessionSchema } from "./board.ts";
 import { StoredRunSchema } from "./transport.ts";
@@ -37,6 +37,7 @@ export const RunListQuerySchema = z.strictObject({
     .default(ServerLimit.RunPageSize),
   client_id: z.string().min(1).max(ServerLimit.IdentityCharacters).optional(),
   harness_session_id: CallerSessionSchema.optional(),
+  state: z.enum(RunStatus).optional(),
   project_path: z
     .string()
     .min(1)
@@ -53,6 +54,7 @@ export const RunListSearchSchema = z
     client_id: z.string().optional(),
     harness_session_id: z.string().optional(),
     project_path: z.string().optional(),
+    state: z.string().optional(),
   })
   .pipe(RunListQuerySchema);
 export const RunPageSchema = z
@@ -74,3 +76,16 @@ export const RunPageSchema = z
   )
   .refine((page) => new Set(page.runs.map((run) => run.run_id)).size === page.runs.length);
 export type RunPage = z.infer<typeof RunPageSchema>;
+
+export const KnownHomeResultSchema = z.union([
+  z.strictObject({ home: z.string(), page: RunPageSchema }),
+  z.strictObject({ home: z.string().nullable(), error: z.string() }),
+]);
+export type KnownHomeResult = z.infer<typeof KnownHomeResultSchema>;
+
+export const KnownHomePathSchema = z
+  .string()
+  .max(ServerLimit.SummaryCharacters)
+  .refine(
+    (path) => !path.includes(KnownHome.NullByte) && isAbsolute(path) && resolve(path) === path,
+  );

@@ -1,6 +1,13 @@
 import { opendir } from "node:fs/promises";
 import { resolve } from "node:path";
-import { ErrorCode, ErrorField, FileErrorCode, PathPart, TextSymbol } from "@titan/constants";
+import {
+  ErrorCode,
+  ErrorField,
+  FileErrorCode,
+  PathPart,
+  TextSymbol,
+  WorkspaceGeneratedDirectories,
+} from "@titan/constants";
 import { all, filePathCovers } from "@titan/core";
 import { TitanError } from "@titan/errors";
 import { snapshotSpecialFile, snapshotSymlink, WorkspaceMessage } from "@titan/messages";
@@ -49,12 +56,22 @@ async function collectTree(
   state: WorkspaceTraversal,
   scanner?: SecretScannerFactory,
   selected?: readonly string[],
+  snapshotIncludes?: readonly string[],
+  insideGenerated = false,
 ): Promise<void> {
   const directory = await opendir(resolve(root, prefix));
   for await (const item of directory) {
     if (!WorkspaceEntryNameSchema.safeParse(item.name).success) continue;
     const path = prefix ? [prefix, item.name].join(PathPart.Separator) : item.name;
     if (state.omitted.includes(path)) continue;
+    const generated =
+      insideGenerated || (item.isDirectory() && WorkspaceGeneratedDirectories.includes(item.name));
+    if (
+      snapshotIncludes &&
+      generated &&
+      !snapshotIncludes.some((entry) => filePathCovers(entry, path) || filePathCovers(path, entry))
+    )
+      continue;
     if (
       selected &&
       !selected.some(
@@ -67,7 +84,17 @@ async function collectTree(
     scanner?.().accept(Buffer.from(path));
     if (item.isSymbolicLink()) throw new TitanError(ErrorCode.UnsafeSymlink, snapshotSymlink(path));
     if (item.isDirectory())
-      await collectTree(root, path, depth + 1, inventory, state, scanner, selected);
+      await collectTree(
+        root,
+        path,
+        depth + 1,
+        inventory,
+        state,
+        scanner,
+        selected,
+        snapshotIncludes,
+        generated,
+      );
     else if (item.isFile()) inventory.set(path, TextSymbol.Empty);
     else throw new TitanError(ErrorCode.UnsupportedFile, snapshotSpecialFile(path));
   }
@@ -79,6 +106,7 @@ async function inventoryTree(
   scanner?: SecretScannerFactory,
   omitted: readonly string[] = [],
   selected?: readonly string[],
+  snapshotIncludes?: readonly string[],
 ): Promise<Map<string, string>> {
   const inventory = new Map<string, string>();
   try {
@@ -90,6 +118,7 @@ async function inventoryTree(
       traversal(limits, omitted),
       scanner,
       selected,
+      snapshotIncludes,
     );
     await all(
       [...inventory.keys()].map((path) => async () => {
@@ -142,18 +171,19 @@ async function captureTree(
   }
 }
 
-export async function readTree(
+async function capture(
   root: string,
   limits?: WorkspaceLimitsInput,
   scanner?: SecretScannerFactory,
   omitted: readonly string[] = [],
   selected?: readonly string[],
+  snapshotIncludes?: readonly string[],
 ): Promise<FileMap> {
   const selection = selected === undefined ? undefined : FileReadPathsSchema.parse(selected);
-  const before = await inventoryTree(root, limits, scanner, omitted, selection);
+  const before = await inventoryTree(root, limits, scanner, omitted, selection, snapshotIncludes);
   const files = await captureTree(root, before, traversal(limits), scanner);
   const verified = await captureTree(root, before, traversal(limits), scanner);
-  const after = await inventoryTree(root, limits, scanner, omitted, selection);
+  const after = await inventoryTree(root, limits, scanner, omitted, selection, snapshotIncludes);
   if (
     before.size !== after.size ||
     before.size !== Object.keys(files).length ||
@@ -166,6 +196,26 @@ export async function readTree(
   return Object.fromEntries(
     Object.entries(files).sort(([left], [right]) => left.localeCompare(right)),
   );
+}
+
+export function readTree(
+  root: string,
+  limits?: WorkspaceLimitsInput,
+  scanner?: SecretScannerFactory,
+  omitted?: readonly string[],
+  selected?: readonly string[],
+): Promise<FileMap> {
+  return capture(root, limits, scanner, omitted, selected);
+}
+
+export function readWorkspaceSnapshot(
+  root: string,
+  limits?: WorkspaceLimitsInput,
+  scanner?: SecretScannerFactory,
+  omitted?: readonly string[],
+  included: readonly string[] = [],
+): Promise<FileMap> {
+  return capture(root, limits, scanner, omitted, undefined, included);
 }
 
 function admitPath(state: WorkspaceTraversal, seen: Set<string>, path: string): void {

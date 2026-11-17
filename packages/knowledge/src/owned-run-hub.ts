@@ -1,11 +1,28 @@
 import { resolve } from "node:path";
-import { RunHubTools } from "@titan/constants";
+import {
+  ErrorCode,
+  PersonaRule,
+  ProjectPersonaPrefix,
+  RequestKind,
+  RunHubTools,
+  WorkflowField,
+} from "@titan/constants";
+import { TitanError } from "@titan/errors";
+import { KnowledgeMessage } from "@titan/messages";
 import { KeyedQueue } from "@titan/store";
-import type { KnowledgeSettingsInput, OwnedKnowledge, RunHub } from "@titan/types";
+import type { KnowledgeSettingsInput, OwnedKnowledge, RunHub, Workflow } from "@titan/types";
 import { KnowledgeHub } from "./hub.ts";
 import { selectKnowledgeAttempt } from "./native-run-knowledge.ts";
 import { scopedRunHub } from "./run-hub.ts";
 import { projectHubHome, ScopedKnowledgeHub } from "./scoped.ts";
+
+function usesProjectPersonas(workflow: Workflow): boolean {
+  return Object.values(workflow.personas).some(
+    (persona) =>
+      (WorkflowField.Use in persona && persona.use.startsWith(ProjectPersonaPrefix)) ||
+      (WorkflowField.Mutates in persona && persona.mutates.startsWith(ProjectPersonaPrefix)),
+  );
+}
 
 export function ownedKnowledge(
   home: string,
@@ -58,16 +75,36 @@ export function ownedKnowledge(
   return {
     hub,
     use,
-    bindPersonas: (workflow) =>
-      use(undefined, (_local, knowledge) => knowledge.bindPersonas(workflow)),
-    resolvePersonas: (workflow) =>
-      use(undefined, (_local, knowledge) => knowledge.resolvePersonas(workflow)),
-    personaHistory: (run, events, request, usage) =>
-      use(undefined, (_local, knowledge) =>
-        knowledge.recordPersonaHistory(run, events, request, usage),
+    bindPersonas: (workflow, project, registration) =>
+      use(usesProjectPersonas(workflow) ? project : undefined, (local, knowledge) =>
+        knowledge.bindPersonas(workflow, registration, local),
       ),
-    personaDecision: (request, stage) =>
-      use(undefined, (_local, knowledge) => knowledge.personaDecision(request, stage)),
+    resolvePersonas: (workflow, project) =>
+      use(usesProjectPersonas(workflow) ? project : undefined, (local, knowledge) =>
+        knowledge.resolvePersonas(workflow, local),
+      ),
+    personaHistory: (run, events, request, usage) =>
+      use(run.project, (local, knowledge) =>
+        knowledge.recordPersonaHistory(run, events, request, usage, local),
+      ),
+    personaDecision: (request, stage, project) =>
+      use(project, (local, knowledge) => {
+        if (
+          ![
+            RequestKind.NewPersona,
+            RequestKind.ImprovePersona,
+            RequestKind.MergePersonas,
+            RequestKind.RetirePersona,
+            RequestKind.DeletePersona,
+          ].includes(request.kind)
+        )
+          return knowledge.personaDecision(request, stage);
+        const sources = request.scope.resource.split(PersonaRule.TagSeparator);
+        const scoped = sources.filter((source) => source.startsWith(ProjectPersonaPrefix));
+        if (scoped.length && (scoped.length !== sources.length || !project))
+          throw new TitanError(ErrorCode.PermissionDenied, KnowledgeMessage.PersonaDecision);
+        return (scoped.length ? local : knowledge).personaDecision(request, stage);
+      }),
     openCalls: (tags, excluded) =>
       use(undefined, (_local, knowledge) => knowledge.openCall(tags, excluded)),
     attempts: {

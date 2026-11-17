@@ -12,7 +12,6 @@ import {
 } from "@titan/constants";
 import { hash, newId } from "@titan/core";
 import { TitanError } from "@titan/errors";
-import type { KnowledgeHub } from "@titan/knowledge";
 import { ServerMessage, WorkflowMessage } from "@titan/messages";
 import type { Engine } from "@titan/runner";
 import type { KeyedQueue } from "@titan/store";
@@ -21,6 +20,7 @@ import {
   type BackendFactory,
   type CatalogDatabase,
   type Logger,
+  type OwnedKnowledge,
   type RunCreation,
   StoredSubmissionSchema,
   SubmissionSchema,
@@ -53,7 +53,7 @@ export class RunSubmissions {
     private operations: KeyedQueue,
     private submissions: KeyedQueue,
     private logger: Logger,
-    private knowledge: KnowledgeHub,
+    private knowledge: OwnedKnowledge,
   ) {}
 
   private async prepare(input: unknown): Promise<RunCreation> {
@@ -83,7 +83,7 @@ export class RunSubmissions {
       source = workflowFile(plan, source, config.value.limits.max_group_depth);
     }
     const resolved = validateWorkflow(
-      await this.knowledge.resolvePersonas(plan.workflow),
+      await this.knowledge.resolvePersonas(plan.workflow, project),
       config.value.limits.max_group_depth,
     );
     this.engine.preflight(resolved, config, body.backend);
@@ -157,7 +157,11 @@ export class RunSubmissions {
       return false;
     }
     const { workflow_path, resolved_plan: _resolved, ...creation } = options;
-    const binding = await this.knowledge.bindPersonas(options.plan.workflow, hash(id));
+    const binding = await this.knowledge.bindPersonas(
+      options.plan.workflow,
+      options.project,
+      hash(id),
+    );
     const resolved = validateWorkflow(
       binding.workflow,
       options.config.value.limits.max_group_depth,

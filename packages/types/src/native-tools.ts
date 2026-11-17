@@ -1,12 +1,20 @@
 import { ConfigDefault, NativeToolRole, NativeToolTransport, RuntimeLimit } from "@titan/constants";
 import { z } from "zod";
 import { KnowledgeAttemptScopeSchema } from "./knowledge-attempt-scope.ts";
+import { PersonaSchema } from "./persona.ts";
 
 export const NativeToolScopeSchema = KnowledgeAttemptScopeSchema.extend({
   execution_id: z.uuid(),
   role: z.enum(NativeToolRole),
 });
 export type NativeToolScope = z.infer<typeof NativeToolScopeSchema>;
+
+export const NativeImproverBindingSchema = z.strictObject({
+  scope: NativeToolScopeSchema,
+  name: z.string().min(1),
+  persona: PersonaSchema,
+});
+export type NativeImproverBinding = z.infer<typeof NativeImproverBindingSchema>;
 
 export const NativeToolSettingsSchema = z.strictObject({
   max_bindings: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),

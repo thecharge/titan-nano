@@ -358,14 +358,31 @@ export function reconciliationRefusal(
       });
     const scripts: ScriptCheck = async () => {
       checks++;
-      await writeFile(resolve(project, "note.txt"), "External edit");
       return {
         exit_code: 1,
         stdout: Buffer.from("Refuted original work"),
         stderr: Buffer.alloc(0),
       };
     };
-    const engine = new Engine(factory, {}, { scripts });
+    let edited = false;
+    const engine = new Engine(
+      factory,
+      {},
+      {
+        scripts,
+        projectRun: async (run, kind) => {
+          const phase = falsifier ? "falsifier-0" : "check-0";
+          if (
+            !edited &&
+            kind === RunEventKind.PhaseCompleted &&
+            run.nodes.deliver?.phases[phase]?.completed
+          ) {
+            edited = true;
+            await writeFile(resolve(project, "note.txt"), "External edit");
+          }
+        },
+      },
+    );
     const run = await engine.create({
       project,
       config: await resolveConfig({

@@ -202,7 +202,6 @@ export const cliEntrypointDiagnostics = async () => {
   expect(rendered).toEqual(["message", '{\n  "ready": true\n}']);
 };
 export const cliRuntimeComposition = async () => {
-  const { serveUntilStopped } = await import("@titan/runtime");
   const { createRunClient } = await import("@titan/server/client");
   const home = await mkdtemp(resolve(tmpdir(), "titan-runtime-home-"));
   const project = await mkdtemp(resolve(tmpdir(), "titan-runtime-project-"));
@@ -229,7 +228,11 @@ export const cliRuntimeComposition = async () => {
     personas,
     steps: [step],
   };
-  const running = serveUntilStopped(
+  const previousHome = process.env.TITAN_HOME;
+  const registry = resolve(project, "registry-file");
+  await writeFile(registry, "unavailable registry");
+  process.env.TITAN_HOME = registry;
+  const running = defaultServices.serve(
     home,
     () => ready?.(),
     () => stopping,
@@ -247,6 +250,8 @@ export const cliRuntimeComposition = async () => {
   } finally {
     stop?.();
     await running;
+    if (previousHome === undefined) delete process.env.TITAN_HOME;
+    else process.env.TITAN_HOME = previousHome;
     await rm(home, { recursive: true, force: true });
     await rm(project, { recursive: true, force: true });
   }

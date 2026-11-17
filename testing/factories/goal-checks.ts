@@ -161,10 +161,7 @@ export async function goalScriptChecks(first: number, second: number, mode: stri
       await engine.resume(run.run_id);
     }
     const finished = engine.get(run.run_id);
-    assert.equal(
-      finished.schema_version,
-      mode.startsWith("legacy-") ? RunFormat.GoalProofs : RunFormat.ProofCaptures,
-    );
+    assert.equal(finished.schema_version, RunFormat.ScriptCandidates);
     if (mode.startsWith("corrupt-")) {
       const invalid = structuredClone(finished);
       assert(invalid.goal);

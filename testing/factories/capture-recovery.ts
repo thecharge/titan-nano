@@ -22,6 +22,7 @@ import { withTemporaryDirectory } from "@titan/test-framework/files";
 import {
   type AgentBackend,
   type FakeHandler,
+  ObjectSchema,
   RunEventSchema,
   type ScriptCheck,
 } from "@titan/types";
@@ -304,7 +305,7 @@ export async function sealedCaptureRecovery(
     assert.deepEqual(node.evidence, []);
     if (reconciling) {
       assert.equal(resumed.state, RunStatus.Passed);
-      assert.equal(resumed.schema_version, RunFormat.Reconciliation);
+      assert.equal(resumed.schema_version, RunFormat.ScriptCandidates);
       assert.deepEqual(node.reconciliations?.[0]?.phases[ExecutionPhase.Worker], received);
       assert.deepEqual(phase.answer, { reconciled: true });
       assert.equal(generations, 1);
@@ -350,7 +351,11 @@ export async function sealedCaptureRecovery(
     );
     const events = (await engine.events(run.run_id)).events;
     assert.equal(
-      events.filter((event) => event.type === RunEventKind.PhaseReceived).length,
+      events.filter(
+        (event) =>
+          event.type === RunEventKind.PhaseReceived &&
+          ObjectSchema.parse(event.data).phase === ExecutionPhase.Worker,
+      ).length,
       split ? 2 : 1,
     );
     assert.equal(

@@ -9,16 +9,17 @@ import {
 } from "@titan/types";
 import { readPersonaEntry } from "./persona-archive.ts";
 import { emptyPersonaUsage, personaEntryId } from "./persona-lifecycle.ts";
-import { personaRecord } from "./persona-register.ts";
+import { localPersonaReference, personaRecord } from "./persona-register.ts";
 
 export async function publishPersonaUsage(
   storage: PersonaRegistryStorage,
   input: PersonaUsageReport,
 ): Promise<void> {
   const { persona, ...report } = PersonaUsageReportSchema.parse(input);
-  const at = persona.lastIndexOf(PersonaRule.VersionMark);
-  const { entry, bytes } = await readPersonaEntry(storage, personaEntryId(persona));
-  const record = personaRecord(entry, persona.slice(0, at), Number(persona.slice(at + 1)));
+  const reference = localPersonaReference(persona);
+  const at = reference.lastIndexOf(PersonaRule.VersionMark);
+  const { entry, bytes } = await readPersonaEntry(storage, personaEntryId(reference));
+  const record = personaRecord(entry, reference.slice(0, at), Number(reference.slice(at + 1)));
   const previous = record.usage?.reports.find((saved) => saved.run_id === report.run_id);
   if (previous && report.through < previous.through) return;
   if (previous && report.through === previous.through) {

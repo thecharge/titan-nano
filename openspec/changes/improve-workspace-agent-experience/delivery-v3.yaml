@@ -1,0 +1,142 @@
+{
+  "name": "Complete retained workspace delivery with bounded Codex telemetry",
+  "workflow_id": "titan-workspace-experience-v3",
+  "goal": "Deliver the improve-workspace-agent-experience OpenSpec change in the shared Titan source tree. Use synthetic public-safe fixtures and reusable personas. Retain actual implementation and independent review evidence. The coordinator will run the full local gate, commit and push after reviewing the result.",
+  "defaults": {
+    "max_attempts": 2,
+  },
+  "limits": {
+    "max_parallel": 2,
+    "max_minutes": 90,
+  },
+  "personas": {
+    "workspace_implementer": {
+      "description": "Implements reusable Titan workspace capabilities through existing entry points.",
+      "tags": [
+        "titan",
+        "implementation",
+        "workspace",
+      ],
+      "role": "Inspect existing implementation before editing. Follow the change proposal, design, specs and tasks and docs/development.md. Use managed file tools. Keep changes readable and focused. Reuse established schemas, constants, messages, errors and package boundaries. Preserve backward compatibility and unrelated files. The existing untracked testing/integration/model-offline-probe.test.ts is unrelated and must keep its original empty bytes. Use flat case tables and existing test helpers for regression coverage. Do not weaken checks, hooks, approval rules or tests. Do not change licenses or dependencies. Use only synthetic fixtures and generic examples. Do not inspect sibling repositories, account journals or credentials. Do not commit, push, deploy or invoke vendors. The coordinator handles actual command verification. Be precise about unexecuted checks. Avoid speculative redesign and unused abstractions. Seek the simplest working implementation across normal entry points.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+        "Write",
+        "Edit",
+      ],
+      "outputs": {
+        "summary": {
+          "type": "string",
+        },
+      },
+    },
+    "workspace_reviewer": {
+      "description": "Challenges observable CLI behavior, compatibility and source integrity.",
+      "tags": [
+        "titan",
+        "review",
+        "workspace",
+      ],
+      "role": "Inspect actual changed files using managed tools. Read the change contract. Find concrete inputs that refute behavior, integration, backward compatibility, boundedness, recoverability or preservation of unrelated files. Do not demand invented executed results during implementation. Check that regressions target normal command and native tool entry points. Give precise evidence.",
+      "tools": [
+        "Read",
+        "Glob",
+        "Grep",
+      ],
+    },
+  },
+  "steps": [
+    {
+      "id": "run-inspection-and-authoring",
+      "files": [
+        "apps",
+        "packages",
+        "testing",
+        "docs",
+      ],
+      "do": {
+        "persona": "workspace_implementer",
+        "task": "CURRENT TASK ONLY. The preceding run reached its bounded runtime limit. Preserve and finish the implementation already in the shared tree. Treat the other step descriptions as coordination metadata. Do not implement sibling steps now. Read openspec/changes/improve-workspace-agent-experience/proposal.md, design.md and all four specs. Implement workspace-run-inspection and workflow-persona-authoring first. Inspect existing runs/status/dashboard, CLI formatting and catalog schemas before modifying them. Add compact status through a real command option, keep legacy JSON full output, and stop compact output including events or file observation bodies. Include steps, attempts, errors, usage availability and waiting requests. Add project/home/known-home scopes and state filtering using bounded authenticated clients and an atomically maintained home registry. Report per-home failure without fabricating statuses. Reuse current dashboard filtering and links. Add skills-independent workflow and persona factories with reviewed/parallel templates, optional script verification, schema validation, exact-version persona reuse and no overwrite. Add direct persona list with scope, versions, lifecycle state and use references. Reuse the existing registry and its project/home semantics. Add focused regression cases for commands, old output and unavailable homes. Update docs for the actual commands. Leave web and skill execution for the next step. The coordinator also corrected the pinned sandbox patch and added focused script-sandbox regression cases. Preserve those changes. Fix any concrete integration defects from the prior review. Complete this step without redesign or redundant file reads. Return a concise file summary. The prior run blocked twice because native command telemetry exceeded the one-MiB host frame. The coordinator has bounded only command/output event telemetry with an explicit excerpt, original UTF-8 byte count and SHA-256. Final answer and usage are unchanged. Preserve and independently inspect that repair. All five new telemetry regressions passed in the focused 42-case suite, which still exits one for full-product coverage. Finish these precise prior refutations first: persona create must emit a KB-importable kind/title/body envelope for documented kb add; known-home registry must include dashboard, serve, MCP, knowledge and request entry points; compact watch must avoid scanning full journal usage on every poll; conflicting project selectors must be refused rather than escaping selected project. Avoid searching docs/examples/self-development huge journal fixtures. Use focused managed source reads.",
+      },
+      "falsify": [
+        {
+          "persona": "workspace_reviewer",
+          "task": "Review the run inspection and workflow/persona command changes against their specs. Find broken command parsing, missing registry updates, stale or fabricated state, unsafe overwrites, mismatched persona scopes, generated workflows that fail schema validation, lost legacy JSON behavior or output that still contains large file bodies. Refute concrete defects and identify the precise input or code path.",
+        },
+      ],
+    },
+    {
+      "id": "skill-discovery-and-execution",
+      "files": [
+        "apps",
+        "packages",
+        "testing",
+        "docs",
+      ],
+      "do": {
+        "persona": "workspace_implementer",
+        "task": "CURRENT TASK ONLY. The preceding run reached its bounded runtime limit. Preserve and finish the implementation already in the shared tree. Treat the other step descriptions as coordination metadata. Do not implement sibling steps now. Implement workspace-skill-discovery from the same change. Reuse the preceding command and catalog work. Discover repository .agents/skills, .codex/skills and .claude/skills and corresponding configured user roots, including CODEX_HOME and CLAUDE_CONFIG_DIR handling. Expose list/show commands with descriptions, origin and project-over-user precedence. Permit canonical repository skill links while refusing escaping references. Supply an available-skill index automatically and full explicit persona.skills instructions to both Codex and Claude. Add execution-bound skill/reference reads through the existing native tool bridge so excluded harness folders need not be copied manually. Retain selected content and hashes with the run and use recorded content on resume. Keep old runs readable. Reuse existing policy rather than silently granting new tools. Add regression cases for both backend bindings, duplicate precedence, links, escapes, live skill change and retained resume. Also implement generated build-cache omissions for full workspace snapshots only, including .cache/.turbo/.next/ .next-dev/.wrangler/.vlog, while preserving explicitly selected managed reads and declared script writes such as .cache/operations. Keep ordinary source and public files in snapshots and test both default and selected views. Include .velite generated output in default full-snapshot omissions. Preserve explicitly selected reads and writes.",
+      },
+      "falsify": [
+        {
+          "persona": "workspace_reviewer",
+          "task": "Review native skill integration and full-snapshot cache handling. Trace an actual selected persona skill into both backend launches and an execution-bound reference read. Refute inert schema-only fields, unbounded or escaping reads, broken canonical symlinks, overwritten global precedence, changed instructions after resume or broken old runs. Verify cache omission does not forbid selected .cache/operations writes.",
+        },
+      ],
+    },
+    {
+      "id": "web-resources-and-guidance",
+      "files": [
+        "apps",
+        "packages",
+        "testing",
+        "docs",
+      ],
+      "do": {
+        "persona": "workspace_implementer",
+        "task": "CURRENT TASK ONLY. The preceding run reached its bounded runtime limit. Preserve and finish the implementation already in the shared tree. Treat the other step descriptions as coordination metadata. Do not implement sibling steps now. Implement agent-web-resources through the existing resource approval mechanism. Expose native and CLI public HTTPS reads. Permit configured autonomous policy while recording requests for person-controlled policy. Preserve actual requested/final URL, status, retrieval time, media type, digest and errors. Centralize sensible byte/time/redirect bounds and refuse credentials and private destinations on each redirect. Keep this readable and reuse existing HTTP and request facilities. Explicitly identify binary extraction limits. Test policy-required and autonomous paths, redirects, oversize, timeout and denied destinations with local injected transports and synthetic content, without live network tests. Update public CLI guidance, generated guide source, normal examples and developer verification instructions for all delivered capabilities. Document persona listing, exact-version reuse and skill handling through a short ordinary workflow. Add docs/workspace-capabilities.md with the concrete commands and remaining unexecuted verification. Do not claim test execution. The coordinator will validate source and installed package.",
+      },
+      "falsify": [
+        {
+          "persona": "workspace_reviewer",
+          "task": "Review web resource entry points, resource approvals and source evidence. Refute policy bypass, stalled request resume, redirects to private hosts, unchecked bytes, lost failure evidence, fake text extraction or missing native tool exposure. Check the documented workflow/persona/skill commands correspond to implemented handlers and ordinary schema-valid examples.",
+        },
+      ],
+    },
+    {
+      "id": "script-execution-repairs",
+      "files": [
+        "packages",
+        "testing",
+        "docs",
+        "patches",
+      ],
+      "do": {
+        "persona": "workspace_implementer",
+        "task": "Repair demonstrated execution defects within this existing design. Inspect packages/server/src/scripts.ts and process command capture. Ordinary script actions currently inherit a ten-second capture deadline that prevents legitimate build steps. Add a schema-validated optional timeout_s on script actions with a bounded default appropriate to ordinary checks, preserve older workflows and retained records, and apply the actual declared deadline to workers/checkers through the authorized script path. Do not weaken cancellation, output bounds, person approval or write confinement. Also fix live read/write claim selection for script verify proofs so they reserve their declared write scope. Preserve exact script results and avoid accepting unrelated external changes when checks modify expected output paths. Study the actual lifecycle before changing it. Add focused regression cases for an explicitly bounded long command, timeout failure, proof write claims and received proof reconciliation. The coordinator has extended patches/sandlock-0.9.1.patch for missing-path errno, exact host-root exec argument handling and private temporary FIFO fixtures. Independently inspect that patch and its regression cases. Refute any boundary weakening, and correct any demonstrated flaw. Keep all license and dependency versions unchanged. No sibling repository reading.",
+      },
+      "falsify": [
+        {
+          "persona": "workspace_reviewer",
+          "task": "Find a concrete counterexample to script deadline and script-proof claim handling, backward compatibility, approval/cancellation and scoped writes. Inspect the sandbox correction under its exact host-root all-read policy. Confirm device nodes and project FIFOs stay refused and source archive patching remains reproducible. Report concrete faults with paths.",
+        },
+      ],
+    },
+    {
+      "id": "typecheck-delivery",
+      "files": [
+        "docs/workspace-capabilities.md",
+      ],
+      "do": {
+        "script": "bun run typecheck",
+      },
+      "falsify": [
+        {
+          "persona": "workspace_reviewer",
+          "task": "Inspect the step result and changed source against all four capability contracts. Report any actual failed typecheck or remaining concrete integration defect. Compilation alone does not establish full delivery.",
+        },
+      ],
+    },
+  ],
+}

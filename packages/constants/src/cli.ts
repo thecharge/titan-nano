@@ -23,6 +23,7 @@ export const CliOptionDefinitions = {
   "run-id": { type: "string" },
   "harness-session-id": { type: "string" },
   "project-path": { type: "string" },
+  "home-after": { type: "string" },
   state: { type: "string" },
   "request-version": { type: "string" },
   reason: { type: "string" },
@@ -35,6 +36,7 @@ export const CliOptionDefinitions = {
   project: { type: "string" },
   config: { type: "string" },
   backend: { type: "string" },
+  compact: { type: "boolean" },
   watch: { type: "boolean" },
   detach: { type: "boolean" },
   "dry-run": { type: "boolean" },
@@ -47,6 +49,12 @@ export const CliOptionDefinitions = {
   limit: { type: "string" },
   offset: { type: "string" },
   force: { type: "boolean" },
+  template: { type: "string" },
+  worker: { type: "string" },
+  reviewer: { type: "string" },
+  verify: { type: "string" },
+  tool: { type: "string", multiple: true },
+  skill: { type: "string", multiple: true },
   persona: { type: "string" },
   rounds: { type: "string" },
 } as const;
@@ -76,6 +84,7 @@ export enum CliOption {
   RunId = "run-id",
   HarnessSessionId = "harness-session-id",
   ProjectPath = "project-path",
+  HomeAfter = "home-after",
   State = "state",
   RequestVersion = "request-version",
   Reason = "reason",
@@ -91,6 +100,7 @@ export enum CliOption {
   Project = "project",
   Config = "config",
   Backend = "backend",
+  Compact = "compact",
   Watch = "watch",
   Detach = "detach",
   DryRun = "dry-run",
@@ -100,6 +110,12 @@ export enum CliOption {
   Harness = "harness",
   Version = "version",
   Force = "force",
+  Template = "template",
+  Worker = "worker",
+  Reviewer = "reviewer",
+  Verify = "verify",
+  Tool = "tool",
+  Skill = "skill",
   Persona = "persona",
   Rounds = "rounds",
 }
@@ -122,7 +138,9 @@ export enum CliCommand {
   Policy = "policy",
   Traces = "traces",
   Persona = "persona",
+  Skill = "skill",
   Knowledge = "kb",
+  Workflow = "workflow",
   Backends = "backends",
   Doctor = "doctor",
   Serve = "serve",
@@ -152,6 +170,7 @@ export enum CliInvocationKind {
 
 export enum CliArgument {
   PersonaName = "persona name or version",
+  SkillName = "skill name",
   Setting = "setting",
   Value = "value",
   KnowledgeId = "entry ID",
@@ -255,4 +274,17 @@ export const RunArtifactFile = {
 } as const;
 
 export const RequestCommand = { Show: "show" } as const;
-export const PersonaCommand = { Show: "show" } as const;
+export const SkillCommand = { Show: "show", List: "list" } as const;
+export const PersonaCommand = { Show: "show", List: "list", Create: "create" } as const;
+export const WorkflowCommand = { Create: "create" } as const;
+export const WorkflowTemplate = { Reviewed: "reviewed", Parallel: "parallel" } as const;
+
+export const WorkflowFactory = {
+  Worker: "worker",
+  Reviewer: "reviewer",
+  Prepare: "prepare",
+  Risks: "risks",
+  Verify: "verify",
+  Yaml: ".yaml",
+  Yml: ".yml",
+} as const;

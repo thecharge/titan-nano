@@ -34,10 +34,12 @@ export interface CliServices {
   knowledge(home: string): KnowledgeClient;
   output(value: unknown, json: boolean, context?: CliOutputContext): void;
   client(home: string): RunClient;
+  knownHomes?(after?: string): Promise<(string | null)[]>;
+  existingRunClient?(home: string): RunClient;
   requests(home: string): RequestClient;
   dashboard(home: string): DashboardClient;
   improve(home: string, request: ImproveRequest): Promise<ImproveReport>;
-  serve(home: string, ready: ReadySink): Promise<void>;
+  serve(home: string, ready: ReadySink, stopped?: () => Promise<void>): Promise<void>;
   mcp(home: string): Promise<unknown>;
   toolServer(): Promise<void>;
   wait(milliseconds: number): Promise<void>;

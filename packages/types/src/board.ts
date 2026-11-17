@@ -34,7 +34,7 @@ import { ProofSummarySchema } from "./proof-report.ts";
 import { PhaseRequestTurnSchema } from "./request-turns.ts";
 import { RequestExecutionSchema } from "./requests.ts";
 import { PlanSchema, WorkflowSourceSchema } from "./workflow.ts";
-import { WorkspaceOmissionsSchema } from "./workspace.ts";
+import { WorkspaceOmissionsSchema, WorkspaceSkillEntrySchema } from "./workspace.ts";
 
 export const CallerSessionSchema = z.string().min(1).max(ServerLimit.IdentityCharacters);
 
@@ -165,6 +165,7 @@ export const RunSchemaVersionSchema = z.union([
   z.literal(RunFormat.GoalProofs),
   z.literal(RunFormat.ProofCaptures),
   z.literal(RunFormat.PinnedBuild),
+  z.literal(RunFormat.ScriptCandidates),
 ]);
 export type RunSchemaVersion = z.infer<typeof RunSchemaVersionSchema>;
 
@@ -193,6 +194,20 @@ export const RunSchema = z
     request_hash: z.string().min(1),
     project: z.string().min(1),
     runtime_paths: WorkspaceOmissionsSchema.optional(),
+    omit_generated_workspace: z.literal(true).optional(),
+    workspace_skills: z
+      .strictObject({
+        index: z.array(WorkspaceSkillEntrySchema),
+        files: z.array(
+          z.strictObject({
+            name: z.string().min(1),
+            path: z.string().min(1),
+            content: z.string(),
+            hash: ArtifactHashSchema,
+          }),
+        ),
+      })
+      .optional(),
     root: z.string().min(1),
     version: count,
     created_at: z.number().nonnegative(),
@@ -234,7 +249,8 @@ export const RunSchema = z
   )
   .refine(
     (run) =>
-      run.schema_version >= RunFormat.PinnedBuild === (run.runtime_build !== undefined) &&
+      (run.schema_version >= RunFormat.ScriptCandidates ||
+        run.schema_version >= RunFormat.PinnedBuild === (run.runtime_build !== undefined)) &&
       (run.runtime_build === undefined || run.runtime_version !== undefined),
   );
 export type Run = z.infer<typeof RunSchema>;

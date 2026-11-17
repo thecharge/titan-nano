@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import {
   CliEventFormat,
   CliOption,
@@ -6,18 +7,22 @@ import {
   ErrorCode,
   ExitCode,
   IoLimit,
+  KnowledgeScope,
+  KnownHome,
   RunAction,
+  ServerLimit,
   TextSymbol,
 } from "@titan/constants";
 import { isActiveRun, jsonByteLength, minutesLeft, runExitCode } from "@titan/core";
-import { RunObservationError, TitanError } from "@titan/errors";
-import { CliOutputMessage, cliRunEvent, limitTimeLeft } from "@titan/messages";
+import { errorMessage, RunObservationError, TitanError } from "@titan/errors";
+import { CliDiagnostic, CliOutputMessage, cliRunEvent, limitTimeLeft } from "@titan/messages";
 import { parseArtifactSearch, parseEventSearch, parseRunListSearch } from "@titan/server/client";
 import type {
   CliOptions,
   CommandContext,
   CommandHandler,
   CommandResult,
+  KnownHomeResult,
   RunSnapshot,
 } from "@titan/types";
 import { CliEventLineSchema } from "@titan/types";
@@ -114,10 +119,58 @@ export const runHandlers = {
       ),
     exitCode: ExitCode.Success,
   }),
-  list: async ({ services, home, options }) => ({
-    data: await services.client(home).list(runListOptions(options)),
-    exitCode: ExitCode.Success,
-  }),
+  list: async ({ services, home, options, project }) => {
+    const query = runListOptions(options);
+    if (
+      query.project_path !== undefined &&
+      (options.scope === KnowledgeScope.Project || options[CliOption.Project] !== undefined) &&
+      resolve(query.project_path) !== project
+    )
+      throw new TitanError(ErrorCode.Arguments, CliDiagnostic.ConflictingProjectSelectors);
+    if (options.scope === KnowledgeScope.Project) {
+      return {
+        data: await services.client(home).list({ ...query, project_path: project }),
+        exitCode: ExitCode.Success,
+      };
+    }
+    if (options.scope === KnownHome.Scope) {
+      const after = options[CliOption.HomeAfter] ?? TextSymbol.Empty;
+      const registered = (await services.knownHomes?.(after)) ?? [];
+      const homes = [...new Set([home, ...registered])]
+        .filter((owner) => owner === null || owner > after)
+        .sort();
+      const lookup = services.existingRunClient ?? services.client;
+      const inspect = async (owner: string | null): Promise<KnownHomeResult> => {
+        if (owner === null) return { home: null, error: CliDiagnostic.InvalidHomeEntry };
+        try {
+          return { home: owner, page: await lookup(owner).list(query) };
+        } catch (error) {
+          return { home: owner, error: errorMessage(error) };
+        }
+      };
+      const pages: Awaited<ReturnType<typeof inspect>>[] = [];
+      let bytes = 0;
+      let last = after;
+      for (const owner of homes.slice(0, ServerLimit.KnownHomePageSize)) {
+        let result = await inspect(owner);
+        let size = jsonByteLength(result, IoLimit.ResponseBytes);
+        if (size > IoLimit.ResponseBytes / 2) {
+          result = { home: owner, error: CliDiagnostic.HomePageTooLarge };
+          size = jsonByteLength(result, IoLimit.ResponseBytes);
+        }
+        if (bytes + size > IoLimit.ResponseBytes / 2) break;
+        pages.push(result);
+        bytes += size;
+        if (owner !== null) last = owner;
+      }
+      const hasMore = pages.length < homes.length;
+      return {
+        data: { homes: pages, has_more: hasMore, next_home: hasMore ? last : null },
+        exitCode: ExitCode.Success,
+      };
+    }
+    return { data: await services.client(home).list(query), exitCode: ExitCode.Success };
+  },
   events: async (context) => {
     if (context.options.follow) {
       return followEvents(context);
@@ -130,10 +183,18 @@ export const runHandlers = {
     };
   },
   status: async (context) => {
-    const run = await context.services
-      .client(context.home)
-      .get(context.positionals[0] ?? TextSymbol.Empty);
-    return runResult(context, run);
+    const id = context.positionals[0] ?? TextSymbol.Empty;
+    const client = context.services.client(context.home);
+    if (!context.options.compact) return runResult(context, await client.get(id));
+    let data = await client.get(id, true);
+    while (context.options.watch && isActiveRun(data.state)) {
+      await context.services.wait(CliRuntime.PollMilliseconds);
+      data = await client.get(id, true);
+    }
+    return {
+      data,
+      exitCode: context.options.watch ? runExitCode(data.state) : ExitCode.Success,
+    };
   },
   artifacts: async ({ services, home, positionals: [argument] }) => ({
     data: await services.client(home).artifacts(argument ?? TextSymbol.Empty),
@@ -160,12 +221,20 @@ export function artifactOptions(options: CliOptions) {
   return parseArtifactSearch({ offset: options.offset, limit: options.limit });
 }
 export function runListOptions(options: CliOptions) {
+  if (
+    options.scope !== undefined &&
+    options.scope !== KnowledgeScope.Home &&
+    options.scope !== KnowledgeScope.Project &&
+    options.scope !== KnownHome.Scope
+  )
+    throw new TitanError(ErrorCode.Arguments, CliDiagnostic.RunScope);
   return parseRunListSearch({
     before: options.before,
     limit: options.limit,
     client_id: options[CliOption.ClientId],
     harness_session_id: options[CliOption.HarnessSessionId],
     project_path: options[CliOption.ProjectPath],
+    state: options[CliOption.State],
   });
 }
 function eventOptions(options: CliOptions) {

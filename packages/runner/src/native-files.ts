@@ -9,6 +9,7 @@ import {
   NativeFileLimit,
   PathPart,
   RunFile,
+  WorkspaceGeneratedDirectories,
 } from "@titan/constants";
 import { OperationalError } from "@titan/errors";
 import { NativeToolMessage } from "@titan/messages";
@@ -30,6 +31,7 @@ import {
 import { readTree, sourceVersion, verifiedChunks, writeWorkspaceFile } from "@titan/workspace";
 import { scopeCovers, writePaths } from "./file-scope.ts";
 import { isWorkerKey } from "./native-execution.ts";
+import { isSkillPath, readSkill } from "./skill-role.ts";
 
 export function retainNativeRead(
   observations: NativeReadObservation[],
@@ -97,14 +99,29 @@ export function nativeFileRoot(run: Run, scope: NativeToolScope): string {
   );
 }
 
+function readsProjectCache(run: Run, root: string, path: string): boolean {
+  return (
+    run.omit_generated_workspace === true &&
+    root !== run.project &&
+    path
+      .split(PathPart.Separator)
+      .slice(0, -1)
+      .some((part) => WorkspaceGeneratedDirectories.includes(part)) &&
+    !run.plan.nodes.some((node) => node.files !== undefined && allowedWrite(run, node, path))
+  );
+}
+
 export async function readNativeFile(
   run: Run,
   root: string,
   path: string,
+  allowProjectCache = false,
 ): Promise<NativeFileResult> {
   NativeFileSelectionSchema.parse({ path });
   const files = await readTree(root, run.config.value.limits, undefined, run.runtime_paths, [path]);
   const entry = files[path];
+  if (!entry && allowProjectCache && readsProjectCache(run, root, path))
+    return readNativeFile(run, run.project, path);
   if (!entry)
     return { observation: { path, version: null, hash: null, executable: null }, content: null };
   const version = await sourceVersion(entry.source);
@@ -140,8 +157,18 @@ export async function verifyNativeReads(
       await verifyListing(run, root, step, observation, writable);
       continue;
     }
+    if (isSkillPath(run, observation.path)) {
+      if (readSkill(run, observation.path).observation.version !== observation.version)
+        throw new OperationalError(ErrorCode.FileConflict, NativeToolMessage.ReadChanged);
+      continue;
+    }
     if (writable && allowedWrite(run, step, observation.path)) continue;
-    if ((await currentVersion(root, observation)) !== observation.version)
+    const version = await currentVersion(root, observation);
+    const current =
+      version === null && readsProjectCache(run, root, observation.path)
+        ? (await readNativeFile(run, run.project, observation.path)).observation.version
+        : version;
+    if (current !== observation.version)
       throw new OperationalError(ErrorCode.FileConflict, NativeToolMessage.ReadChanged);
   }
 }
@@ -153,6 +180,7 @@ export async function writeNativeFile(
   change: NativeFileChange,
 ): Promise<NativeFileResult> {
   if (
+    isSkillPath(run, change.path) ||
     !allowedWrite(run, step, change.path) ||
     run.runtime_paths?.some(
       (path) => scopeCovers(path, change.path) || scopeCovers(change.path, path),

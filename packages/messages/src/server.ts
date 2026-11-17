@@ -1,6 +1,7 @@
 import { BoardLimit, ServerLimit } from "@titan/constants";
 
 export const ServerMessage = {
+  CompactBusy: "Run requests changed during inspection. Retry compact status",
   BuildMismatch: "The running Titan server uses a different build. Finish active work and retry.",
   MaintenancePerson: "Stopping the local server requires the home owner's credential",
   MaintenanceBusy:

@@ -230,6 +230,22 @@
     "description": "Inspect saved persona definitions and quality history",
     "options": ["home"],
     "subcommands": {
+      "create": {
+        "description": "Create a portable persona definition",
+        "options": ["home", "tool", "skill"],
+        "positionals": [
+          {
+            "name": "entry file",
+            "required": true
+          }
+        ],
+        "handler": "<function>"
+      },
+      "list": {
+        "description": "List reusable persona definitions and lifecycle states",
+        "options": ["home", "project", "scope"],
+        "handler": "<function>"
+      },
       "show": {
         "description": "Inspect saved versions and quality history, newest first",
         "positionals": [
@@ -239,6 +255,28 @@
           }
         ],
         "options": ["home", "before", "limit"],
+        "handler": "<function>"
+      }
+    }
+  },
+  "skill": {
+    "description": "Inspect workspace skills",
+    "options": [],
+    "subcommands": {
+      "list": {
+        "description": "List discovered skills and their origins",
+        "options": ["project"],
+        "handler": "<function>"
+      },
+      "show": {
+        "description": "Show a discovered skill and its instructions",
+        "positionals": [
+          {
+            "name": "skill name",
+            "required": true
+          }
+        ],
+        "options": ["project"],
         "handler": "<function>"
       }
     }
@@ -375,6 +413,23 @@
       }
     }
   },
+  "workflow": {
+    "description": "Author workflow files",
+    "options": [],
+    "subcommands": {
+      "create": {
+        "description": "Create a reviewed or parallel workflow template",
+        "positionals": [
+          {
+            "name": "workflow file",
+            "required": true
+          }
+        ],
+        "options": ["home", "project", "template", "worker", "reviewer", "skill", "verify"],
+        "handler": "<function>"
+      }
+    }
+  },
   "backends": {
     "description": "Inspect backend availability",
     "options": [],
@@ -482,7 +537,18 @@
   },
   "runs": {
     "description": "List known runs",
-    "options": ["home", "before", "limit", "client-id", "harness-session-id", "project-path"],
+    "options": [
+      "home",
+      "before",
+      "limit",
+      "client-id",
+      "harness-session-id",
+      "project-path",
+      "home-after",
+      "state",
+      "scope",
+      "project"
+    ],
     "handler": "<function>",
     "validate": "<function>"
   },
@@ -494,7 +560,7 @@
         "required": true
       }
     ],
-    "options": ["home", "watch"],
+    "options": ["home", "watch", "compact"],
     "handler": "<function>"
   },
   "usage": {

@@ -3,11 +3,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   ConfigFile,
+  EnvVar,
   ErrorCode,
+  ExitCode,
+  HookFile,
   KnowledgeAttemptState,
   KnowledgeTool,
   NativeToolAudit,
   NativeToolOutcome,
+  Packaging,
   RunFormat,
   RunStatus,
   SdkProcessFixture,
@@ -23,6 +27,8 @@ import { vendorRecoveryWorkflow } from "@titan/test-factories";
 import { waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
 import {
+  CliOutputSchema,
+  CompactRunSchema,
   ConfigSchema,
   type NativeBackendId,
   NativeFileListingSchema,
@@ -31,7 +37,8 @@ import {
   RunSchema,
   type SdkProbePaths,
 } from "@titan/types";
-import { prepareSdkProject } from "./sdk-process.ts";
+import { captureCli } from "../support/command.ts";
+import { prepareSdkProject, seedNativeSkill } from "./sdk-process.ts";
 import { serverReady, spawnServer } from "./server-process.ts";
 
 export async function nativeProjectWrite(
@@ -41,6 +48,9 @@ export async function nativeProjectWrite(
 ) {
   return withTemporaryDirectory(async (root) => {
     const { home, project } = await prepareSdkProject(root, backend, 0, false, paths.vendors);
+    const source = Buffer.from("Synthetic observation content.\n".repeat(4096));
+    await writeFile(resolve(project, "source.txt"), source);
+    await seedNativeSkill(project);
     const file = resolve(home, ConfigFile.User);
     const config = ConfigSchema.parse(JSON.parse((await readFile(file)).toString()));
     config.workspace = { ...config.workspace, mode: WorkspaceModeSetting.Live };
@@ -54,7 +64,16 @@ export async function nativeProjectWrite(
       const mode = refused
         ? VendorStubMode.NativeProjectRefused
         : VendorStubMode.NativeProjectWrite;
-      const workflow = vendorRecoveryWorkflow(mode);
+      const original = vendorRecoveryWorkflow(mode);
+      const workflow = {
+        ...original,
+        personas: Object.fromEntries(
+          Object.entries(original.personas).map(([name, persona]) => [
+            name,
+            { ...persona, skills: ["linked"] },
+          ]),
+        ),
+      };
       for (const step of workflow.steps) step.do.task = mode;
       const client = createRunClient(home);
       const submitted = await client.submit({
@@ -83,14 +102,39 @@ export async function nativeProjectWrite(
         run.runtime_build ? RunFormat.PinnedBuild : RunFormat.PersonaBindings,
       );
       for (const phase of Object.values(run.nodes.deliver?.phases ?? {})) {
-        assert.equal(phase.file_reads?.length, 3);
-        assert.equal(NativeFileObservationSchema.parse(phase.file_reads[0]).path, "source.txt");
-        assert.equal(NativeFileObservationSchema.parse(phase.file_reads[1]).version, null);
+        assert.equal(phase.file_reads?.length, 4);
+        const reads = phase.file_reads.flatMap((entry) => {
+          const parsed = NativeFileObservationSchema.safeParse(entry);
+          return parsed.success ? [parsed.data] : [];
+        });
+        assert.deepEqual(reads.map((entry) => entry.path).sort(), [
+          "@titan-skills/linked/references/alias.md",
+          "missing-native-read.txt",
+          "source.txt",
+        ]);
         assert.equal(
-          NativeFileListingSchema.parse(phase.file_reads[2]).files.includes("source.txt"),
-          true,
+          reads.find((entry) => entry.path === "missing-native-read.txt")?.version,
+          null,
         );
+        const listing = phase.file_reads.flatMap((entry) => {
+          const parsed = NativeFileListingSchema.safeParse(entry);
+          return parsed.success ? [parsed.data] : [];
+        });
+        assert.equal(listing.length, 1);
+        assert.equal(listing[0]?.files.includes("source.txt"), true);
       }
+      const status = await captureCli(
+        paths.cli ?? resolve(import.meta.dir, HookFile.RepositoryRoot, Packaging.CliSource),
+        ["status", run.run_id, "--home", home, "--compact", "--json"],
+        project,
+        { ...process.env, [EnvVar.TitanHome]: resolve(root, "registry") },
+      );
+      assert.equal(status.code, ExitCode.Success, status.error.toString());
+      const envelope = CliOutputSchema.parse(JSON.parse(status.output.toString()));
+      const compact = CompactRunSchema.parse(envelope.data);
+      assert.equal(compact.nodes.deliver?.state, run.nodes.deliver?.state);
+      assert.deepEqual(envelope.events, []);
+      assert.ok(status.output.length < source.length);
       const id = uuidFromText(JSON.stringify([run.run_id, "deliver", "native-project"]));
       await assert.rejects(() => createKnowledgeClient(home).get(id), {
         code: ErrorCode.KnowledgeMissing,

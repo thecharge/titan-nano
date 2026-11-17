@@ -1,5 +1,6 @@
 import { unit } from "@titan/test-factories";
 import {
+  codexCommandTelemetryCases,
   configuredFakeScriptCases,
   fakeCancellationCases,
   fakeScriptAdmissionCases,
@@ -9,6 +10,7 @@ import {
   scriptedFakeCases,
 } from "../cases/backend.ts";
 import {
+  codexCommandTelemetry,
   configuredFakeScript,
   fakeCancellation,
   fakeScriptAdmission,
@@ -28,3 +30,5 @@ unit(fakeScriptPrompt, fakeScriptPromptCases);
 
 unit(configuredFakeScript, configuredFakeScriptCases);
 unit(personaInvocation, personaInvocationCases);
+
+unit(codexCommandTelemetry, codexCommandTelemetryCases);

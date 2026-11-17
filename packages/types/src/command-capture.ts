@@ -40,12 +40,20 @@ export const CommandCaptureSchema = z.strictObject({
 });
 export type CommandCapture = z.infer<typeof CommandCaptureSchema>;
 
+export const ScriptCandidateSchema = z.strictObject({
+  path: WorkspaceRelativePathSchema,
+  hash: ArtifactHashSchema,
+  parent_hash: ArtifactHashSchema,
+  ordinal: z.int().positive(),
+});
+
 export const SavedCommandCaptureSchema = CommandCaptureSchema.extend({
   stdout: z.string(),
   stderr: z.string(),
   stdout_base64: z.string().base64().optional(),
   stderr_base64: z.string().base64().optional(),
   elapsed_ms: z.int().nonnegative().optional(),
+  candidate: ScriptCandidateSchema.optional(),
   capture: z
     .strictObject({ path: WorkspaceRelativePathSchema, hash: ArtifactHashSchema })
     .optional(),

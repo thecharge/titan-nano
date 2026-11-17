@@ -32,6 +32,12 @@ List hand changes in the commit.
 
 Use the installed `titan` executable. In a source checkout use `bun run titan` instead. Read `titan schema workflow` before writing YAML and `titan schema config` before changing settings. Run `titan doctor --project PROJECT --home HOME` to inspect prerequisites; its report does not prove live authentication.
 
+Use `titan runs --scope project --project PROJECT --state running --home HOME` to find project work, `titan runs --scope known-home` to inspect registered homes and `titan status RUN_ID --compact --home HOME` for a bounded step, request and usage summary. Full status remains available. Unavailable homes retain their own diagnostic in the listing.
+
+Run `titan skill list --project PROJECT` to discover repository and user skills with their origins. Project skills take precedence. Add required names to a persona's skills array. Titan retains their instructions and supported references at admission. Both native backends receive the retained instructions and can read references through titan_file_read at paths such as @titan-skills/review/references/checklist.md. Recovery uses the retained version. Links escaping the skill directory are refused.
+
+Use `titan persona create reviewer.yaml --tool Read`, edit its instructions, then `titan kb add reviewer.yaml --scope project --project PROJECT --home HOME`. Inspect `titan persona list --scope project --project PROJECT --home HOME` before selecting a registered version. `titan workflow create workflow.yaml --template parallel --reviewer project:reviewer@1 --verify 'git diff --check' --project PROJECT --home HOME` creates parallel tasks followed by an independently reviewed script step. Edit the generated tasks and goal before checking. Creation preserves existing destinations. Scoped persona versions remain bound through admission, history and usage.
+
 Use `titan config init --scope project --home HOME --project PROJECT --json` to create a settings file. Inspect its byte version with `titan config validate --scope project --home HOME --project PROJECT --json`, then pass it to `titan config set limits.max_parallel 2 --scope project --expected-version VERSION --home HOME --project PROJECT --json`. Use `titan config show --scope project --home HOME --project PROJECT --sources --json` to inspect current values, sources and file version offline. Select user scope for home-owner settings. After a conflict inspect again before combining edits. Successful writes replace file comments and formatting with JSON. Settings changes apply to new runs. Use `titan config show --run-id RUN_ID --home HOME --sources --json` to inspect committed settings and sources. File edits and daemon restart preserve them. Omitting `--sources` omits the source map. Current owner ceilings and revision history remain pending.
 
 Run and control commands connect to the selected home and start an authenticated background server when needed. Keep the same home for all commands controlling that engine. Use `titan serve --home HOME` for foreground startup diagnostics. Live workers, script checks and falsifiers run in the shared project directory by default. Their writes reach that project immediately. Candidate directories retain evidence; they are not private execution workspaces. Explicit isolated mode remains a compatibility option. Claims coordinate cooperating runs. Managed reads and approved write-scope requests release the earlier claim and negotiate the combined scope. Independent scopes continue while an overlapping claim waits. Protected native process writes remain incomplete. Read project development instructions and put acceptance criteria and required checks into the worker and independent checker tasks. Give the checker concrete ways to disprove the result.
@@ -144,7 +150,7 @@ Use artifacts to verify the kept delivery against its journal, manifest and resu
 
 Inspect one exact permission request with titan requests show RUN_ID REQUEST_ID. An agent can answer a main-level request with titan answer RUN_ID REQUEST_ID approve (or deny), supplying --request-version with the version actually inspected, --client-id and --reason. Do not fetch a new version merely to override a conflict. Human-level requests require the person credential through titan approve RUN_ID REQUEST_ID --request-version 1 --client-id CLIENT --reason Reviewed, or titan deny RUN_ID REQUEST_ID Reason --request-version 1 --client-id CLIENT. These commands read the private person-token file; same-user agents can read that file too, so token possession does not prove human presence. Agents must not use a person command to bypass the person's decision. Stale or repeated answers fail with exit code 2. To pass a pending main request to the person, use titan answer RUN_ID REQUEST_ID --to-person --request-version N --client-id CLIENT --reason Reason without an approve or deny argument. Inspect the returned waiting request and its next version. Scope and origin stay unchanged, and a passed_up event records the actor, reason and time. The person must use that new version when approving or denying; a new request normally advances from 1 to 2 on escalation and to 3 on the person decision. Repeated escalation and stale versions fail without overwriting the pending request. MCP request tools use the same ledger and cannot grant human authority. A recorded permission alone does not execute an operation or resume a waiting agent.
 
-Script workers, script falsifiers and step checks run through scoped action approval. Inspect the action request, including its command, working directory, phase and configuration hash. An unanswered request waits without starting a process. After the person approves it, resume the same run. The server revalidates the execution claim and recorded approval before launching the command. A changed command requires its own approval. Approved scripts operate on the shared live project and have bounded output and deadlines. Script write fencing and automatic reconciliation remain unfinished.
+Script workers, script falsifiers and step checks run through scoped action approval. Inspect the action request, including its command, working directory, phase and configuration hash. An unanswered request waits without starting a process. The server resumes a script-waiting run after approval and revalidates its execution claim before launching the command. A changed command requires its own approval. Script actions and falsifiers default to five minutes and accept timeout_s up to one hour. Approved checks and proofs may update their declared output scope. Titan retains each changed candidate and its parent hash alongside the command receipt. Recovery verifies the chain, preserves the worker snapshot and blocks on changed evidence or a pending capture. Independent falsifiers inspect the resulting candidate. Generated caches are omitted from ordinary snapshots unless explicitly included in the step scope.
 
 Claude supports Read, Glob, Grep, Write, Edit and writable-phase Bash when the persona lists them. Both permission callbacks check tool admission and paths. Write and Edit use the declared live file scope. Bash has command-text checks with incomplete filesystem enforcement. Codex uses its native workspace sandbox with network disabled. Complete per-tool Codex enforcement, native write fencing and live transcript recovery remain pending. Routine product tests use versioned vendor stubs. External operations still require their implemented approval and execution path.
 
@@ -188,7 +194,7 @@ This JSON schema is the same text that `titan schema` prints.
           },
           {
             "type": "string",
-            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+            "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
           }
         ]
       },
@@ -293,7 +299,7 @@ This JSON schema is the same text that `titan schema` prints.
             "properties": {
               "use": {
                 "type": "string",
-                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
               },
               "backend": {
                 "type": "string",
@@ -314,7 +320,7 @@ This JSON schema is the same text that `titan schema` prints.
             "properties": {
               "mutates": {
                 "type": "string",
-                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
               },
               "request_turns": {
                 "type": "boolean"
@@ -587,7 +593,7 @@ This JSON schema is the same text that `titan schema` prints.
                           },
                           {
                             "type": "string",
-                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                            "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                           }
                         ]
                       },
@@ -608,6 +614,11 @@ This JSON schema is the same text that `titan schema` prints.
                       "script": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "timeout_s": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 3600
                       }
                     },
                     "required": [
@@ -659,7 +670,7 @@ This JSON schema is the same text that `titan schema` prints.
                       },
                       {
                         "type": "string",
-                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                        "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                       }
                     ]
                   },
@@ -707,7 +718,7 @@ This JSON schema is the same text that `titan schema` prints.
                             },
                             {
                               "type": "string",
-                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                              "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                             }
                           ]
                         },
@@ -728,6 +739,11 @@ This JSON schema is the same text that `titan schema` prints.
                         "script": {
                           "type": "string",
                           "minLength": 1
+                        },
+                        "timeout_s": {
+                          "type": "number",
+                          "exclusiveMinimum": 0,
+                          "maximum": 3600
                         }
                       },
                       "required": [
@@ -1211,7 +1227,7 @@ This JSON schema is the same text that `titan schema` prints.
                           },
                           {
                             "type": "string",
-                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                            "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                           }
                         ]
                       },
@@ -1289,7 +1305,7 @@ This JSON schema is the same text that `titan schema` prints.
                         },
                         {
                           "type": "string",
-                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                          "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                         }
                       ]
                     },
@@ -1310,6 +1326,11 @@ This JSON schema is the same text that `titan schema` prints.
                     "script": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "timeout_s": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3600
                     }
                   },
                   "required": [
@@ -1361,7 +1382,7 @@ This JSON schema is the same text that `titan schema` prints.
                     },
                     {
                       "type": "string",
-                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                      "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                     }
                   ]
                 },
@@ -1409,7 +1430,7 @@ This JSON schema is the same text that `titan schema` prints.
                           },
                           {
                             "type": "string",
-                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
+                            "pattern": "^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$"
                           }
                         ]
                       },
@@ -1430,6 +1451,11 @@ This JSON schema is the same text that `titan schema` prints.
                       "script": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "timeout_s": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 3600
                       }
                     },
                     "required": [

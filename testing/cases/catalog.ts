@@ -1,4 +1,10 @@
-import { ErrorCode, EventInspectionTransport, ServerLimit, ServerState } from "@titan/constants";
+import {
+  ErrorCode,
+  EventInspectionTransport,
+  RunStatus,
+  ServerLimit,
+  ServerState,
+} from "@titan/constants";
 import { negative, positive, rejected } from "@titan/test-factories";
 
 const all = {
@@ -269,10 +275,15 @@ export const catalogScopeCases = {
       [3, 1, 0],
     ),
     positive(
-      "MCP caller session and project intersect",
+      "MCP caller session, project and state intersect",
       [
         EventInspectionTransport.Mcp,
-        { client_id: "codex", harness_session_id: "session-one", project_path: "first" },
+        {
+          client_id: "codex",
+          harness_session_id: "session-one",
+          project_path: "first",
+          state: RunStatus.Passed,
+        },
       ],
       [3, 0],
     ),
@@ -307,8 +318,8 @@ export const catalogScopeCases = {
       [],
     ),
     rejected(
-      "MCP absent session cannot select a legacy run",
-      [EventInspectionTransport.Mcp, { harness_session_id: "absent" }],
+      "MCP running selector excludes completed runs",
+      [EventInspectionTransport.Mcp, { state: RunStatus.Running }],
       [],
     ),
     rejected(

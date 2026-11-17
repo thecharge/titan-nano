@@ -123,6 +123,7 @@ export async function personaLifecycleDelivery(
   state: PersonaState,
   before: boolean,
   after: boolean,
+  scoped = false,
 ): Promise<boolean> {
   return withTemporaryDirectory(async (root) => {
     const home = resolve(root, PersonaRegister.Strays);
@@ -130,7 +131,13 @@ export async function personaLifecycleDelivery(
     assert(base.steps);
     const plan = validateWorkflow({ ...base, steps: base.steps.slice(0, 1) });
     let hub = await KnowledgeHub.open(home);
-    const references = await hub.registerPersonas(plan.workflow);
+    const registered = await hub.registerPersonas(plan.workflow);
+    const references = Object.fromEntries(
+      Object.entries(registered).map(([name, reference]) => [
+        name,
+        scoped ? `project:${reference}` : reference,
+      ]),
+    );
     await seedPersonaCounts(hub, state, 1, 6);
     let executions = 0;
     let failed = false;
@@ -144,22 +151,36 @@ export async function personaLifecycleDelivery(
     const services = {
       runtimePaths: [home],
       personaHistory: (run: Run, events: AsyncIterable<RunEvent>, request?: PersonaRequestWriter) =>
-        hub.recordPersonaHistory(run, events, async (run, update) => {
-          if (before && !failed) {
-            failed = true;
-            throw new Error(PersonaRegister.Broken);
-          }
-          await request?.(run, update);
-          if (after && !failed) {
-            failed = true;
-            throw new Error(PersonaRegister.Broken);
-          }
-        }),
+        hub.recordPersonaHistory(
+          run,
+          events,
+          async (run, update) => {
+            if (before && !failed) {
+              failed = true;
+              throw new Error(PersonaRegister.Broken);
+            }
+            await request?.(run, update);
+            if (after && !failed) {
+              failed = true;
+              throw new Error(PersonaRegister.Broken);
+            }
+          },
+          [],
+          scoped ? hub : undefined,
+        ),
     };
     const engine = new Engine(backend, {}, services);
     const run = await engine.create({
       project: root,
-      plan,
+      plan: scoped
+        ? validateWorkflow({
+            ...plan.workflow,
+            personas: Object.fromEntries(
+              Object.entries(references).map(([name, use]) => [name, { use }]),
+            ),
+          })
+        : plan,
+      ...(scoped ? { resolved_plan: plan } : {}),
       persona_references: references,
       config: await resolveConfig({ home, project: root }),
       backend: Backend.Fake,
@@ -180,6 +201,7 @@ export async function personaLifecycleDelivery(
       const requests = await restored.requests.list(run.run_id);
       assert.equal(requests.length, 1);
       assert.equal(requests[0]?.kind, RequestKind.ImprovePersona);
+      if (scoped) assert.ok(requests[0]?.scope.resource.startsWith("project:"));
       assert.equal(executions, 2);
       const worker = await record(hub, PersonaRegister.JudgeFirst);
       assert.equal(worker.state, PersonaState.NeedsUpdate);

@@ -7,6 +7,7 @@ const knowledge = { name: CliArgument.KnowledgeId, required: true } as const;
 const knowledgeFile = { name: CliArgument.KnowledgeFile, required: true } as const;
 
 export const CliPositionals = {
+  Skill: [{ name: CliArgument.SkillName, required: true }],
   Persona: [{ name: CliArgument.PersonaName, required: true }],
   ConfigSet: [
     { name: CliArgument.Setting, required: true },

@@ -6,8 +6,8 @@ import {
   IdentifierPattern,
   IoLimit,
   MessageId,
-  PersonaReferencePattern,
   PolicyField,
+  ScopedPersonaReferencePattern,
   ScriptExecution,
   VerifyField,
   VerifyKind,
@@ -31,7 +31,7 @@ export const PersonaChangesSchema = PersonaSchema.partial().extend({
   tools: PersonaSchema.shape.tools.removeDefault().optional(),
 });
 export type PersonaChanges = z.infer<typeof PersonaChangesSchema>;
-const reference = z.string().regex(PersonaReferencePattern);
+const reference = z.string().regex(ScopedPersonaReferencePattern);
 export const RegisteredPersonaSchema = z.strictObject({
   use: reference,
   backend: z.enum(backendIds).optional(),
@@ -84,15 +84,16 @@ export const PersonaActionSchema = z.strictObject({
   task: z.string().min(1),
 });
 export type PersonaAction = z.infer<typeof PersonaActionSchema>;
-export const FalsifierSchema = z.union([
-  PersonaActionSchema,
-  z.strictObject({ script: z.string().min(1) }),
-]);
+export const ScriptActionSchema = z.strictObject({
+  script: z.string().min(1),
+  timeout_s: timeout.optional(),
+});
+export const FalsifierSchema = z.union([PersonaActionSchema, ScriptActionSchema]);
 export const OpenCallSchema = z.strictObject({ tags: names.min(1), task: z.string().min(1) });
 export type OpenCall = z.infer<typeof OpenCallSchema>;
 export const ActionSchema = z.union([
   PersonaActionSchema,
-  z.strictObject({ script: z.string().min(1) }),
+  ScriptActionSchema,
   z.strictObject({ call: OpenCallSchema }),
 ]);
 export const SplitSchema = z.strictObject({

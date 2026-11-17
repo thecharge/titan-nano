@@ -1,5 +1,12 @@
 export const CliDescription = {
   Persona: "Inspect saved persona definitions and quality history",
+  Skill: "Inspect workspace skills",
+  SkillList: "List discovered skills and their origins",
+  SkillShow: "Show a discovered skill and its instructions",
+  PersonaList: "List reusable persona definitions and lifecycle states",
+  PersonaCreate: "Create a portable persona definition",
+  Workflow: "Author workflow files",
+  WorkflowCreate: "Create a reviewed or parallel workflow template",
   PersonaShow: "Inspect saved versions and quality history, newest first",
   Update: "Check or install a release with a verified backup and managed launcher",
   Request: "List scoped requests or inspect exact run and request IDs",
@@ -46,6 +53,16 @@ export const CliDiagnostic = {
   RunObservation: "--detach and --watch cannot be combined",
   DryRunIdentity: "Submission identities cannot be used with --dry-run",
   RunConfig: "Run submission uses project .titan/config.yaml; config-file override is pending",
+  DefinitionExists: "The destination already exists.",
+  DefinitionSize: "The generated definition exceeds the input byte limit.",
+  WorkflowTemplate: "--template requires reviewed or parallel",
+  WorkflowSkills: "--skill requires an inline worker. Omit --worker to use it.",
+  PersonaScope: "--scope requires home or project",
+  ConflictingProjectSelectors: "Project selectors must identify the same project.",
+  RunScope: "--scope requires home, project, or known-home",
+  HomeRegistryUnavailable: "Could not record Titan home",
+  HomePageTooLarge: "Home result exceeds the combined page budget. Inspect this home directly",
+  InvalidHomeEntry: "Invalid home registry entry",
   StepLimit: "Plan exceeds max_steps",
   Release: "experimental preview",
   Stub: "stub only",
@@ -101,3 +118,17 @@ export const cliRunEvent = (id: number, type: string, data: unknown): string =>
   `${id} ${type} ${JSON.stringify(data)}`;
 export const installedSkill = (guide: string): string =>
   `---\nname: titan\ndescription: Plan, run and recover local Titan workflows with independent falsification for Codex or Claude Code.\n---\n\n${guide}`;
+
+export const WorkflowFactoryMessage = {
+  PersonaDescription: "Reusable reviewer",
+  PersonaRole: "Review the supplied work against its requirements and report concrete findings.",
+  WorkerDescription: "Prepare a deliverable",
+  WorkerRole: "Complete the assigned task and state what you verified.",
+  ReviewerDescription: "Independently review a deliverable",
+  ReviewerRole: "Seek concrete counterexamples against the task requirements.",
+  CheckTask: "Check the result against the assigned task.",
+  PrepareTask: "Summarize the requirements for the proposed deliverable.",
+  RiskTask: "Identify risks for the proposed deliverable.",
+  Name: "Reviewed delivery",
+  Goal: "Prepare and independently review material for a deliverable.",
+} as const;

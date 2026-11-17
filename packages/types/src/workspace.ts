@@ -1,4 +1,4 @@
-import { RuntimeLimit } from "@titan/constants";
+import { RuntimeLimit, WorkspaceSkillScope } from "@titan/constants";
 import { z } from "zod";
 import { WorkspaceLimitsSchema } from "./workspace-limits.ts";
 import { WorkspaceRelativePathSchema } from "./workspace-path.ts";
@@ -30,3 +30,16 @@ export const WorkspaceTraversalSchema = z.strictObject({
   omitted: WorkspaceOmissionsSchema,
 });
 export type WorkspaceTraversal = z.infer<typeof WorkspaceTraversalSchema>;
+
+export const WorkspaceSkillEntrySchema = z.strictObject({
+  name: z.string().min(1),
+  description: z.string(),
+  scope: z.enum(WorkspaceSkillScope),
+  origin: z.string(),
+  alternatives: z.array(z.string()),
+});
+export const DiscoveredWorkspaceSkillSchema = WorkspaceSkillEntrySchema.extend({
+  directory: z.string(),
+});
+export type DiscoveredWorkspaceSkill = z.infer<typeof DiscoveredWorkspaceSkillSchema>;
+export const WorkspaceSkillMetadataSchema = z.object({ description: z.string().optional() });

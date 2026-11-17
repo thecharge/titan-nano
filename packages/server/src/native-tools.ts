@@ -170,7 +170,7 @@ export class NativeToolAuthority {
   }
 
   private async response(request: Request, binding: NativeToolRegistration): Promise<Response> {
-    if (this.route)
+    if (binding.scope.role !== NativeToolRole.Improver && this.route)
       return this.route(binding.scope, (hub) => this.knowledgeResponse(request, binding, hub));
     return this.knowledgeResponse(request, binding, this.knowledge);
   }
@@ -184,17 +184,19 @@ export class NativeToolAuthority {
     await using resources = new AsyncDisposableStack();
     const server = new McpServer({ name: McpIdentity.Name, version: McpIdentity.Version });
     resources.defer(() => server.close());
-    registerNativeKnowledge(server, hub, binding.scope);
-    server.registerTool(
-      NativeTool.ListFiles,
-      { description: NativeToolMessage.ListFiles, inputSchema: NativeFileListSelectionSchema },
-      async ({ directory }) =>
-        nativeToolOperation(async () => {
-          if (!this.listFiles)
-            throw new TitanError(ErrorCode.ServerUnavailable, NativeToolMessage.Unavailable);
-          return this.listFiles(binding.scope, directory);
-        }),
-    );
+    if (binding.scope.role !== NativeToolRole.Improver) {
+      registerNativeKnowledge(server, hub, binding.scope);
+      server.registerTool(
+        NativeTool.ListFiles,
+        { description: NativeToolMessage.ListFiles, inputSchema: NativeFileListSelectionSchema },
+        async ({ directory }) =>
+          nativeToolOperation(async () => {
+            if (!this.listFiles)
+              throw new TitanError(ErrorCode.ServerUnavailable, NativeToolMessage.Unavailable);
+            return this.listFiles(binding.scope, directory);
+          }),
+      );
+    }
     server.registerTool(
       NativeTool.ReadFile,
       { description: NativeToolMessage.ReadFile, inputSchema: NativeFileSelectionSchema },

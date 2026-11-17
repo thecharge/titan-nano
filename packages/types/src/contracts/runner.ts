@@ -22,6 +22,7 @@ export type PersonaRequestWriter = (run: Run, request: PersonaRequest) => Promis
 export type PersonaDecisionWriter = (
   request: OperationRequest,
   stage: PersonaDecisionStage,
+  project?: string,
 ) => Promise<void>;
 
 export type ScriptCheck = (

@@ -1,8 +1,17 @@
+import { createHash } from "node:crypto";
 import type { ThreadEvent } from "@openai/codex-sdk";
-import { AgentEventKind, CodexEventKind, ErrorCode } from "@titan/constants";
+import {
+  AgentEventKind,
+  CodexEventKind,
+  ErrorCode,
+  FileEncoding,
+  HashAlgorithm,
+  IoLimit,
+  NativeEventField,
+} from "@titan/constants";
 import { retainSessionId } from "@titan/core";
 import { OperationalError } from "@titan/errors";
-import { CodexMessage } from "@titan/messages";
+import { CodexMessage, codexTruncatedOutput } from "@titan/messages";
 import type { CodexTurnState } from "@titan/types";
 import {
   type AgentAnswer,
@@ -10,6 +19,30 @@ import {
   type AgentSpec,
   UsageSchema,
 } from "@titan/types/agents";
+
+function commandExcerpt(value: string): string {
+  if (Buffer.byteLength(value) <= IoLimit.ChunkBytes) return value;
+  return (
+    value.slice(0, IoLimit.ChunkBytes) +
+    codexTruncatedOutput(
+      Buffer.byteLength(value),
+      createHash(HashAlgorithm.Sha256).update(value).digest(FileEncoding.Hex),
+    )
+  );
+}
+
+function commandTelemetry(event: ThreadEvent): ThreadEvent {
+  if (!(NativeEventField.Item in event) || event.item.type !== CodexEventKind.CommandExecution)
+    return event;
+  return {
+    ...event,
+    item: {
+      ...event.item,
+      command: commandExcerpt(event.item.command),
+      aggregated_output: commandExcerpt(event.item.aggregated_output),
+    },
+  };
+}
 
 export function codexEvent(state: CodexTurnState, event: ThreadEvent): AgentEvent {
   if (event.type === CodexEventKind.ThreadStarted)
@@ -42,7 +75,7 @@ export function codexEvent(state: CodexTurnState, event: ThreadEvent): AgentEven
           ? AgentEventKind.Usage
           : AgentEventKind.Message,
     session_id: state.session_id,
-    data: event,
+    data: commandTelemetry(event),
   };
 }
 

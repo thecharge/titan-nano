@@ -51,3 +51,23 @@ Events accepts --follow with optional --format jsonl. It drains bounded pages be
 `titan config show --run-id RUN_ID --home HOME --sources --json` reads the exact run's committed settings, source map, configuration hash, workflow revision and journal position. Omitting `--sources` omits the source map. A missing run fails without selecting a neighboring run. Setting and backend overrides are refused before client creation. File edits and daemon restart preserve the saved report. Current owner ceilings and revision history remain pending.
 
 `config show --scope user --home HOME --sources --json` inspects owner settings offline. `config show --scope project --home HOME --project PROJECT --sources --json` inspects project settings with inherited owner policy. Reports include the scope, absolute file path, nullable byte version and effective configuration hash. Missing optional files remain absent. Omitting `--sources` omits the source map. An exact run selector cannot be combined with scope or project selectors.
+
+## Inspect runs and author workflows
+
+Use `titan status RUN_ID --compact --watch` to wait for a concise status with step attempts, errors, usage and waiting request IDs. Use `titan status RUN_ID --json` for the full status and events.
+
+- `titan runs --scope project --project . --state running` filters the selected project's runs.
+- `titan runs --scope home --home ./titan-home` lists runs in a selected home.
+- `titan runs --scope known-home` reports pages and connection errors by registered home.
+
+Create and import a reusable persona, then use its exact version in a reviewed workflow.
+
+```sh
+titan persona create reviewer.yaml --tool Read
+titan kb add reviewer.yaml --scope home
+titan persona list --scope home
+titan workflow create workflow.yaml --template reviewed --reviewer reviewer@1
+titan check workflow.yaml
+```
+
+Use `--template parallel` for parallel preparation steps and `--verify 'git diff --check'` to add a script step. Creation commands refuse existing destinations.

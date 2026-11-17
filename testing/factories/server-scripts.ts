@@ -522,26 +522,37 @@ export async function scopedScriptAdmission(
   mutation: string,
   exit: number,
   mode = WorkspaceModeSetting.Live,
+  timeout?: number,
+  delay = 0,
 ) {
   return withTemporaryDirectory(async (root) => {
     let starts = 0;
     let code: string | number = exit;
+    let stop: (() => void) | undefined;
     const processes: CommandProcessPort = {
       spawn(command, cwd) {
         assert.deepEqual(command.slice(-3), ["/bin/sh", "-c", "printf checked"]);
         assert.ok(command[0]?.endsWith("/sandlock"));
         assert.ok(cwd.startsWith(root));
         starts++;
+        const completion = Promise.withResolvers<number>();
+        const timer = setTimeout(() => completion.resolve(exit), delay);
+        stop = () => {
+          clearTimeout(timer);
+          completion.resolve(exit);
+        };
         return {
           pid: 1,
           stdout: new Blob(["checked"]).stream(),
           stderr: new Blob([]).stream(),
-          exited: Promise.resolve(exit),
+          exited: completion.promise,
           signalCode: null,
           kill() {},
         };
       },
-      stop() {},
+      stop() {
+        stop?.();
+      },
     };
     const scripts = scopedScripts(() => engine, 1, 1, processes);
     const engine: Engine = new Engine(
@@ -606,8 +617,16 @@ export async function scopedScriptAdmission(
           {
             id: "write",
             max_attempts: 1,
-            do: { script: "printf checked" },
-            falsify: [{ script: "printf checked" }],
+            do: {
+              script: "printf checked",
+              ...(timeout === undefined ? {} : { timeout_s: timeout }),
+            },
+            falsify: [
+              {
+                script: "printf checked",
+                ...(timeout === undefined ? {} : { timeout_s: timeout }),
+              },
+            ],
             checks: ["printf checked"],
           },
         ],
@@ -717,10 +736,7 @@ export async function scriptProofFlow(
       await engine.resume(run.run_id);
     }
     const final = engine.get(run.run_id);
-    assert.equal(
-      final.schema_version,
-      final.runtime_build ? RunFormat.PinnedBuild : RunFormat.ProofCaptures,
-    );
+    assert.equal(final.schema_version, RunFormat.ScriptCandidates);
     const answered = (await engine.events(run.run_id)).events.filter(
       (event) => event.type === RunEventKind.CheckAnswered,
     );

@@ -21,7 +21,7 @@ import {
 } from "@titan/constants";
 import { hash, newId } from "@titan/core";
 import { OperationalError, TitanError } from "@titan/errors";
-import { RunnerMessage, stepReference } from "@titan/messages";
+import { liveCandidateConflict, RunnerMessage, stepReference } from "@titan/messages";
 import type { RequestLedger } from "@titan/requests";
 import {
   type CommandCapture,
@@ -34,6 +34,7 @@ import {
   RecordedScriptAnswerSchema,
   type Run,
   type RunCommit,
+  type SavedCommandCapture,
   SavedCommandCaptureSchema,
   type ScriptCheck,
   ScriptProofRecordSchema,
@@ -49,10 +50,17 @@ import {
   treeHash,
   writeTree,
 } from "@titan/workspace";
-import { assembleRun, runParents, verifyAttemptInput, verifyCandidate } from "./artifacts.ts";
+import {
+  assembleRun,
+  currentCandidate,
+  runParents,
+  verifyAttemptInput,
+  verifyCandidate,
+} from "./artifacts.ts";
 import type { Capacity } from "./capacity.ts";
 import type { FileAccess } from "./file-access.ts";
 import { reconcileFiles } from "./file-reconciliation.ts";
+import { readRunSnapshot } from "./file-scope.ts";
 import type { RunKnowledge } from "./knowledge.ts";
 import { liveRun, readLiveWriteTree, scoped, verifyLiveCandidate, workPath } from "./live.ts";
 import { recordPersonaQuality } from "./persona-quality.ts";
@@ -183,12 +191,13 @@ export class RunSteps {
       if (phase !== ExecutionPhase.Worker && cached?.completed) {
         return loadScriptCapture(context.run, cached.answer);
       }
-      if (phase !== ExecutionPhase.Worker)
-        await verifyLiveCandidate(
-          context.run,
-          resolve(stepFolder(context.run, context.step, context.state), RunFile.Candidate),
-          context.step,
-        );
+      if (cached) assertCaptured(cached);
+      const folder = stepFolder(context.run, context.step, context.state);
+      const before =
+        phase === ExecutionPhase.Worker
+          ? undefined
+          : await currentCandidate(context.run, context.step, folder);
+      if (before) await verifyLiveCandidate(context.run, before, context.step);
       context.state.phases[phase] ??= initialPhase();
       const execution = {
         run_id: context.run.run_id,
@@ -212,7 +221,7 @@ export class RunSteps {
       const checkpoint = initialPhase();
       checkpoint.execution_id = execution.execution_id;
       if (file_claim) checkpoint.file_claim = file_claim;
-      checkpoint.completed = true;
+      checkpoint.capture_pending = true;
       checkpoint.answer =
         context.run.schema_version >= RunFormat.ProofCaptures
           ? await saveScriptCapture(
@@ -231,6 +240,30 @@ export class RunSteps {
               elapsed_ms: Math.max(0, Date.now() - started),
             };
       context.state.phases[phase] = checkpoint;
+      if (context.run.schema_version < RunFormat.ScriptCandidates)
+        context.run.schema_version = RunFormat.ScriptCandidates;
+      await this.commit(context.run, RunEventKind.PhaseReceived, {
+        step_id: context.step.id,
+        attempt: context.state.attempt,
+        phase,
+        execution_id: execution.execution_id,
+      });
+      if (
+        before &&
+        liveRun(context.run) &&
+        (phase.startsWith(ScriptExecution.CheckPrefix) ||
+          phase.startsWith(ScriptExecution.ProofPrefix))
+      ) {
+        checkpoint.answer = await this.retainScriptCandidate(
+          context,
+          folder,
+          execution.execution_id,
+          before,
+          SavedCommandCaptureSchema.parse(checkpoint.answer),
+        );
+      }
+      delete checkpoint.capture_pending;
+      checkpoint.completed = true;
       await this.commit(context.run, RunEventKind.PhaseCompleted, {
         step_id: context.step.id,
         phase,
@@ -243,12 +276,48 @@ export class RunSteps {
     }
   }
 
+  private async retainScriptCandidate(
+    context: PhaseContext,
+    folder: string,
+    execution: string,
+    before: string,
+    answer: SavedCommandCapture,
+  ): Promise<SavedCommandCapture> {
+    const { run, step, state } = context;
+    const limits = run.config.value.limits;
+    const original = await readTree(before, limits);
+    const current = await readRunSnapshot(run, run.project);
+    const allowed = { ...scoped(run, step, original), ...scoped(run, step, current) };
+    for (const path of new Set([...Object.keys(original), ...Object.keys(current)]))
+      if (
+        fileIdentity(original[path]) !== fileIdentity(current[path]) &&
+        !Object.hasOwn(allowed, path)
+      )
+        throw new OperationalError(ErrorCode.FileConflict, liveCandidateConflict(path));
+    const parent_hash = await treeHash(original);
+    const checksum = await treeHash(current);
+    if (parent_hash === checksum) return answer;
+    const candidate = resolve(folder, execution, RunFile.Candidate);
+    await writeTree(candidate, current, limits);
+    if ((await treeHash(await readTree(candidate, limits))) !== checksum)
+      throw new TitanError(ErrorCode.CheckpointChanged, step.id);
+    await atomicWrite(resolve(folder, execution, RunFile.CandidateHash), checksum);
+    const ordinal =
+      Object.values(state.phases).filter(
+        (phase) => SavedCommandCaptureSchema.safeParse(phase.answer).data?.candidate,
+      ).length + 1;
+    return {
+      ...answer,
+      candidate: { path: relative(run.root, candidate), hash: checksum, parent_hash, ordinal },
+    };
+  }
+
   private async falsify(context: PhaseContext, folder: string): Promise<FalsifyResult> {
     const { run, step, state, signal, inputs } = context;
-    const candidate = resolve(folder, RunFile.Candidate);
     const refutations: string[] = [];
     const failures: FailureKind[] = [];
     for (const [index, falsifier] of step.falsify.entries()) {
+      const candidate = await currentCandidate(run, step, folder);
       const reviewFolder = resolve(folder, `${RunFile.ReviewPrefix}${index}`);
       const cwd = liveRun(run) ? run.project : reviewFolder;
       if (WorkflowField.Script in falsifier) {
@@ -350,7 +419,16 @@ export class RunSteps {
       key + ScriptExecution.ProofOutputSuffix,
     );
     await atomicWrite(path, output);
-    const result_hash = context.state.phases[ExecutionPhase.Worker]?.candidate_hash;
+    const result_hash = await treeHash(
+      await readTree(
+        await currentCandidate(
+          context.run,
+          context.step,
+          stepFolder(context.run, context.step, context.state),
+        ),
+        context.run.config.value.limits,
+      ),
+    );
     const candidate_id = hash(
       JSON.stringify([context.run.run_id, context.step.id, context.state.attempt, result_hash]),
     );
@@ -438,7 +516,7 @@ export class RunSteps {
     );
     await receiveWorker(context, results, this.commit);
     const candidate = resolve(folder, RunFile.Candidate);
-    await writeTree(candidate, await readTree(work, limits, undefined, run.runtime_paths), limits);
+    await writeTree(candidate, await readRunSnapshot(run, work), limits);
     const checksum = await treeHash(await readTree(candidate, limits));
     await atomicWrite(resolve(folder, RunFile.CandidateHash), checksum);
     const phase = state.phases[ExecutionPhase.Worker] ?? initialPhase();
@@ -501,11 +579,7 @@ export class RunSteps {
     );
     const candidate = resolve(folder, RunFile.Candidate);
     const limits = run.config.value.limits;
-    await writeTree(
-      candidate,
-      await readTree(workPath(run, state, folder), limits, undefined, run.runtime_paths),
-      limits,
-    );
+    await writeTree(candidate, await readRunSnapshot(run, workPath(run, state, folder)), limits);
     const checksum = await treeHash(await readTree(candidate, limits));
     await atomicWrite(resolve(folder, RunFile.CandidateHash), checksum);
     await sealWorker(context, phase, checksum, this.commit);
@@ -553,7 +627,7 @@ export class RunSteps {
     if (WorkflowField.Script in step.do && state.reconciliations)
       worker = SavedCommandCaptureSchema.parse(retained);
     if (!state.work || !state.input) throw new TitanError(ErrorCode.MissingWorkspace, step.id);
-    const candidate = resolve(folder, RunFile.Candidate);
+    let candidate = await currentCandidate(run, step, folder);
     if (state.read_paths) await verifyLiveCandidate(run, candidate, step);
     if (await this.files?.reviseReads(run, step)) return false;
     const checking = {
@@ -569,6 +643,7 @@ export class RunSteps {
     };
     const checked = await this.runChecks(checking, state.work);
     const proved = checked.evidence.length ? checked : await this.runProofs(checking, state.work);
+    candidate = await currentCandidate(run, step, folder);
     const falsified = proved.evidence.length ? proved : await this.falsify(checking, folder);
     if (await this.files?.reviseReads(run, step)) return false;
     signal.throwIfAborted();

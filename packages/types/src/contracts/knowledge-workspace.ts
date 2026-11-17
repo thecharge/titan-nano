@@ -37,8 +37,12 @@ export interface OwnedKnowledge {
   hub: RunHub;
   attempts: KnowledgeAttemptOwner;
   use: KnowledgeWorkspaceOperation;
-  bindPersonas(workflow: Workflow): Promise<PersonaBinding>;
-  resolvePersonas(workflow: Workflow): Promise<Workflow>;
+  bindPersonas(
+    workflow: Workflow,
+    project?: string,
+    registration?: string,
+  ): Promise<PersonaBinding>;
+  resolvePersonas(workflow: Workflow, project?: string): Promise<Workflow>;
   personaHistory: PersonaHistoryWriter;
   personaDecision: PersonaDecisionWriter;
   openCalls: OpenCallResolver;

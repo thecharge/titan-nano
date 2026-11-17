@@ -267,3 +267,23 @@ export const configuredFakeScriptCases = {
     ),
   ],
 };
+
+export const codexCommandTelemetryCases = {
+  positive: [
+    positive("ordinary command output remains exact", [false, "x", 100], true),
+    positive("resumed ordinary output remains exact", [true, "界", 100], true),
+  ],
+  negative: [
+    rejected(
+      "oversized command output cannot overflow the host frame",
+      [false, "x", 8 * 1024 * 1024],
+      true,
+    ),
+    rejected(
+      "oversized resumed Unicode output cannot overflow the byte frame",
+      [true, "界", 1024 * 1024],
+      true,
+    ),
+    rejected("JSON escaping cannot overflow the host frame", [true, "\u0000", 1024 * 1024], true),
+  ],
+};

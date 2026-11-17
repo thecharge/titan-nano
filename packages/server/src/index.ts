@@ -7,6 +7,7 @@ import {
   ApprovalLevel,
   BoardFile,
   CliCommand,
+  CliOption,
   DashboardHeader,
   DashboardPolicy,
   DashboardRoute,
@@ -26,6 +27,7 @@ import {
   NativeTool,
   RequestOperation,
   RequestPageFormat,
+  RequestProjection,
   RunAction,
   RunFormat,
   RunStatus,
@@ -62,6 +64,7 @@ import {
 } from "@titan/messages";
 import { Engine } from "@titan/runner";
 import { KeyedQueue } from "@titan/store";
+import { readFileBytes } from "@titan/streams";
 import type {
   BackendFactory,
   ClientAuthority,
@@ -71,6 +74,8 @@ import type {
 } from "@titan/types";
 import {
   ArtifactHashSchema,
+  CompactRunSchema,
+  RequestProjectionSchema,
   type ServerHandle,
   ServerStopRequestSchema,
   StoredRootSchema,
@@ -219,9 +224,8 @@ async function startOwnedServer(
         settings.value.server.max_pending_agents,
       ),
       hub: owned.hub,
-      personaHistory: (run, events, request, usage) =>
-        knowledge.recordPersonaHistory(run, events, request, usage),
-      personaDecision: (request, stage) => knowledge.personaDecision(request, stage),
+      personaHistory: owned.personaHistory,
+      personaDecision: owned.personaDecision,
       openCalls: (tags, excluded) => knowledge.openCall(tags, excluded),
       ...(nativeTools ? { nativeTools } : {}),
     },
@@ -240,7 +244,7 @@ async function startOwnedServer(
     operations,
     submissions,
     logger,
-    knowledge,
+    owned,
   );
   const load = async (id: string): Promise<void> => {
     if (engine.has(id)) return engine.replayRequestEffects(id);
@@ -480,7 +484,77 @@ async function startOwnedServer(
       else throw new TitanError(ErrorCode.Method, ServerMessage.Operation);
     } else if (request.method !== HttpMethod.Get || action)
       throw new TitanError(ErrorCode.Method, ServerMessage.Method);
-    const run = await engine.snapshot(id);
+    let run = await engine.snapshot(id);
+    if (
+      request.method === HttpMethod.Get &&
+      url.searchParams.get(CliOption.Compact) === String(true)
+    ) {
+      let projection = RequestProjectionSchema.parse(
+        JSON.parse(
+          new TextDecoder().decode(
+            await readFileBytes(
+              resolve(run.root, RequestProjection.File),
+              RequestProjection.MaximumBytes,
+            ),
+          ),
+        ),
+      );
+      for (
+        let attempt = 1;
+        projection.through > run.version && attempt < ServerLimit.CompactSnapshotAttempts;
+        attempt += 1
+      ) {
+        run = await engine.snapshot(id);
+        projection = RequestProjectionSchema.parse(
+          JSON.parse(
+            new TextDecoder().decode(
+              await readFileBytes(
+                resolve(run.root, RequestProjection.File),
+                RequestProjection.MaximumBytes,
+              ),
+            ),
+          ),
+        );
+      }
+      if (projection.run_id !== id)
+        throw new TitanError(ErrorCode.CorruptBoard, ServerMessage.Operation);
+      if (projection.through > run.version)
+        throw new TitanError(ErrorCode.ServerBusy, ServerMessage.CompactBusy);
+      const requests = projection.requests;
+      const nodes = Object.fromEntries(
+        Object.entries(run.nodes).map(([step, node]) => {
+          const phases = node.reconciliations?.at(-1)?.phases ?? node.phases;
+          const errors = Object.fromEntries(
+            Object.entries(phases).flatMap(([phase, value]) =>
+              value.error === null ? [] : [[phase, value.error]],
+            ),
+          );
+          return [
+            step,
+            { state: node.state, attempt: node.attempt, refutations: node.refutations, errors },
+          ];
+        }),
+      );
+      return Response.json(
+        CompactRunSchema.parse({
+          compact: true,
+          run_id: run.run_id,
+          workflow_id: run.workflow_id,
+          client_id: run.client_id,
+          submission_id: run.submission_id,
+          harness_session_id: run.harness_session_id,
+          root: run.root,
+          artifacts: run.artifacts,
+          state: run.state,
+          error: run.error,
+          nodes,
+          usage: await projector.usage(run),
+          waiting_requests: requests
+            .filter((entry) => entry.answer === null)
+            .map((entry) => entry.request_id),
+        }),
+      );
+    }
     return Response.json({
       ...run,
       ...(run.schema_version >= RunFormat.ProofReports ? { proofs: runProofSummary(run) } : {}),

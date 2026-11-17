@@ -22,7 +22,8 @@ import {
   type Step,
 } from "@titan/types";
 import { readTree, treeHash, writeTree } from "@titan/workspace";
-import { verifyCandidate } from "./artifacts.ts";
+import { currentCandidate, verifyCandidate } from "./artifacts.ts";
+import { readRunSnapshot } from "./file-scope.ts";
 import { liveRun, verifyLiveCandidate } from "./live.ts";
 
 export function workerAction(step: Step, state: NodeState) {
@@ -75,13 +76,21 @@ export async function reconcileReceived(
   if ((!step.reconcile && !(WorkflowField.Persona in step.do)) || retainedRefutation(state))
     return false;
   if (received.candidate_hash) {
-    const candidate = resolve(stepFolder(run, step, state), RunFile.Candidate);
-    await verifyCandidate(run, step, candidate);
+    const candidate = await currentCandidate(run, step, stepFolder(run, step, state));
     try {
       await verifyLiveCandidate(run, candidate, step);
       return false;
     } catch (error) {
       if (!(error instanceof OperationalError) || error.code !== ErrorCode.FileConflict)
+        throw error;
+      if (
+        Object.entries(state.phases).some(
+          ([key, phase]) =>
+            key !== ExecutionPhase.Worker &&
+            phase.completed &&
+            SavedCommandCaptureSchema.safeParse(phase.answer).success,
+        )
+      )
         throw error;
     }
   }
@@ -97,7 +106,7 @@ export async function reconcileReceived(
     `${RunFile.AttemptPrefix}${state.attempt}`,
   );
   const input = resolve(parent, `${RunFile.ReconciliationPrefix}${generation}`, RunFile.Input);
-  const current = await readTree(run.project, limits, undefined, run.runtime_paths);
+  const current = await readRunSnapshot(run, run.project);
   await writeTree(input, current, limits);
   const input_hash = await treeHash(await readTree(input, limits));
   const phases = state.phases;
@@ -141,5 +150,6 @@ export async function verifyReconciliation(run: Run, step: Step, state: NodeStat
       RunFile.Candidate,
     );
     await verifyCandidate(run, step, candidate, undefined, checksum);
+    await currentCandidate(run, step, resolve(candidate, PathPart.Parent), generation.phases);
   }
 }

@@ -1,236 +1,212 @@
 diff --git a/crates/sandlock-cli/src/main.rs b/crates/sandlock-cli/src/main.rs
-index 31263e3..bc0a026 100644
 --- a/crates/sandlock-cli/src/main.rs
 +++ b/crates/sandlock-cli/src/main.rs
-@@ -135,6 +135,9 @@ struct RunArgs {
-     #[arg(long = "profile-file", value_name = "PATH", conflicts_with = "profile")]
-     profile_file: Option<PathBuf>,
- 
+@@ -136,0 +137,3 @@
++
 +    #[arg(long = "titan-policy")]
 +    titan_policy: Option<PathBuf>,
-+
-     #[arg(long = "status-fd", value_name = "FD")]
-     status_fd: Option<i32>,
- 
-@@ -521,6 +524,9 @@ async fn main() -> Result<()> {
- /// `process::exit`. Calling `process::exit` here would bypass
- /// `Sandbox::Drop`, which is where COW commit/abort runs.
- async fn run_command(args: RunArgs) -> Result<i32> {
+@@ -523,0 +527,3 @@
 +    if let Some(ref path) = args.titan_policy {
 +        sandlock_core::titan_policy::configure(path).map_err(|e| anyhow!("{}", e))?;
 +    }
-     let pb = &args.sandbox_builder;
- 
-     // `--no-supervisor` reaches the same `Sandbox::run` path as everything
 diff --git a/crates/sandlock-core/src/chroot/dispatch.rs b/crates/sandlock-core/src/chroot/dispatch.rs
-index 6b41513..4134847 100644
 --- a/crates/sandlock-core/src/chroot/dispatch.rs
 +++ b/crates/sandlock-core/src/chroot/dispatch.rs
-@@ -137,6 +137,7 @@ impl ChrootCtx<'_> {
- 
-     /// Check if `virtual_path` is allowed for writing.
-     fn can_write(&self, virtual_path: &Path) -> bool {
+@@ -139,0 +140 @@
 +        if !crate::titan_policy::write(virtual_path) { return false; }
-         if self.is_denied(virtual_path) {
-             return false;
-         }
-@@ -645,11 +646,12 @@ pub(crate) async fn handle_chroot_open(
-     notif_fd: RawFd,
-     ctx: &ChrootCtx<'_>,
- ) -> NotifAction {
+@@ -542,0 +544,25 @@
++/// Preserve lookup errors without admitting a filesystem operation. In
++/// particular, recursive directory creation and optional reads need ENOENT.
++fn resolution_error(
++    notif: &SeccompNotif,
++    dirfd: i64,
++    path: &str,
++    ctx: &ChrootCtx<'_>,
++) -> NotifAction {
++    let Some(full) = build_virtual_path(notif, dirfd, path, ctx) else {
++        return NotifAction::Errno(libc::EACCES);
++    };
++    let confined = confine(&full);
++    let (root, sub) = match ctx.mount_target(&confined) {
++        Some((mount, sub)) => (mount, sub),
++        None => (ctx.root, confined.to_string_lossy().into_owned()),
++    };
++    match openat2_in_root(root, &sub, libc::O_PATH | libc::O_CLOEXEC, 0) {
++        Err(error) => NotifAction::Errno(error),
++        Ok(fd) => {
++            unsafe { libc::close(fd) };
++            NotifAction::Errno(libc::EACCES)
++        }
++    }
++}
++
+@@ -556,2 +582,2 @@
+-    let (host_path, virtual_path) =
+-        resolve_chroot_path(notif, dirfd, &path, ctx).ok_or(NotifAction::Errno(libc::EACCES))?;
++    let (host_path, virtual_path) = resolve_chroot_path(notif, dirfd, &path, ctx)
++        .ok_or_else(|| resolution_error(notif, dirfd, &path, ctx))?;
+@@ -647,0 +674 @@
 +    let _guard = crate::titan_policy::lock().await;
-     // Every open spelling lands here, and they do not share an argument
-     // layout: openat2 keeps flags, mode and resolve in a struct open_how in
-     // child memory, where args[2] is the pointer to it rather than the flags.
+@@ -651,2 +678,2 @@
 -    let (dirfd, path_ptr, flags, resolve) = match decode_open_args(notif, notif_fd) {
 -        Some(a) => (a.dirfd, a.path_ptr, a.flags, a.resolve),
 +    let (dirfd, path_ptr, flags, resolve, requested_mode) = match decode_open_args(notif, notif_fd) {
 +        Some(a) => (a.dirfd, a.path_ptr, a.flags, a.resolve, a.mode),
-         None => return NotifAction::Continue,
-     };
- 
-@@ -670,7 +672,7 @@ pub(crate) async fn handle_chroot_open(
-     };
- 
-     // Access check: writes need can_write, reads need can_read
--    let is_write = (flags as i32 & (libc::O_WRONLY | libc::O_RDWR)) != 0;
-+    let is_write = crate::procfs::proc_open_is_write(flags);
-     if is_write {
-         if !ctx.can_write(&virtual_path) {
-             return NotifAction::Errno(libc::EACCES);
-@@ -679,6 +681,10 @@ pub(crate) async fn handle_chroot_open(
-         return NotifAction::Errno(libc::EACCES);
-     }
- 
-+    if is_write && crate::titan_policy::enabled() {
-+        return crate::titan_policy::open(&host_path, flags as i32, requested_mode as u32);
+@@ -665,0 +693,16 @@
++    // Preserve no-follow failure before resolving the final link for policy.
++    if flags as i32 & libc::O_NOFOLLOW != 0 && flags as i32 & libc::O_PATH == 0 {
++        if let Some((path, _)) = resolve_chroot_path_nofollow(notif, dirfd, &rel_path, ctx) {
++            if std::fs::symlink_metadata(path).is_ok_and(|entry| entry.is_symlink()) {
++                let error = if flags as i32 & (libc::O_CREAT | libc::O_EXCL) == (libc::O_CREAT | libc::O_EXCL) {
++                    libc::EEXIST
++                } else if flags as i32 & libc::O_DIRECTORY != 0 {
++                    libc::ENOTDIR
++                } else {
++                    libc::ELOOP
++                };
++                return NotifAction::Errno(error);
++            }
++        }
 +    }
 +
-     // openat2 rejects a non-zero mode unless O_CREAT/O_TMPFILE is set (stricter
-     // than openat), so only supply a creation mode when the child asks to create.
-     // O_TMPFILE is a composite (__O_TMPFILE | O_DIRECTORY), so it must be matched
-@@ -1435,6 +1441,7 @@ pub(crate) async fn handle_chroot_write(
-     notif_fd: RawFd,
-     ctx: &ChrootCtx<'_>,
- ) -> NotifAction {
+@@ -669 +712 @@
+-        None => return NotifAction::Errno(libc::EACCES),
++        None => return resolution_error(notif, dirfd, &rel_path, ctx),
+@@ -673 +716 @@
+-    let is_write = (flags as i32 & (libc::O_WRONLY | libc::O_RDWR)) != 0;
++    let is_write = crate::procfs::proc_open_is_write(flags);
+@@ -679,0 +723,21 @@
++    }
++
++    // O_PATH descriptors cannot be injected with SECCOMP_IOCTL_NOTIF_ADDFD.
++    // Direct-argument opens cannot change their register flags while stopped.
++    // In Titan's unmodified host-root read view, any path is readable and the
++    // descriptor mutation handlers still mediate all later writes. openat2
++    // keeps flags in mutable child memory and must retain the emulated path.
++    if !is_write
++        && flags as i32 & libc::O_PATH != 0
++        && notif.data.nr as i64 != libc::SYS_openat2
++        && crate::titan_policy::enabled()
++        && ctx.root == Path::new("/")
++        && ctx.mounts.is_empty()
++        && ctx.denied.is_empty()
++        && ctx.readable.iter().any(|grant| grant.covers(Path::new("/")))
++    {
++        return NotifAction::Continue;
++    }
++
++    if is_write && crate::titan_policy::enabled() {
++        return crate::titan_policy::open(&host_path, flags as i32, requested_mode as u32);
+@@ -1369,0 +1434,14 @@
++    // Titan's host-root policy grants all reads and has no path translation.
++    // Keep exec arguments untouched in that exact mode. In-place rewriting
++    // corrupts a vfork parent's shared heap, including allocator metadata.
++    // The existing filesystem and descriptor policies still mediate writes.
++    if crate::titan_policy::enabled()
++        && ctx.root == Path::new("/")
++        && ctx.mounts.is_empty()
++        && ctx.denied.is_empty()
++        && ctx.readable.iter().any(|grant| grant.covers(Path::new("/")))
++    {
++        unsafe { libc::close(src_fd) };
++        return NotifAction::Continue;
++    }
++
+@@ -1437,0 +1516 @@
 +    let _guard = crate::titan_policy::lock().await;
-     let nr = notif.data.nr as i64;
- 
-     if nr == libc::SYS_unlinkat {
-@@ -1480,7 +1487,7 @@ pub(crate) async fn handle_chroot_write(
-             Ok(r) => r,
-             Err(a) => return a,
-         };
+@@ -1445,0 +1525,5 @@
++        if notif.data.args[2] == 0 {
++            if let Some(action) = crate::titan_policy::remove_temporary_entry(&host_path) {
++                return action;
++            }
++        }
+@@ -1477,0 +1562,8 @@
++    if nr == libc::SYS_mknodat {
++        let (_, host_path, _) = match read_and_resolve(notif, notif_fd, ctx, 0, 1) {
++            Ok(value) => value,
++            Err(action) => return action,
++        };
++        return crate::titan_policy::fifo(&host_path, notif.data.args[2] as u32);
++    }
++
+@@ -1483 +1575 @@
 -        if !ctx.can_write(&vp) {
 +        if !(crate::titan_policy::enabled() && crate::titan_policy::mkdir(&vp)) && !ctx.can_write(&vp) {
-             return NotifAction::Errno(libc::EACCES);
-         }
-         let mode = notif.data.args[2] as u32;
-@@ -1533,6 +1540,10 @@ pub(crate) async fn handle_chroot_write(
-             return NotifAction::Errno(libc::EACCES);
-         }
- 
-+        if crate::titan_policy::enabled() && nr == libc::SYS_renameat2 {
-+            return crate::titan_policy::rename(&old_host, &new_host, notif.data.args[4] as u32);
+@@ -1533,0 +1626,4 @@
 +        }
 +
-         {
-             #[cfg(feature = "cow")]
-             let mut cs = cow_state.lock().await;
-@@ -1584,7 +1595,7 @@ pub(crate) async fn handle_chroot_write(
-                 Some(r) => r,
-                 None => return NotifAction::Errno(libc::EACCES),
-             };
++        if crate::titan_policy::enabled() && nr == libc::SYS_renameat2 {
++            return crate::titan_policy::rename(&old_host, &new_host, notif.data.args[4] as u32);
+@@ -1587 +1683 @@
 -        if !ctx.can_write(&link_vp) {
 +        if !crate::titan_policy::symlink(&link_vp) || !ctx.can_write(&link_vp) {
-             return NotifAction::Errno(libc::EACCES);
-         }
- 
-@@ -1621,6 +1632,8 @@ pub(crate) async fn handle_chroot_write(
-         };
-     }
- 
-+    if nr == libc::SYS_linkat && crate::titan_policy::enabled() { return crate::titan_policy::deny(); }
+@@ -1622,0 +1719,2 @@
 +
-     if nr == libc::SYS_linkat {
-         // linkat(olddirfd, oldpath, newdirfd, newpath, flags)
-         let old_path = match read_path(notif, notif.data.args[1], notif_fd) {
-@@ -2169,4 +2182,4 @@ pub(crate) async fn handle_chroot_readlink(
-     let target = match std::fs::read_link(&host_path) {
-         Ok(t) => t,
++    if nr == libc::SYS_linkat && crate::titan_policy::enabled() { return crate::titan_policy::deny(); }
+@@ -2171 +2269 @@
 -        Err(_) => return NotifAction::Errno(libc::ENOENT),
 +        Err(error) => return NotifAction::Errno(error.raw_os_error().unwrap_or(libc::EIO)),
-     };
-@@ -2295,6 +2308,7 @@ pub(crate) async fn handle_chroot_xattr(
-     notif_fd: RawFd,
-     ctx: &ChrootCtx<'_>,
- ) -> NotifAction {
+@@ -2297,0 +2396 @@
 +    let _guard = crate::titan_policy::lock().await;
-     let (op, follow) = match classify_xattr(notif.data.nr as i64) {
-         Some(x) => x,
-         None => return NotifAction::Continue,
-@@ -2598,11 +2612,15 @@ pub(crate) async fn handle_chroot_utimensat(
-     notif_fd: RawFd,
-     ctx: &ChrootCtx<'_>,
- ) -> NotifAction {
+@@ -2600,0 +2700 @@
 +    let _guard = crate::titan_policy::lock().await;
-     let dirfd = notif.data.args[0] as i64;
-     let path_ptr = notif.data.args[1];
-     let times_ptr = notif.data.args[2];
-     let flags = notif.data.args[3] as i32;
- 
+@@ -2605,0 +2706,3 @@
 +    if path_ptr == 0 && crate::titan_policy::enabled() {
 +        return crate::titan_policy::fd_time(notif, notif_fd);
 +    }
-     if path_ptr == 0 {
-         return NotifAction::Continue;
-     }
 diff --git a/crates/sandlock-core/src/landlock_policy.rs b/crates/sandlock-core/src/landlock_policy.rs
-index c30df05..5433a5d 100644
 --- a/crates/sandlock-core/src/landlock_policy.rs
 +++ b/crates/sandlock-core/src/landlock_policy.rs
-@@ -478,6 +478,7 @@ fn confine_inner(
-     // degraded rights cannot be reintroduced. add_path_beneath_rule further
-     // removes directory-only rights for non-directory paths.
-     for grant in &policy.fs_writable {
+@@ -480,0 +481 @@
 +        if crate::titan_policy::enabled() { continue; }
-         let path = grant_path(grant)?;
-         if served && crate::procfs::is_supervised_proc_grant(&path) {
-             continue;
 diff --git a/crates/sandlock-core/src/lib.rs b/crates/sandlock-core/src/lib.rs
-index 1418a68..1f6fd6c 100644
 --- a/crates/sandlock-core/src/lib.rs
 +++ b/crates/sandlock-core/src/lib.rs
-@@ -126,3 +126,5 @@ pub fn confine(confinement: &Confinement) -> Result<(), SandlockError> {
-     // Apply Landlock filesystem rules.
-     landlock_policy::confine_filesystem(&stripped)
- }
+@@ -128,0 +129,2 @@
 +
 +pub mod titan_policy;
 diff --git a/crates/sandlock-core/src/sandbox.rs b/crates/sandlock-core/src/sandbox.rs
-index 8db65cf..156531f 100644
 --- a/crates/sandlock-core/src/sandbox.rs
 +++ b/crates/sandlock-core/src/sandbox.rs
-@@ -2702,6 +2702,10 @@ impl Sandbox {
-         }
- 
-         // ===== PARENT PROCESS =====
+@@ -2704,0 +2705,4 @@
 +        if crate::titan_policy::enabled() {
 +            crate::titan_policy::own_lifetime(pid).map_err(SandboxRuntimeError::Io)?;
 +        }
 +
-         drop(pipes.notif_w);
-         drop(pipes.ready_r);
- 
+diff --git a/crates/sandlock-core/src/seccomp/dispatch.rs b/crates/sandlock-core/src/seccomp/dispatch.rs
+--- a/crates/sandlock-core/src/seccomp/dispatch.rs
++++ b/crates/sandlock-core/src/seccomp/dispatch.rs
+@@ -912,0 +913 @@
++        libc::SYS_mknodat,
 diff --git a/crates/sandlock-core/src/seccomp/notif.rs b/crates/sandlock-core/src/seccomp/notif.rs
-index e42057c..368e00b 100644
 --- a/crates/sandlock-core/src/seccomp/notif.rs
 +++ b/crates/sandlock-core/src/seccomp/notif.rs
-@@ -3088,6 +3088,12 @@ async fn decide(
- ) {
-     let policy = &ctx.policy;
-     let nr = notif.data.nr as i64;
+@@ -3090,0 +3091,6 @@
 +    {
 +        let _guard = crate::titan_policy::lock().await;
 +        if let Some(verdict) = crate::titan_policy::descriptor(&notif, fd) {
 +            action = verdict;
 +        }
 +    }
- 
-     // A bare Continue for an open is the racy window: the kernel re-resolves
-     // the path after it, and a racing thread can swap a link to reach a
 diff --git a/crates/sandlock-core/src/seccomp_plan.rs b/crates/sandlock-core/src/seccomp_plan.rs
-index 9de4a58..0b3d021 100644
 --- a/crates/sandlock-core/src/seccomp_plan.rs
 +++ b/crates/sandlock-core/src/seccomp_plan.rs
-@@ -373,6 +373,9 @@ pub(crate) fn notif_syscalls(policy: &Sandbox, sandbox_name: Option<&str>) -> Ve
- pub(crate) fn notif_syscalls_resolved(resolved: &ResolvedSandbox) -> Vec<u32> {
-     let features = &resolved.features;
-     let mut nrs = SyscallList::with(BASE_NOTIF_SYSCALLS);
+@@ -208,0 +209 @@
++        libc::SYS_mknodat,
+@@ -375,0 +377,3 @@
 +    if crate::titan_policy::enabled() {
 +        nrs.extend(&[libc::SYS_fchmod, libc::SYS_fchown, libc::SYS_ioctl, libc::SYS_fsetxattr, libc::SYS_fremovexattr]);
 +    }
-     nrs.push_optional(arch::sys_vfork());
- 
-     // Bare fork(2) creates a process like any clone: left out of the
-@@ -488,6 +491,11 @@ fn resolve_blocklist(base: &[&str], policy: &Sandbox) -> Vec<u32> {
-         .chain(extra_denies)
-         .filter_map(|n| n.parse::<Sysno>().ok())
-         .collect();
+@@ -490,0 +495,5 @@
 +    if crate::titan_policy::enabled() {
 +        for name in ["pidfd_getfd", "recvmmsg", "utime", "utimes", "futimesat", "setxattrat", "removexattrat"] {
 +            if let Ok(sysno) = name.parse::<Sysno>() { set.insert(sysno); }
 +        }
 +    }
-     if !policy.allows_sysv_ipc() {
-         for name in SYSV_IPC_BLOCKLIST_SYSCALLS {
-             if let Ok(sysno) = name.parse::<Sysno>() {
 diff --git a/crates/sandlock-core/src/titan_policy.rs b/crates/sandlock-core/src/titan_policy.rs
-new file mode 100644
-index 0000000..013152d
 --- /dev/null
 +++ b/crates/sandlock-core/src/titan_policy.rs
-@@ -0,0 +1,440 @@
+@@ -0,0 +1,481 @@
 +use crate::seccomp::notif::{NotifAction, inject_open_result};
 +use serde::Deserialize;
 +use std::ffi::CString;
@@ -670,4 +646,45 @@ index 0000000..013152d
 +    receive
 +        .recv()
 +        .map_err(|_| std::io::Error::other("descendant ownership could not start"))?
++}
++
++/// Create only named pipes inside this execution's private temporary tree.
++pub fn fifo(path: &Path, mode: u32) -> NotifAction {
++    let Some(policy) = POLICY.get() else { return deny(); };
++    if mode & libc::S_IFMT != libc::S_IFIFO { return deny(); }
++    let Some(parent) = path.parent() else { return deny(); };
++    let Some(leaf) = path.file_name() else { return deny(); };
++    let Ok(fd) = pin(parent) else { return deny(); };
++    let Ok(parent) = real(&fd) else { return deny(); };
++    let target = parent.join(leaf);
++    if !target.starts_with(&policy.temporary) || !allowed(policy, &target) { return deny(); }
++    let Ok(name) = CString::new(leaf.as_encoded_bytes()) else { return deny(); };
++    let result = unsafe { libc::mknodat(fd.as_raw_fd(), name.as_ptr(), mode, 0) };
++    if result == 0 { NotifAction::ReturnValue(0) }
++    else { NotifAction::Errno(std::io::Error::last_os_error().raw_os_error().unwrap_or(libc::EIO)) }
++}
++
++/// Remove a private temporary pipe or symlink through its pinned parent.
++pub fn remove_temporary_entry(path: &Path) -> Option<NotifAction> {
++    let policy = POLICY.get()?;
++    let metadata = std::fs::symlink_metadata(path).ok()?;
++    if ![libc::S_IFIFO, libc::S_IFLNK].contains(&(metadata.mode() & libc::S_IFMT)) {
++        return None;
++    }
++    let Some(parent) = path.parent() else { return Some(deny()); };
++    let Some(leaf) = path.file_name() else { return Some(deny()); };
++    let Ok(fd) = pin(parent) else { return Some(deny()); };
++    let Ok(parent) = real(&fd) else { return Some(deny()); };
++    let target = parent.join(leaf);
++    if !target.starts_with(&policy.temporary)
++        || protected(policy, &target)
++        || policy.structural.iter().any(|p| p == &target)
++        || !policy.allow.iter().any(|p| target.starts_with(p))
++    {
++        return Some(deny());
++    }
++    let Ok(name) = CString::new(leaf.as_encoded_bytes()) else { return Some(deny()); };
++    let result = unsafe { libc::unlinkat(fd.as_raw_fd(), name.as_ptr(), 0) };
++    Some(if result == 0 { NotifAction::ReturnValue(0) }
++    else { NotifAction::Errno(std::io::Error::last_os_error().raw_os_error().unwrap_or(libc::EIO)) })
 +}

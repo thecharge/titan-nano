@@ -1,7 +1,17 @@
-import { CliCommand, CliOption, CliPositionals, TextSymbol } from "@titan/constants";
+import {
+  CliCommand,
+  CliOption,
+  CliPositionals,
+  ExitCode,
+  SkillCommand,
+  TextSymbol,
+  WorkflowCommand,
+} from "@titan/constants";
+import { discoverWorkspaceSkills, showWorkspaceSkill } from "@titan/knowledge";
 import { CliDescription, NativeToolBridgeMessage } from "@titan/messages";
 import type { CommandDefinition, CommandName } from "@titan/types";
 import { artifactDefinition } from "./commands/artifacts.ts";
+import { createWorkflow } from "./commands/authoring.ts";
 import { configSubcommands } from "./commands/config.ts";
 import { dashboardDefinition } from "./commands/dashboard.ts";
 import { improveDefinition } from "./commands/improve.ts";
@@ -86,7 +96,57 @@ const catalog = {
   [CliCommand.Policy]: pending,
   [CliCommand.Traces]: pending,
   [CliCommand.Persona]: personaDefinition,
+  [CliCommand.Skill]: {
+    description: CliDescription.Skill,
+    options: [],
+    subcommands: {
+      [SkillCommand.List]: {
+        description: CliDescription.SkillList,
+        options: [CliOption.Project],
+        handler: async ({ project, services }) => {
+          const catalog = await discoverWorkspaceSkills(project, services.environment);
+          return {
+            data: [...catalog.values()].map(({ directory: _directory, ...entry }) => entry),
+            exitCode: ExitCode.Success,
+          };
+        },
+      },
+      [SkillCommand.Show]: {
+        description: CliDescription.SkillShow,
+        positionals: CliPositionals.Skill,
+        options: [CliOption.Project],
+        handler: async ({ project, services, positionals }) => ({
+          data: await showWorkspaceSkill(
+            project,
+            services.environment,
+            positionals[0] ?? TextSymbol.Empty,
+          ),
+          exitCode: ExitCode.Success,
+        }),
+      },
+    },
+  },
   [CliCommand.Knowledge]: knowledgeDefinition,
+  [CliCommand.Workflow]: {
+    description: CliDescription.Workflow,
+    options: [],
+    subcommands: {
+      [WorkflowCommand.Create]: {
+        description: CliDescription.WorkflowCreate,
+        positionals: CliPositionals.Workflow,
+        options: [
+          CliOption.Home,
+          CliOption.Project,
+          CliOption.Template,
+          CliOption.Worker,
+          CliOption.Reviewer,
+          CliOption.Skill,
+          CliOption.Verify,
+        ],
+        handler: createWorkflow,
+      },
+    },
+  },
   [CliCommand.Backends]: {
     description: CliDescription.Backends,
     options: [],
@@ -134,6 +194,10 @@ const catalog = {
       CliOption.ClientId,
       CliOption.HarnessSessionId,
       CliOption.ProjectPath,
+      CliOption.HomeAfter,
+      CliOption.State,
+      CliOption.Scope,
+      CliOption.Project,
     ],
     handler: runHandlers.list,
     validate: runListOptions,
@@ -141,7 +205,7 @@ const catalog = {
   [CliCommand.Status]: {
     description: CliDescription.Status,
     positionals: CliPositionals.Run,
-    options: runOptions,
+    options: [...runOptions, CliOption.Compact],
     handler: runHandlers.status,
   },
   [CliCommand.Usage]: {

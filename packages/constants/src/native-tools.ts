@@ -8,6 +8,7 @@ export enum NativeToolTransport {
 export enum NativeToolRole {
   Worker = "worker",
   Checker = "checker",
+  Improver = "improver",
 }
 
 export const NativeTool = {
@@ -58,6 +59,7 @@ export enum NativeAuditFixture {
 }
 
 export const NativeToolPolicy = {
+  [NativeToolRole.Improver]: [NativeTool.Ready, NativeTool.ReadFile],
   [NativeToolRole.Worker]: [
     NativeTool.Ready,
     NativeTool.ReadFile,

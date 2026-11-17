@@ -138,6 +138,10 @@ class SummaryHistory {
     this.through = event.id;
   }
 
+  usageAt(run: Run) {
+    if (this.through === run.version && this.root === run.root) return this.usage.finish();
+  }
+
   finish(run: Run): RunNumbers {
     return this.numbers.finish(this.usage.finish(), run);
   }
@@ -164,8 +168,13 @@ export class RunSummaryProjector {
     }
     const history = new SummaryHistory(run);
     for await (const entry of new RunStore(run.root).events(run.version)) history.observe(entry);
-    this.histories.set(run.run_id, history);
+    if (this.histories.get(run.run_id) === cached) this.histories.set(run.run_id, history);
     return history;
+  }
+
+  async usage(run: Run) {
+    const history = this.histories.get(run.run_id);
+    return history?.usageAt(run) ?? (await this.history(run)).usageAt(run);
   }
 
   async write(run: Run, stamp?: SummaryStamp, event?: RunEvent): Promise<void> {
@@ -281,11 +290,14 @@ export async function listRuns(
     (run) =>
       (query.harness_session_id === undefined ||
         run.harness_session_id === query.harness_session_id) &&
-      (query.project_path === undefined || run.project === query.project_path),
+      (query.project_path === undefined || run.project === query.project_path) &&
+      (query.state === undefined || run.state === query.state),
   );
   return RunPageSchema.parse({
     schema_version:
-      query.harness_session_id !== undefined || query.project_path !== undefined
+      query.harness_session_id !== undefined ||
+      query.project_path !== undefined ||
+      query.state !== undefined
         ? ServerLimit.FilteredRunPageVersion
         : ServerLimit.RunPageVersion,
     runs,

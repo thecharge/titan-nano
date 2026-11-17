@@ -54,3 +54,6 @@ export enum SchemaKind {
 }
 
 export const PersonaReferencePattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$/;
+export const ScopedPersonaReferencePattern =
+  /^(?:project:)?[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}@[0-9]+$/;
+export const ProjectPersonaPrefix = "project:";

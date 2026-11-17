@@ -70,6 +70,7 @@ export const RunFormat = {
   GoalProofs: 16,
   ProofCaptures: 17,
   PinnedBuild: 18,
+  ScriptCandidates: 19,
 } as const;
 
 export const RunResultFormat = { FailureVersion: 1, PassedVersion: 1, ProofVersion: 2 } as const;

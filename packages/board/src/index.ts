@@ -15,6 +15,7 @@ import {
   RequestLimit,
   RunFile,
   RunFormat,
+  ScriptExecution,
   StepStatus,
   TextSymbol,
   TitanRelease,
@@ -45,6 +46,7 @@ import {
   type RunProjectionWriter,
   type RunValidationCache,
   RunValidationCacheSchema,
+  SavedCommandCaptureSchema,
   type Step,
 } from "@titan/types";
 import { validateWorkflow } from "@titan/workflow";
@@ -255,7 +257,16 @@ function validateRecord(run: Run, root: string, cache: RunValidationCache): void
       .some(
         ([key, phase]) =>
           phase.capture_pending !== undefined &&
-          (run.schema_version < RunFormat.CaptureReceipts || key !== ExecutionPhase.Worker),
+          (run.schema_version < RunFormat.CaptureReceipts ||
+            (key !== ExecutionPhase.Worker &&
+              !(
+                run.schema_version >= RunFormat.ScriptCandidates &&
+                phase.execution_id &&
+                (key.startsWith(ScriptExecution.CheckPrefix) ||
+                  key.startsWith(ScriptExecution.ProofPrefix) ||
+                  key.startsWith(ExecutionPhase.FalsifierPrefix)) &&
+                SavedCommandCaptureSchema.safeParse(phase.answer).success
+              ))),
       );
     if (incompatibleReceipt) throw new TitanError(ErrorCode.CorruptBoard, BoardMessage.Record);
     if (

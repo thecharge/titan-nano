@@ -4,6 +4,7 @@ import {
   NativeToolRole,
   PersonaRule,
   PersonaState,
+  ProjectPersonaPrefix,
   Verdict,
 } from "@titan/constants";
 import { hash } from "@titan/core";
@@ -19,7 +20,7 @@ import {
 import { readPersonaEntry } from "./persona-archive.ts";
 import { advancePersona, personaEntryId } from "./persona-lifecycle.ts";
 import { personaVersionOffers } from "./persona-offers.ts";
-import { personaRecord } from "./persona-register.ts";
+import { localPersonaReference, personaRecord } from "./persona-register.ts";
 import { publishPersonaSampling } from "./persona-sampling.ts";
 
 function identity(result: PersonaQualityResult): string {
@@ -32,10 +33,11 @@ export async function publishPersonaQuality(
   input: PersonaQualityResult,
 ): Promise<readonly PersonaRequest[]> {
   const result = PersonaQualityResultSchema.parse(input);
-  const at = result.persona.lastIndexOf(PersonaRule.VersionMark);
-  const name = result.persona.slice(0, at);
-  const version = Number(result.persona.slice(at + 1));
-  const { entry, bytes } = await readPersonaEntry(storage, personaEntryId(result.persona));
+  const reference = localPersonaReference(result.persona);
+  const at = reference.lastIndexOf(PersonaRule.VersionMark);
+  const name = reference.slice(0, at);
+  const version = Number(reference.slice(at + 1));
+  const { entry, bytes } = await readPersonaEntry(storage, personaEntryId(reference));
   const record = personaRecord(entry, name, version);
   const history = record.history ?? [];
   const outcome = identity({ ...result, later_refuted: undefined });
@@ -90,6 +92,11 @@ export async function publishPersonaQuality(
     advance.requests.push(
       ...(await personaVersionOffers(storage, { ...body, state: advance.state })),
     );
+  if (result.persona.startsWith(ProjectPersonaPrefix))
+    advance.requests = advance.requests.map((request) => ({
+      ...request,
+      names: request.names.map((name) => ProjectPersonaPrefix + name),
+    }));
   const transitions = advance.history.map((move) => ({
     result: identity(result),
     run: result.run,

@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { readRunConfiguration } from "@titan/config";
 import {
   CliCommand,
+  CliOption,
   ErrorCode,
   EventCursor,
   ExitCode,
@@ -32,6 +33,7 @@ import {
   type ClientConnector,
   type ClientRuntimeRecovery,
   type ClientTransport,
+  CompactRunSchema,
   EventPageSchema,
   EventQuerySchema,
   EventSearchSchema,
@@ -169,8 +171,8 @@ export async function callAsPerson(
   return callAddress({ ...address, token: await readPersonToken(home) }, path, method, body);
 }
 
-function parseRun(value: unknown, id?: string) {
-  const result = RunSnapshotSchema.safeParse(value);
+function parseRun(value: unknown, id?: string, compact = false) {
+  const result = (compact ? CompactRunSchema : RunSnapshotSchema).safeParse(value);
   if (!result.success || (id !== undefined && result.data.run_id !== id))
     throw new TitanError(
       ErrorCode.InvalidResponse,
@@ -261,8 +263,13 @@ export function createRunClient(
         throw new TitanError(ErrorCode.InvalidResponse, ArtifactMessage.Client, ExitCode.Transport);
       return parsed.data;
     },
-    async get(id) {
-      return parseRun(await request(runPath(id)), id);
+    async get(id, compact = false) {
+      const path = compact
+        ? runPath(id) +
+          EventCursor.Separator +
+          new URLSearchParams({ [CliOption.Compact]: String(true) })
+        : runPath(id);
+      return parseRun(await request(path), id, compact);
     },
     async submit(body) {
       return parseRun(await request(LocalServer.Runs, HttpMethod.Post, body));
@@ -294,7 +301,9 @@ export function createRunClient(
         !result.success ||
         result.data.before !== expected.before ||
         result.data.schema_version !==
-          (expected.harness_session_id !== undefined || expected.project_path !== undefined
+          (expected.harness_session_id !== undefined ||
+          expected.project_path !== undefined ||
+          expected.state !== undefined
             ? ServerLimit.FilteredRunPageVersion
             : ServerLimit.RunPageVersion) ||
         result.data.runs.length > expected.limit ||
@@ -302,6 +311,8 @@ export function createRunClient(
           result.data.runs.some((run) => run.harness_session_id !== expected.harness_session_id)) ||
         (expected.project_path !== undefined &&
           result.data.runs.some((run) => run.project !== expected.project_path)) ||
+        (expected.state !== undefined &&
+          result.data.runs.some((run) => run.state !== expected.state)) ||
         (expected.client_id !== undefined &&
           result.data.runs.some((run) => run.client_id !== expected.client_id))
       )

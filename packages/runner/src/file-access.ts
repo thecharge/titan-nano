@@ -17,6 +17,7 @@ import {
   SignalEvent,
   StepStatus,
   StoreEviction,
+  VerifyKind,
 } from "@titan/constants";
 import { filePathCovers, fileScopesOverlap, newId } from "@titan/core";
 import { OperationalError } from "@titan/errors";
@@ -59,7 +60,9 @@ function writes(run: Run, entry: StepAction): boolean {
 
 export function accessMode(run: Run, step: Step): FileAccessMode {
   const actions = [step.do, ...step.falsify, ...(step.reconcile ? [step.reconcile] : [])];
-  return step.checks.length || actions.some((action) => writes(run, action))
+  return step.checks.length ||
+    step.verify.some((entry) => entry.kind === VerifyKind.Script) ||
+    actions.some((action) => writes(run, action))
     ? FileAccessMode.Write
     : FileAccessMode.Read;
 }
@@ -72,6 +75,8 @@ function observedParent(path: string, observed: ReadonlySet<string>): boolean {
   }
   return false;
 }
+
+import { isSkillPath } from "./skill-role.ts";
 
 export class FileAccess {
   private admission = new KeyedQueue(RuntimeLimit.PendingOperations);
@@ -237,8 +242,10 @@ export class FileAccess {
       throw new OperationalError(ErrorCode.PermissionDenied, RunnerMessage.FileClaim);
     const paths = new Set(state.read_paths ?? []);
     for (const phase of Object.values(state.phases))
-      for (const observation of phase.file_reads ?? [])
-        paths.add(NativeFileField.Files in observation ? observation.directory : observation.path);
+      for (const observation of phase.file_reads ?? []) {
+        if (NativeFileField.Files in observation) paths.add(observation.directory);
+        else if (!isSkillPath(run, observation.path)) paths.add(observation.path);
+      }
     const minimal = paths.has(PathPart.Current)
       ? [PathPart.Current]
       : [...paths].filter((path) => !observedParent(path, paths));

@@ -105,13 +105,13 @@ export async function runWorkflow(
   );
   engine.preflight(
     validateWorkflow(
-      await knowledge.resolvePersonas(plan.workflow),
+      await knowledge.resolvePersonas(plan.workflow, project),
       config.value.limits.max_group_depth,
     ),
     config,
     backend,
   );
-  const binding = await knowledge.bindPersonas(plan.workflow);
+  const binding = await knowledge.bindPersonas(plan.workflow, project);
   const resolved = validateWorkflow(binding.workflow, config.value.limits.max_group_depth);
   const run = await engine.create({
     project,

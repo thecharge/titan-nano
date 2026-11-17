@@ -96,6 +96,10 @@ if (
   !prompt.toString().startsWith("Transport contract role")
 )
   throw new Error("Codex 0.167.0 request contract mismatch");
+if (role.includes("Skill linked:")) {
+  if (!nativeTools) throw new Error("Missing skill reference binding");
+  await nativeTools.verifySkills(role);
+}
 await appendFile(
   await stateFile(cwd, `${resultSchema.properties.verdict ? "checker" : "worker"}-calls.jsonl`),
   `${JSON.stringify({ pid: process.pid, resume })}\n`,

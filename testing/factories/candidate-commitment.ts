@@ -153,7 +153,7 @@ export function assertCandidatePhases(before: NodeState, after: NodeState): void
   assert.deepEqual(after.phases[ExecutionPhase.Worker], before.phases[ExecutionPhase.Worker]);
   const key = `${ExecutionPhase.FalsifierPrefix}0`;
   assert.deepEqual(after.phases[key], { ...before.phases[key], error: after.phases[key]?.error });
-  assert.equal(after.phases[key]?.error, `${ErrorCode.ExecutionInterrupted}: deliver`);
+  assert.equal(after.phases[key]?.error, before.phases[key]?.error);
 }
 
 export function candidateCommitmentPublication(executable: boolean, changed: boolean) {

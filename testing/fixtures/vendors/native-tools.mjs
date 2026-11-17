@@ -124,6 +124,38 @@ export async function vendorNativeTools(configuration, args, resources) {
         tools: listed.tools.map((tool) => ({ name: tool.name, description: tool.description })),
       },
     ],
+    async verifySkills(role) {
+      assert.ok(
+        role.includes("Available workspace skills:") && role.includes("- linked: Synthetic review"),
+      );
+      assert.ok(role.includes("Use the synthetic reference."));
+      if (role.includes("Read the synthetic generated file.")) {
+        const cache = await client.callTool({
+          name: NativeTool.ReadFile,
+          arguments: { path: ".cache/generated.txt" },
+        });
+        assert.equal(cache.isError === true, false, JSON.stringify(cache));
+        assert.equal(
+          Buffer.from(JSON.parse(cache.content[0].text).content, "base64").toString(),
+          "Explicit managed cache read.",
+        );
+      }
+      const prefix = "@titan-skills/linked/references/";
+      const read = await client.callTool({
+        name: NativeTool.ReadFile,
+        arguments: { path: prefix + "alias.md" },
+      });
+      assert.equal(read.isError === true, false, JSON.stringify(read));
+      assert.equal(
+        Buffer.from(JSON.parse(read.content[0].text).content, "base64").toString(),
+        "Synthetic reference.",
+      );
+      const escapedRead = await client.callTool({
+        name: NativeTool.ReadFile,
+        arguments: { path: prefix + "escape.md" },
+      });
+      assert.equal(escapedRead.isError, true, JSON.stringify(escapedRead));
+    },
     async executeSplit() {
       assert.equal(connection.scope.role, NativeToolRole.Worker);
       const file = await client.callTool({
@@ -185,7 +217,10 @@ export async function vendorNativeTools(configuration, args, resources) {
       });
       assert.equal(file.isError === true, false, JSON.stringify(file));
       const observed = JSON.parse(file.content[0].text);
-      assert.equal(Buffer.from(observed.content, "base64").toString(), "Original project content");
+      assert.equal(
+        Buffer.from(observed.content, "base64").toString(),
+        "Synthetic observation content.\n".repeat(4096),
+      );
       assert.equal(observed.observation.path, "source.txt");
       assert.equal(typeof observed.observation.version, "string");
       const absent = await client.callTool({

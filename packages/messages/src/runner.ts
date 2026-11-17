@@ -4,6 +4,11 @@ export const ProgramMessage = {
   NotStarted: "The run handle was not made by runWorkflow",
 };
 export const RunnerMessage = {
+  SkillIndexHeading: "Available workspace skills:",
+  SkillIndexEntry: (name: string, description: string): string => `- ${name}: ${description}`,
+  SkillInstructions: (name: string, content: string): string => `Skill ${name}:\n${content}`,
+  SkillReferenceAccess: (directory: string): string =>
+    `Read retained skill files with titan_file_read at ${directory}/<name>/<path>.`,
   FileClaim: "Execution does not own the current live file claim",
   FileReadClaims: "Observed dependencies exceed the live file claim allowance",
   FileWriteClaims: "Requested write paths exceed the live file claim allowance",

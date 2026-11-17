@@ -1,5 +1,6 @@
 import {
   Backend,
+  CodexEventKind,
   NativeCodexStatus,
   NativeEventActivity,
   NativeEventLimit,
@@ -57,3 +58,12 @@ export const NativeClaudeUseSchema = z.object({
   name: z.string().min(1).max(NativeEventLimit.NameCharacters),
 });
 export const NativeClaudeResultSchema = z.object({ tool_use_id: identity });
+
+export const NativeCodexCommandEventSchema = z.object({
+  item: z.object({
+    type: z.literal(CodexEventKind.CommandExecution),
+    command: z.string(),
+    aggregated_output: z.string(),
+    exit_code: z.number().nullable(),
+  }),
+});

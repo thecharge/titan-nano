@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { assertNoSecrets } from "@titan/config";
 import {
+  ConfigFile,
   ErrorCode,
   ErrorField,
   FileErrorCode,
@@ -12,6 +13,7 @@ import {
   PersonaRegister,
   PersonaRule,
   PersonaState,
+  ProjectPersonaPrefix,
   WorkflowField,
 } from "@titan/constants";
 import { hash } from "@titan/core";
@@ -58,6 +60,10 @@ function filePath(home: string, name: string, version: number): string {
 export function splitReference(value: string): PersonaReferenceParts {
   const at = value.lastIndexOf(PersonaRule.VersionMark);
   return { name: value.slice(0, at), version: Number(value.slice(at + 1)) };
+}
+
+export function localPersonaReference(value: string): string {
+  return value.startsWith(ProjectPersonaPrefix) ? value.slice(ProjectPersonaPrefix.length) : value;
 }
 
 function isMissing(error: unknown): boolean {
@@ -144,7 +150,10 @@ async function existing(home: string, value: string): Promise<PersonaRecord> {
 }
 
 export class PersonaRegistry {
-  constructor(private storage: PersonaRegistryStorage) {}
+  constructor(
+    private storage: PersonaRegistryStorage,
+    private project?: PersonaRegistry,
+  ) {}
 
   async approve(
     request: OperationRequest,
@@ -248,6 +257,11 @@ export class PersonaRegistry {
   }
 
   private async existing(value: string): Promise<PersonaRecord> {
+    if (value.startsWith(ProjectPersonaPrefix)) {
+      if (!this.project)
+        throw new TitanError(ErrorCode.UnknownPersona, personaNotInRegister(value));
+      return this.project.existing(localPersonaReference(value));
+    }
     const { name, version } = splitReference(value);
     const record = await this.read(name, version);
     if (!record || record.state === PersonaState.Deleted)
@@ -326,6 +340,14 @@ export class PersonaRegistry {
     }
     if (WorkflowField.Mutates in entry) {
       const { mutates, ...changes } = entry;
+      if (mutates.startsWith(ProjectPersonaPrefix)) {
+        if (!this.project)
+          throw new TitanError(ErrorCode.UnknownPersona, personaNotInRegister(mutates));
+        return (
+          ProjectPersonaPrefix +
+          (await this.project.mutation(localPersonaReference(mutates), changes, registration))
+        );
+      }
       return this.mutation(mutates, changes, registration);
     }
     return this.inline(key, entry, registration);
@@ -357,15 +379,24 @@ async function resolveWorkflow(
   return WorkflowSchema.parse({ ...workflow, personas });
 }
 
-export function resolvePersonaWorkflow(home: string, workflow: Workflow): Promise<Workflow> {
-  return resolveWorkflow(workflow, (value) => existing(home, value));
+export function resolvePersonaWorkflow(
+  home: string,
+  workflow: Workflow,
+  project?: string,
+): Promise<Workflow> {
+  return resolveWorkflow(workflow, (value) => {
+    if (!value.startsWith(ProjectPersonaPrefix)) return existing(home, value);
+    if (!project) throw new TitanError(ErrorCode.UnknownPersona, personaNotInRegister(value));
+    return existing(join(project, ConfigFile.HomeDirectory), localPersonaReference(value));
+  });
 }
 
-export async function checkPersonaUses(home: string, workflow: Workflow): Promise<void> {
-  for (const entry of Object.values(workflow.personas)) {
-    if (WorkflowField.Use in entry) await existing(home, entry.use);
-    else if (WorkflowField.Mutates in entry) await existing(home, entry.mutates);
-  }
+export async function checkPersonaUses(
+  home: string,
+  workflow: Workflow,
+  project?: string,
+): Promise<void> {
+  await resolvePersonaWorkflow(home, workflow, project);
 }
 
 export async function recordRunPersonas(root: string, references: PersonaRunRecord): Promise<void> {

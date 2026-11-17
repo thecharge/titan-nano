@@ -30,6 +30,7 @@ import {
 } from "@titan/types";
 import { readTree, treeHash } from "@titan/workspace";
 import type { FileAccess } from "./file-access.ts";
+import { readRunSnapshot } from "./file-scope.ts";
 import { liveRun } from "./live.ts";
 import { assertProofCheckers } from "./proof-checkers.ts";
 import { loadScriptCapture, saveScriptCapture } from "./script-captures.ts";
@@ -43,12 +44,10 @@ export class GoalChecks {
   ) {}
 
   private async unchanged(run: Run, state: GoalState): Promise<void> {
-    const files = await readTree(
-      state.work ?? run.project,
-      run.config.value.limits,
-      undefined,
-      liveRun(run) ? run.runtime_paths : undefined,
-    );
+    const root = state.work ?? run.project;
+    const files = liveRun(run)
+      ? await readRunSnapshot(run, root)
+      : await readTree(root, run.config.value.limits);
     if ((await treeHash(files)) !== state.result_hash)
       throw new OperationalError(ErrorCode.FileConflict, RunnerMessage.GoalChanged);
   }

@@ -1,4 +1,4 @@
-import { PersonaReferencePattern, PersonaRegister, UsageReport } from "@titan/constants";
+import { PersonaRegister, ScopedPersonaReferencePattern, UsageReport } from "@titan/constants";
 import { z } from "zod";
 
 const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
@@ -40,7 +40,7 @@ export const PersonaRunUsageSchema = RunUsageSchema.safeExtend({
 });
 
 export const PersonaUsageReportSchema = PersonaRunUsageSchema.safeExtend({
-  persona: z.string().regex(PersonaReferencePattern),
+  persona: z.string().regex(ScopedPersonaReferencePattern),
 });
 export type PersonaUsageReport = z.infer<typeof PersonaUsageReportSchema>;
 
@@ -57,7 +57,7 @@ export type PersonaUsage = z.infer<typeof PersonaUsageSchema>;
 
 export const UsagePhasePolicySchema = z.strictObject({
   cumulative: z.boolean(),
-  persona: z.string().regex(PersonaReferencePattern).optional(),
+  persona: z.string().regex(ScopedPersonaReferencePattern).optional(),
 });
 export type UsagePhasePolicy = z.infer<typeof UsagePhasePolicySchema>;
 

@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import {
   ErrorCode,
   ExecutionPhase,
@@ -6,15 +6,38 @@ import {
   IoLimit,
   PathPart,
   RunFile,
+  ScriptExecution,
   StepStatus,
 } from "@titan/constants";
 import { all } from "@titan/core";
-import { TitanError } from "@titan/errors";
+import { OperationalError, TitanError } from "@titan/errors";
 import { fileConflict, RunnerMessage, stepReference } from "@titan/messages";
 import { readFileBytes } from "@titan/streams";
-import type { FileMap, NodeState, Run, Step } from "@titan/types";
+import {
+  type FileMap,
+  type NodeState,
+  type Phase,
+  type Run,
+  SavedCommandCaptureSchema,
+  type Step,
+} from "@titan/types";
 import { assertManifestBounds, exists, fileIdentity, readTree, treeHash } from "@titan/workspace";
 import { liveRun } from "./live.ts";
+import { loadScriptCapture } from "./script-captures.ts";
+
+function scriptCandidates(phases: Record<string, Phase>) {
+  return Object.entries(phases)
+    .flatMap(([key, phase]) => {
+      if (
+        !key.startsWith(ScriptExecution.CheckPrefix) &&
+        !key.startsWith(ScriptExecution.ProofPrefix)
+      )
+        return [];
+      const retained = SavedCommandCaptureSchema.safeParse(phase.answer).data?.candidate;
+      return retained ? [{ phase, retained }] : [];
+    })
+    .sort((left, right) => left.retained.ordinal - right.retained.ordinal);
+}
 
 export function runParents(run: Run, step: Step): Set<string> {
   const result = new Set<string>();
@@ -59,15 +82,13 @@ async function readSnapshot(run: Run, step: Step) {
   if (!state?.snapshot || state.state !== StepStatus.Passed)
     throw new TitanError(ErrorCode.MissingSnapshot, step.id);
   const changed = await readTree(state.snapshot, run.config.value.limits);
-  const manifest = resolve(state.snapshot, PathPart.Parent, RunFile.CandidateHash);
-  const checksum = await treeHash(changed);
-  const committed = state.phases[ExecutionPhase.Worker]?.candidate_hash;
-  if (
-    !(await exists(manifest)) ||
-    checksum !== (await readFileBytes(manifest, IoLimit.HashBytes)).toString(FileEncoding.Utf8) ||
-    (committed !== undefined && checksum !== committed)
-  )
+  const postScript = scriptCandidates(state.phases).some(
+    ({ retained }) => retained.path === relative(run.root, state.snapshot ?? PathPart.Current),
+  );
+  const folder = resolve(state.snapshot, PathPart.Parent, ...(postScript ? [PathPart.Parent] : []));
+  if ((await currentCandidate(run, step, folder)) !== state.snapshot)
     throw new TitanError(ErrorCode.SnapshotChanged, step.id);
+  await verifyCandidate(run, step, state.snapshot, changed);
   return [step, state, changed] as const;
 }
 function mergeRun(
@@ -101,8 +122,12 @@ export async function verifyCandidate(
   step: Step,
   candidate: string,
   files?: FileMap,
-  committed = run.nodes[step.id]?.phases[ExecutionPhase.Worker]?.candidate_hash,
+  committed?: string,
 ): Promise<void> {
+  const phases = run.nodes[step.id]?.phases ?? {};
+  committed ??=
+    scriptCandidates(phases).find(({ retained }) => retained.path === relative(run.root, candidate))
+      ?.retained.hash ?? phases[ExecutionPhase.Worker]?.candidate_hash;
   if (
     !(await exists(candidate)) ||
     !(await exists(resolve(candidate, PathPart.Parent, RunFile.CandidateHash)))
@@ -121,6 +146,42 @@ export async function verifyCandidate(
     (committed !== undefined && checksum !== committed)
   )
     throw new TitanError(ErrorCode.CheckpointChanged, step.id);
+}
+
+export async function currentCandidate(
+  run: Run,
+  step: Step,
+  folder: string,
+  phases: Record<string, Phase> = run.nodes[step.id]?.phases ?? {},
+): Promise<string> {
+  if (
+    Object.entries(phases).some(
+      ([key, phase]) => key !== ExecutionPhase.Worker && phase.capture_pending,
+    )
+  )
+    throw new OperationalError(ErrorCode.SnapshotChanged, RunnerMessage.CapturePending);
+  let candidate = resolve(folder, RunFile.Candidate);
+  let checksum =
+    phases[ExecutionPhase.Worker]?.candidate_hash ??
+    (await treeHash(await readTree(candidate, run.config.value.limits)));
+  await verifyCandidate(run, step, candidate, undefined, checksum);
+  const receipts = scriptCandidates(phases);
+  for (const [index, { phase, retained }] of receipts.entries()) {
+    const expected = resolve(folder, phase.execution_id ?? PathPart.Current, RunFile.Candidate);
+    if (
+      !phase.completed ||
+      !phase.execution_id ||
+      retained.ordinal !== index + 1 ||
+      retained.parent_hash !== checksum ||
+      retained.path !== relative(run.root, expected)
+    )
+      throw new TitanError(ErrorCode.CheckpointChanged, step.id);
+    candidate = expected;
+    checksum = retained.hash;
+    await loadScriptCapture(run, phase.answer);
+    await verifyCandidate(run, step, candidate, undefined, checksum);
+  }
+  return candidate;
 }
 
 export async function verifyAttemptInput(run: Run, step: Step, input: string): Promise<FileMap> {

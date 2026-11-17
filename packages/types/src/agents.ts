@@ -14,7 +14,7 @@ import {
   FileAccessMode,
   IdentifierPattern,
   PathPart,
-  PersonaReferencePattern,
+  ScopedPersonaReferencePattern,
   Verdict,
 } from "@titan/constants";
 import { FakeMessage, invocationId } from "@titan/messages";
@@ -43,7 +43,7 @@ export type AgentEvent = z.infer<typeof AgentEventSchema>;
 export const FakeInvocationSchema = z.object({
   persona_id: z.union([
     z.string().regex(IdentifierPattern),
-    z.string().regex(PersonaReferencePattern),
+    z.string().regex(ScopedPersonaReferencePattern),
   ]),
   attempt: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
   execution: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),

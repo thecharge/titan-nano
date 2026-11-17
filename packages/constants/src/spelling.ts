@@ -41,6 +41,9 @@ export const SpellingConfiguration = {
     "openspec/changes/*/research/user-instructions-*.md",
   ],
   words: [
+    "velite",
+    "mkfifo",
+    "mknod",
     "dtype",
     "onnx",
     "acked",

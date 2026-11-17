@@ -49,6 +49,7 @@ import {
   RunSnapshotSchema,
 } from "@titan/types";
 import { daemonEntry, ensureDaemon } from "./daemon.ts";
+import { knownHomes, rememberHome } from "./known-homes.ts";
 import { handoff, launch } from "./launch.ts";
 import { outputEnvelope } from "./output.ts";
 import { recoverRunRuntime, recoverRuntimeConnection } from "./runtime-recovery.ts";
@@ -133,11 +134,22 @@ export function renderCommandOutput(
 }
 
 function runtimeConnection(home: string) {
+  let recorded: Promise<void> | undefined;
   return {
-    connect: () => ensureDaemon(home),
+    connect: async () => {
+      recorded ??= recordHome(home);
+      await recorded;
+      await ensureDaemon(home);
+    },
     recover: (version: string, build?: string) =>
       recoverRuntimeConnection(home, version, defaultServices, undefined, build),
   };
+}
+
+async function recordHome(home: string): Promise<void> {
+  await rememberHome(home).catch((error: unknown) => {
+    console.error(CliDiagnostic.HomeRegistryUnavailable, String(error));
+  });
 }
 
 export const defaultServices: CliServices = {
@@ -151,8 +163,10 @@ export const defaultServices: CliServices = {
   prepareSubmission,
   loadData,
   loadKnowledge,
-  knowledge: (home) => createKnowledgeClient(home, () => ensureDaemon(home)),
+  knowledge: (home) => createKnowledgeClient(home, runtimeConnection(home).connect),
   output: renderCommandOutput,
+  knownHomes,
+  existingRunClient: (home) => createRunClient(home),
   client: (home) => {
     const connection = runtimeConnection(home);
     return createRunClient(home, connection.connect, connection.recover);
@@ -161,9 +175,12 @@ export const defaultServices: CliServices = {
     const connection = runtimeConnection(home);
     return createRequestClient(home, connection.connect, connection.recover);
   },
-  dashboard: (home) => createDashboardClient(home, () => ensureDaemon(home)),
+  dashboard: (home) => createDashboardClient(home, runtimeConnection(home).connect),
   improve: improveEarlierRun,
-  serve: serveUntilStopped,
+  serve: async (home, ...args) => {
+    await recordHome(home);
+    return serveUntilStopped(home, ...args);
+  },
   mcp: async (home) => {
     const connection = runtimeConnection(home);
     await connection.connect();

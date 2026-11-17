@@ -1,13 +1,20 @@
 import { strict as assert } from "node:assert";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { CodexBackend } from "@titan/backend-codex";
 import { FakeBackend, ScriptedFakeBackend } from "@titan/backend-fake";
 import { resolveConfig, workflowSettings } from "@titan/config";
-import { CancellationBoundary, ErrorCode } from "@titan/constants";
+import { AgentHost, CancellationBoundary, ErrorCode, IoLimit } from "@titan/constants";
 import { agentSpec } from "@titan/test-factories";
 import { processExited, thrownBy, waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
-import { AgentSpecSchema, FakeInvocationSchema, FakeScriptSchema } from "@titan/types";
+import {
+  AgentEventSchema,
+  AgentSpecSchema,
+  FakeInvocationSchema,
+  FakeScriptSchema,
+  NativeCodexCommandEventSchema,
+} from "@titan/types";
 
 export function personaInvocation(persona: string): boolean {
   return (
@@ -174,4 +181,66 @@ export async function configuredFakeScript(script: unknown) {
     assert.deepEqual(config.value.backends?.fake?.script, FakeScriptSchema.parse(script));
     return true;
   });
+}
+
+export async function codexCommandTelemetry(resume: boolean, character: string, size: number) {
+  const output = character.repeat(size);
+  const events: unknown[] = [];
+  const thread = {
+    async runStreamed() {
+      return {
+        events: (async function* () {
+          yield { type: "thread.started", thread_id: "native" };
+          yield {
+            type: "item.completed",
+            item: {
+              id: "command",
+              type: "command_execution",
+              command: output,
+              aggregated_output: output,
+              status: "completed",
+              exit_code: 0,
+            },
+          };
+          yield { type: "item.completed", item: { type: "agent_message", text: "done" } };
+          yield { type: "turn.completed", usage: { input_tokens: 1, output_tokens: 1 } };
+        })(),
+      };
+    },
+  };
+  const backend = new CodexBackend({
+    startThread: () => thread,
+    resumeThread: () => thread,
+  } as unknown as NonNullable<ConstructorParameters<typeof CodexBackend>[0]>);
+  const spec = AgentSpecSchema.parse({ ...agentSpec("/tmp"), output_schema: null });
+  const session = resume ? await backend.resume("native", spec) : await backend.start(spec);
+  try {
+    const answer = await session.send(
+      "work",
+      async (event) => {
+        events.push(event);
+      },
+      new AbortController().signal,
+    );
+    const commandEvent = AgentEventSchema.parse(events[1]);
+    const command = NativeCodexCommandEventSchema.parse(commandEvent.data);
+    assert.equal(answer.text, "done");
+    assert.equal(command.item.exit_code, 0);
+    assert.ok(
+      Buffer.byteLength(JSON.stringify({ type: "event", event: commandEvent })) <
+        AgentHost.MessageBytes,
+    );
+    assert.equal(command.item.command, command.item.aggregated_output);
+    if (Buffer.byteLength(output) <= IoLimit.ChunkBytes)
+      assert.equal(command.item.aggregated_output, output);
+    else {
+      assert.ok(
+        command.item.aggregated_output.includes(createHash("sha256").update(output).digest("hex")),
+      );
+      assert.ok(command.item.aggregated_output.startsWith(output.slice(0, IoLimit.ChunkBytes)));
+    }
+    return true;
+  } finally {
+    await session.close();
+  }
 }

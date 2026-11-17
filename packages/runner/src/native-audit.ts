@@ -31,7 +31,7 @@ export function nativeToolBoard(run: Run, scope: NativeToolScope, record: Native
     scope.run_id !== run.run_id ||
     scope.part_id !== null ||
     scope.candidate_id !== runKnowledgeScope(run, step, state).candidate_id ||
-    isWorkerKey(phase[0]) !== (scope.role === NativeToolRole.Worker)
+    scope.role !== (isWorkerKey(phase[0]) ? NativeToolRole.Worker : NativeToolRole.Checker)
   )
     throw new TitanError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
   const action = phase[1].helper

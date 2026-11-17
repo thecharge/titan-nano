@@ -1,7 +1,7 @@
 import {
   NativeToolRole,
-  PersonaReferencePattern,
   PersonaRegister,
+  ScopedPersonaReferencePattern,
   Verdict,
 } from "@titan/constants";
 import { z } from "zod";
@@ -9,7 +9,7 @@ import { Sha256Schema } from "./hash.ts";
 
 export const PersonaQualityResultSchema = z
   .strictObject({
-    persona: z.string().regex(PersonaReferencePattern),
+    persona: z.string().regex(ScopedPersonaReferencePattern),
     run: z.string().min(1),
     step: z.string().min(1),
     part: z.string().min(1),

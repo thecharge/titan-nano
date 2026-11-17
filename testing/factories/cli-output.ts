@@ -7,6 +7,7 @@ import {
   CliCommand,
   CliRecoveryAction,
   CliRuntime,
+  EnvVar,
   ErrorCode,
   ExitCode,
   HookFile,
@@ -19,7 +20,7 @@ import { OperationalError } from "@titan/errors";
 import { startServer } from "@titan/server";
 import { createRunClient } from "@titan/server/client";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
-import { CliOutputSchema, RunSchema } from "@titan/types";
+import { CliOutputSchema, CompactRunSchema, RunSchema } from "@titan/types";
 import { captureCli } from "../support/command.ts";
 import { checkedWorkflow } from "./hardening.ts";
 
@@ -59,17 +60,23 @@ async function observeEnvelopeProcess(
       }),
   );
   resources.defer(() => server.stop());
-  const result = await captureCli(cli, [
-    CliCommand.Run,
-    file,
-    ProbeOption.Home,
-    home,
-    ProbeOption.Project,
+  const environment = { ...process.env, [EnvVar.TitanHome]: resolve(root, "registry") };
+  const result = await captureCli(
+    cli,
+    [
+      CliCommand.Run,
+      file,
+      ProbeOption.Home,
+      home,
+      ProbeOption.Project,
+      project,
+      ProbeOption.Backend,
+      Backend.Fake,
+      CliRuntime.JsonFlag,
+    ],
     project,
-    ProbeOption.Backend,
-    Backend.Fake,
-    CliRuntime.JsonFlag,
-  ]);
+    environment,
+  );
   assert.equal(result.code, blocked ? ExitCode.Blocked : ExitCode.Success, result.error.toString());
   assert.equal(result.error.length, 0);
   assert.equal(result.output.toString().trim().split("\n").length, 1);
@@ -91,15 +98,88 @@ async function observeEnvelopeProcess(
     assert.equal(envelope.error.recovery.run_id, run.run_id);
     assert.equal(envelope.error.retryable, false);
   } else assert.equal(envelope.error, null);
-  const first = await captureCli(cli, [
-    CliCommand.Events,
-    run.run_id,
-    ProbeOption.Home,
-    home,
-    ProbeOption.Limit,
-    "1",
-    CliRuntime.JsonFlag,
-  ]);
+  const status = async (extra: string[], expected: ExitCode = ExitCode.Success) => {
+    const result = await captureCli(
+      cli,
+      [CliCommand.Status, run.run_id, ProbeOption.Home, home, CliRuntime.JsonFlag, ...extra],
+      project,
+      environment,
+    );
+    assert.equal(result.code, expected, result.error.toString());
+    return CliOutputSchema.parse(JSON.parse(result.output.toString()));
+  };
+  const full = await status([]);
+  assert.equal(RunSchema.parse(full.data).run_id, run.run_id);
+  assert.ok(full.events.length);
+  const compact = await status(["--compact"]);
+  const projected = CompactRunSchema.parse(compact.data);
+  assert.equal(projected.run_id, run.run_id);
+  assert.deepEqual(Object.keys(projected.nodes), Object.keys(run.nodes));
+  assert.deepEqual(compact.events, []);
+  assert.equal(projected.usage.run_id, run.run_id);
+  const watched = await status(
+    ["--compact", "--watch"],
+    blocked ? ExitCode.Blocked : ExitCode.Success,
+  );
+  assert.deepEqual(watched.data, compact.data);
+  assert.deepEqual(watched.events, []);
+  const missing = resolve(root, "unavailable");
+  for (const selectors of [
+    ["--scope", "project"],
+    ["--project", project],
+  ]) {
+    const conflict = await captureCli(
+      cli,
+      [CliCommand.Runs, ...selectors, "--project-path", missing, CliRuntime.JsonFlag],
+      project,
+      environment,
+    );
+    assert.equal(conflict.code, ExitCode.Input, conflict.error.toString());
+  }
+  const discovery = await captureCli(
+    cli,
+    [
+      CliCommand.Runs,
+      "--scope",
+      "known-home",
+      "--state",
+      run.state,
+      ProbeOption.Home,
+      missing,
+      CliRuntime.JsonFlag,
+    ],
+    project,
+    environment,
+  );
+  assert.equal(discovery.code, ExitCode.Success, discovery.error.toString());
+  const homes = CliOutputSchema.parse(JSON.parse(discovery.output.toString())).data;
+  assert.deepEqual(homes, {
+    homes: [
+      {
+        home: missing,
+        error: await createRunClient(missing)
+          .list()
+          .catch((error: Error) => error.message),
+      },
+      { home, page: await createRunClient(home).list({ state: run.state }) },
+    ].sort((left, right) => left.home.localeCompare(right.home)),
+    has_more: false,
+    next_home: null,
+  });
+  const first = await captureCli(
+    cli,
+    [
+      CliCommand.Events,
+      run.run_id,
+      ProbeOption.Home,
+      home,
+      ProbeOption.Limit,
+      "1",
+      CliRuntime.JsonFlag,
+    ],
+    project,
+    environment,
+  );
   assert.equal(first.code, ExitCode.Success, first.error.toString());
   const page = CliOutputSchema.parse(JSON.parse(first.output.toString()));
   assert.equal(page.operation, CliCommand.Events);
@@ -108,15 +188,20 @@ async function observeEnvelopeProcess(
   assert.equal(page.next_cursor, 1);
   assert.equal(page.has_more, true);
   assert.equal(page.truncated, true);
-  const next = await captureCli(cli, [
-    CliCommand.Events,
-    run.run_id,
-    ProbeOption.Home,
-    home,
-    ProbeOption.After,
-    String(page.next_cursor),
-    CliRuntime.JsonFlag,
-  ]);
+  const next = await captureCli(
+    cli,
+    [
+      CliCommand.Events,
+      run.run_id,
+      ProbeOption.Home,
+      home,
+      ProbeOption.After,
+      String(page.next_cursor),
+      CliRuntime.JsonFlag,
+    ],
+    project,
+    environment,
+  );
   assert.equal(next.code, ExitCode.Success, next.error.toString());
   const remaining = CliOutputSchema.parse(JSON.parse(next.output.toString()));
   assert.equal(remaining.after, page.next_cursor);

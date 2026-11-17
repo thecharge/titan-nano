@@ -1,11 +1,17 @@
 import { Backend, backendIds, LocalServer, RunStatus, ServerLimit } from "@titan/constants";
 import { z } from "zod";
 import { ArtifactHashSchema, ArtifactQuerySchema } from "./artifacts.ts";
-import { CallerSessionSchema, type Run, RunRuntimeVersionSchema } from "./board.ts";
+import {
+  CallerSessionSchema,
+  NodeStateSchema,
+  type Run,
+  RunRuntimeVersionSchema,
+} from "./board.ts";
 import type { Embedder } from "./contracts/embedder.ts";
 import { type LogSink, LogStatisticsSchema } from "./logging.ts";
 import type { NativeToolLaunch } from "./native-tool-launch.ts";
 import { ProofSummarySchema } from "./proof-report.ts";
+import { RunUsageSchema } from "./usage.ts";
 
 export const RunSnapshotSchema = z.looseObject({
   run_id: z.string().min(1),
@@ -20,6 +26,19 @@ export const RunSnapshotSchema = z.looseObject({
   proofs: ProofSummarySchema.optional(),
 });
 export type RunSnapshot = z.infer<typeof RunSnapshotSchema>;
+export const CompactRunSchema = z.strictObject({
+  ...RunSnapshotSchema.omit({ nodes: true, proofs: true }).shape,
+  compact: z.literal(true),
+  error: z.string().nullable(),
+  nodes: z.record(
+    z.string(),
+    NodeStateSchema.pick({ state: true, attempt: true, refutations: true }).extend({
+      errors: z.record(z.string(), z.string()),
+    }),
+  ),
+  usage: RunUsageSchema,
+  waiting_requests: z.array(z.string().min(1)),
+});
 export const ResumeBackendSchema = z.enum(backendIds).optional();
 export const LimitNodesSchema = z.record(
   z.string(),
@@ -129,3 +148,5 @@ export interface ServerOptions {
   nativeTools?: NativeToolLaunch;
   embedders?: readonly Embedder[];
 }
+
+export const KnownHomeRowSchema = z.object({ path: z.unknown() });

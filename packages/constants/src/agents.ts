@@ -24,6 +24,7 @@ export enum CodexEventKind {
   TurnFailed = "turn.failed",
   Error = "error",
   AgentMessage = "agent_message",
+  CommandExecution = "command_execution",
 }
 
 export enum CodexPolicy {

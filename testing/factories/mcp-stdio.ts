@@ -99,7 +99,8 @@ async function observeMcpFrames(
     ),
   );
   await stopCommand(child);
-  assert.equal((await readFileBytes(error, IoLimit.DataBytes)).length, 0);
+  const diagnostics = await readFileBytes(error, IoLimit.DataBytes);
+  assert.equal(diagnostics.length, 0, diagnostics.toString());
   const frames = await readFrames(output, true);
   assert.equal(frames.length, McpStdioFixture.FrameCount);
   assert(frames.some((frame) => frame.id === McpStdioFixture.InitializationId && frame.result));

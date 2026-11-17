@@ -25,7 +25,7 @@ export enum NativeCodexStatus {
 
 export const NativeEventLimit = { IdentityCharacters: 128, NameCharacters: 256 } as const;
 export const NativeEventProjection = { Version: 1 } as const;
-export const NativeEventField = { ToolResult: "tool_use_result" } as const;
+export const NativeEventField = { Item: "item", ToolResult: "tool_use_result" } as const;
 
 export enum NativeEventFixture {
   Codex = "codex",

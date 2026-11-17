@@ -17,6 +17,7 @@ import {
   PathPart,
   PersonaDecisionStage,
   PersonaState,
+  ProjectPersonaPrefix,
   RunEventKind,
   ServerDatabaseAdapter,
   ServerLimit,
@@ -447,25 +448,28 @@ export class KnowledgeHub {
     return this.use(() => this.personaRegistry().register(workflow));
   }
 
-  resolvePersonas(workflow: Workflow) {
-    return this.use(() => this.personaRegistry().resolve(workflow));
+  resolvePersonas(workflow: Workflow, project?: KnowledgeHub) {
+    return this.use(() => this.personaRegistry(project).resolve(workflow));
   }
 
-  bindPersonas(workflow: Workflow, registration?: string) {
+  bindPersonas(workflow: Workflow, registration?: string, project?: KnowledgeHub) {
     return this.use(async () => {
-      const registry = this.personaRegistry();
+      const registry = this.personaRegistry(project);
       const resolved = await registry.resolve(workflow);
       const references = await registry.register(workflow, registration);
       return { workflow: resolved, references };
     });
   }
 
-  private personaRegistry(): PersonaRegistry {
-    return new PersonaRegistry({
-      read: (id) => this.read(id),
-      readArchived: (id) => archivedPersona(this.root, id),
-      publish: (change) => this.publish(change),
-    });
+  private personaRegistry(project?: KnowledgeHub): PersonaRegistry {
+    return new PersonaRegistry(
+      {
+        read: (id) => this.read(id),
+        readArchived: (id) => archivedPersona(this.root, id),
+        publish: (change) => this.publish(change),
+      },
+      project ? project.personaRegistry() : undefined,
+    );
   }
 
   openCall(tags: readonly string[], excluded: readonly string[] = []) {
@@ -496,16 +500,19 @@ export class KnowledgeHub {
     events: AsyncIterable<RunEvent>,
     request?: PersonaRequestWriter,
     usage: readonly PersonaUsageReport[] = [],
+    project?: KnowledgeHub,
   ): Promise<void> {
     if (!run.persona_references) return;
     for await (const event of events) {
       if (event.type !== RunEventKind.ResultJudged) continue;
       const { results } = PersonaJudgementSchema.parse(event.data);
-      const requests = await this.recordPersonaResults(run, results);
+      const requests = await this.recordPersonaResults(run, results, project);
       for (const pending of requests) await request?.(run, pending);
     }
-    for (const report of usage)
-      await this.use(async () => {
+    for (const report of usage) {
+      const target = report.persona.startsWith(ProjectPersonaPrefix) ? project : this;
+      if (!target) throw new TitanError(ErrorCode.KnowledgeCorrupt, KnowledgeMessage.Corrupt);
+      await target.use(async () => {
         if (
           report.run_id !== run.run_id ||
           report.through > run.version ||
@@ -517,13 +524,14 @@ export class KnowledgeHub {
           throw new TitanError(ErrorCode.KnowledgeCorrupt, KnowledgeMessage.Corrupt);
         await publishPersonaUsage(
           {
-            read: (id) => this.read(id),
-            readArchived: (id) => archivedPersona(this.root, id),
-            publish: (change) => this.publish(change),
+            read: (id) => target.read(id),
+            readArchived: (id) => archivedPersona(target.root, id),
+            publish: (change) => target.publish(change),
           },
           report,
         );
       });
+    }
     if (request && this.meaning)
       for (const offer of await this.use(() => this.meaning?.merges() ?? Promise.resolve([])))
         await request(run, offer);
@@ -532,10 +540,17 @@ export class KnowledgeHub {
   private recordPersonaResults(
     run: Run,
     results: readonly PersonaQualityResult[],
+    project?: KnowledgeHub,
   ): Promise<PersonaRequest[]> {
     return this.use(async () => {
       const requests: PersonaRequest[] = [];
       for (const result of results) {
+        const target = result.persona.startsWith(ProjectPersonaPrefix) ? project : this;
+        if (!target) throw new TitanError(ErrorCode.KnowledgeCorrupt, KnowledgeMessage.Corrupt);
+        if (target !== this) {
+          requests.push(...(await target.recordPersonaResults(run, [result], target)));
+          continue;
+        }
         if (
           result.run !== run.run_id ||
           ![

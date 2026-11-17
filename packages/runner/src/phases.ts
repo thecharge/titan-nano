@@ -62,7 +62,7 @@ import { readTree, treeHash, writeTree } from "@titan/workspace";
 import { personaBackend } from "./backend-choice.ts";
 import type { Capacity } from "./capacity.ts";
 import { accessMode, type FileAccess } from "./file-access.ts";
-import { writePaths } from "./file-scope.ts";
+import { readRunSnapshot, writePaths } from "./file-scope.ts";
 import { HelperTurns } from "./helper-turns.ts";
 import { liveRun } from "./live.ts";
 import { effectiveModel } from "./models.ts";
@@ -70,6 +70,7 @@ import { ExecutionTools, isWorkerKey } from "./native-execution.ts";
 import { verifyNativeReads } from "./native-files.ts";
 import { assertCaptured, receiveWorker, sealWorker } from "./received.ts";
 import type { RunHubFlow } from "./run-hub-flow.ts";
+import { skillRole } from "./skill-role.ts";
 
 function grantedTools(context: PhaseExecution): string[] {
   return context.request_answers
@@ -108,9 +109,12 @@ function specification(
           },
         }
       : {}),
-    role: persona.request_turns
-      ? `${persona.role}${Newline}${RequestTurnMessage.Role}`
-      : persona.role,
+    role: skillRole(
+      context.run,
+      persona.request_turns
+        ? { ...persona, role: `${persona.role}${Newline}${RequestTurnMessage.Role}` }
+        : persona,
+    ),
     model: effectiveModel(persona, context.run.config.value.defaults),
     tools,
     output_schema: persona.request_turns
@@ -514,7 +518,7 @@ export class AgentPhases {
     const checkpoint = resolve(attemptFolder(context), RunFile.Candidate);
     await writeTree(
       checkpoint,
-      await readTree(context.cwd, limits, tools.scanner, context.run.runtime_paths),
+      await readRunSnapshot(context.run, context.cwd, tools.scanner),
       limits,
       tools.scanner,
     );

@@ -41,6 +41,8 @@ export const ServerRoute = {
 export const ServerLimit = {
   IdentityCharacters: 128,
   RunPageSize: 50,
+  CompactSnapshotAttempts: 3,
+  KnownHomePageSize: 50,
   RunPageMaximum: 200,
   SummaryCharacters: 4096,
   RunPageVersion: 1,
@@ -137,4 +139,14 @@ export const SummaryTest = {
   Extra: "two lines\n",
   Folder: "run",
   Sequence: 1,
+} as const;
+
+export const KnownHome = {
+  BusyTimeout: "PRAGMA busy_timeout=5000",
+  Scope: "known-home",
+  File: "known-homes.sqlite",
+  NullByte: "\0",
+  Create: "CREATE TABLE IF NOT EXISTS homes (path TEXT PRIMARY KEY NOT NULL)",
+  Insert: "INSERT OR IGNORE INTO homes (path) VALUES (?)",
+  Page: "SELECT path FROM homes WHERE path > ? ORDER BY path LIMIT ?",
 } as const;

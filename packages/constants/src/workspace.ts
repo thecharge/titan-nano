@@ -9,6 +9,28 @@ export const WorkspaceExcluded = [
   "dist",
   "coverage",
 ];
+export const WorkspaceSkill = {
+  Roots: [".agents", ".codex", ".claude"],
+  Header: /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/,
+  Directory: "skills",
+  VirtualDirectory: "@titan-skills",
+  Instructions: "SKILL.md",
+  References: "references",
+  Entries: 4096,
+} as const;
+export enum WorkspaceSkillScope {
+  Project = "project",
+  User = "user",
+}
+export const WorkspaceGeneratedDirectories = [
+  ".cache",
+  ".turbo",
+  ".next",
+  ".next-dev",
+  ".wrangler",
+  ".vlog",
+  ".velite",
+];
 export const WorkspaceFile = {
   Environment: ".env",
   EnvironmentPrefix: ".env.",

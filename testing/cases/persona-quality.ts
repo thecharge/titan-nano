@@ -170,6 +170,16 @@ export const personaProductionLifecycleCases = {
 export const personaLifecycleDeliveryCases = {
   positive: [
     positive(
+      "project trial improvement retains its scope",
+      [PersonaState.Trial, false, false, true],
+      true,
+    ),
+    positive(
+      "project proven improvement retains its scope",
+      [PersonaState.Proven, false, false, true],
+      true,
+    ),
+    positive(
       "trial transition and improvement request survive recreation",
       [PersonaState.Trial, false, false],
       true,
@@ -181,6 +191,16 @@ export const personaLifecycleDeliveryCases = {
     ),
   ],
   negative: [
+    rejected(
+      "interrupted project offer retains scope on replay",
+      [PersonaState.Trial, true, false, true],
+      true,
+    ),
+    rejected(
+      "project acknowledgement replay preserves exact scope",
+      [PersonaState.Proven, false, true, true],
+      true,
+    ),
     rejected(
       "interrupted request delivery resumes from the retained transition",
       [PersonaState.Trial, true, false],

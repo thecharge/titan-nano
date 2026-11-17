@@ -2,7 +2,7 @@ export { knowledgeBytes, parseKnowledgeEntry, parseKnowledgeFile } from "./forma
 export { KnowledgeHub, ownKnowledge } from "./hub.ts";
 export { runImproveRounds } from "./improve-rounds.ts";
 export { improvedFileName, nextImprovedVersion, saveImprovedFile } from "./improved-file.ts";
-export { inspectKnowledge, inspectPersona } from "./inspection.ts";
+export { inspectKnowledge, inspectPersona, listPersonaVersions } from "./inspection.ts";
 export { listLessons } from "./lesson-list.ts";
 export { lessonKeeper, scopedLessonKeeper } from "./lessons.ts";
 export { loadKnowledge } from "./load.ts";
@@ -36,4 +36,5 @@ export { policyKind, policyPath, readPolicy, recordPolicyRun, runReward } from "
 export { policyAlarms } from "./policy-alarms.ts";
 export { scopedRunHub } from "./run-hub.ts";
 export { projectHubHome, projectHubPath, ScopedKnowledgeHub } from "./scoped.ts";
+export { discoverWorkspaceSkills, retainWorkspaceSkills, showWorkspaceSkill } from "./skills.ts";
 export { eligibleWidths, emptyWidthState, learnWidth, pickWidth } from "./width-learner.ts";

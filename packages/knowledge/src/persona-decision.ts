@@ -3,11 +3,11 @@ import {
   ErrorCode,
   FileEncoding,
   PersonaDecisionStage,
-  PersonaReferencePattern,
   PersonaRule,
   PersonaState,
   RequestDecision,
   RequestKind,
+  ScopedPersonaReferencePattern,
 } from "@titan/constants";
 import { hash } from "@titan/core";
 import { TitanError } from "@titan/errors";
@@ -21,7 +21,12 @@ import {
 } from "@titan/types";
 import { readPersonaEntry } from "./persona-archive.ts";
 import { personaEntryId, wilson } from "./persona-lifecycle.ts";
-import { PersonaRegistry, personaRecord, splitReference } from "./persona-register.ts";
+import {
+  localPersonaReference,
+  PersonaRegistry,
+  personaRecord,
+  splitReference,
+} from "./persona-register.ts";
 
 async function finishDeletion(storage: PersonaRegistryStorage, current: PersonaReadResult) {
   if (current.archived) return;
@@ -54,11 +59,12 @@ export async function publishPersonaDecision(
     (request.kind === RequestKind.DeletePersona &&
       request.answer.actor.authority !== ApprovalLevel.Human) ||
     request.scope.operation !== request.kind ||
-    !PersonaReferencePattern.test(request.scope.resource)
+    !ScopedPersonaReferencePattern.test(request.scope.resource)
   )
     throw new TitanError(ErrorCode.PermissionDenied, KnowledgeMessage.PersonaDecision);
-  const { name, version } = splitReference(request.scope.resource);
-  const current = await readPersonaEntry(storage, personaEntryId(request.scope.resource));
+  const reference = localPersonaReference(request.scope.resource);
+  const { name, version } = splitReference(reference);
+  const current = await readPersonaEntry(storage, personaEntryId(reference));
   const { entry, bytes } = current;
   const record = personaRecord(entry, name, version);
   const fingerprint = hash(JSON.stringify(request));
@@ -147,12 +153,13 @@ async function approveDefinition(
         ? sources.length < 1 || sources.length > 2
         : sources.length !== 2) ||
       new Set(sources).size !== sources.length ||
-      !sources.every((value) => PersonaReferencePattern.test(value))
+      !sources.every((value) => ScopedPersonaReferencePattern.test(value))
     )
       throw new TitanError(ErrorCode.PermissionDenied, KnowledgeMessage.PersonaDecision);
     for (const source of sources) {
-      const { name, version } = splitReference(source);
-      const { entry } = await storage.read(personaEntryId(source));
+      const reference = localPersonaReference(source);
+      const { name, version } = splitReference(reference);
+      const { entry } = await storage.read(personaEntryId(reference));
       const record = personaRecord(entry, name, version);
       if (record.state === PersonaState.Deleted)
         throw new TitanError(ErrorCode.PermissionDenied, KnowledgeMessage.PersonaDefinition);
@@ -160,11 +167,11 @@ async function approveDefinition(
         name === supplied.name &&
         (parent === undefined || version > splitReference(parent).version)
       )
-        parent = source;
+        parent = reference;
     }
     if (
       request.kind === RequestKind.ImprovePersona &&
-      sources.some((source) => splitReference(source).name !== supplied.name)
+      sources.some((source) => splitReference(localPersonaReference(source)).name !== supplied.name)
     )
       throw new TitanError(ErrorCode.PermissionDenied, KnowledgeMessage.PersonaDecision);
   }

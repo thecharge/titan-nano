@@ -11,7 +11,7 @@ export interface RunClient {
   usage(id: string): Promise<RunUsage>;
   artifact(id: string, file: string, query?: ArtifactQueryInput): Promise<ArtifactPage>;
   artifacts(id: string): Promise<ArtifactInspection>;
-  get(id: string): Promise<RunSnapshot>;
+  get(id: string, compact?: boolean): Promise<RunSnapshot>;
   submit(body: unknown): Promise<RunSnapshot>;
   control(id: string, action: RunAction, backend?: string): Promise<RunSnapshot>;
   list(query?: RunListQueryInput): Promise<RunPage>;

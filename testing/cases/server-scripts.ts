@@ -192,6 +192,33 @@ export const scopedScriptAdmissionCases = {
   ],
 };
 
+export const scopedScriptDeadlineCases = {
+  positive: [
+    positive(
+      "worker can exceed the former ten-second deadline",
+      [ExecutionPhase.Worker, "valid", 0, WorkspaceModeSetting.Live, 12, 10050],
+      { code: 0, starts: 1 },
+    ),
+    positive(
+      "falsifier can exceed the former ten-second deadline",
+      ["falsifier-0", "valid", 0, WorkspaceModeSetting.Live, 12, 10050],
+      { code: 0, starts: 1 },
+    ),
+  ],
+  negative: [
+    rejected(
+      "worker obeys its declared short deadline",
+      [ExecutionPhase.Worker, "valid", 0, WorkspaceModeSetting.Live, 0.01, 100],
+      { code: ErrorCode.CommandTimeout, starts: 1 },
+    ),
+    rejected(
+      "falsifier obeys its declared short deadline",
+      ["falsifier-0", "valid", 0, WorkspaceModeSetting.Live, 0.01, 100],
+      { code: ErrorCode.CommandTimeout, starts: 1 },
+    ),
+  ],
+};
+
 export const serverScriptCases = {
   positive: [
     positive(

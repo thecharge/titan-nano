@@ -4,7 +4,7 @@ import { OperationalError } from "@titan/errors";
 import { liveCandidateConflict, rollbackConflict } from "@titan/messages";
 import type { FileMap, NodeState, Run, Step } from "@titan/types";
 import { fileIdentity, putBack, readTree } from "@titan/workspace";
-import { scopeCovers, writePaths } from "./file-scope.ts";
+import { readRunSnapshot, scopeCovers, writePaths } from "./file-scope.ts";
 import { isWorkerKey } from "./native-execution.ts";
 import { verifyNativeReads } from "./native-files.ts";
 import { withWriteInputs } from "./write-inputs.ts";
@@ -46,7 +46,7 @@ export async function verifyLiveCandidate(run: Run, candidate: string, step: Ste
     await verifyNativeReads(run, step, phase.file_reads ?? [], isWorkerKey(key));
   const limits = run.config.value.limits;
   const retained = await readTree(candidate, limits);
-  const current = await readTree(run.project, limits, undefined, run.runtime_paths);
+  const current = await readRunSnapshot(run, run.project);
   for (const path of new Set([...Object.keys(retained), ...Object.keys(current)]))
     if (fileIdentity(retained[path]) !== fileIdentity(current[path]))
       throw new OperationalError(ErrorCode.FileConflict, liveCandidateConflict(path));

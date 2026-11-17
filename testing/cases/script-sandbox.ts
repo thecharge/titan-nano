@@ -3,6 +3,51 @@ import { positive, rejected } from "@titan/test-factories";
 export const scriptBoundaryCases = {
   positive: [
     positive(
+      "private temporary dependency links can be removed without touching their targets",
+      [
+        'ln -s "$PWD/allowed.txt" "$TMPDIR/link" && rm "$TMPDIR/link" && test "$(cat allowed.txt)" = Original && printf Changed > allowed.txt',
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "path descriptors preserve real paths for package resolution",
+      [
+        "bun -e \"const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');assert.equal(fs.realpathSync('symbolic'),path.resolve('../outside.txt'));fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "optional reads and recursive directory creation retain missing-path errors",
+      [
+        "bun -e \"const fs=require('node:fs'),assert=require('node:assert/strict');const root=process.env.TMPDIR+'/missing/deep';assert.throws(()=>fs.readFileSync(root+'/optional'),{code:'ENOENT'});fs.mkdirSync(root,{recursive:true});fs.writeFileSync(root+'/result','ok');assert.equal(fs.readFileSync(root+'/result','utf8'),'ok');fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "child execution preserves the parent executable identity",
+      [
+        "bun -e \"const fs=require('node:fs'),assert=require('node:assert/strict');const before=fs.readlinkSync('/proc/self/exe');assert.equal(Bun.spawnSync(['/bin/true']).exitCode,0);assert.equal(fs.readlinkSync('/proc/self/exe'),before);fs.writeFileSync('allowed.txt','Changed')\"",
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
+      "private temporary named pipes support non-regular input verification",
+      [
+        'mkfifo "$TMPDIR/pipe" && test -p "$TMPDIR/pipe" && printf Changed > allowed.txt',
+        ["allowed.txt"],
+        false,
+      ],
+      true,
+    ),
+    positive(
       "reading a regular file as a link retains its invalid-argument error",
       [
         "bun -e \"const fs=require('node:fs');try{fs.readlinkSync('allowed.txt');process.exit(8)}catch(e){if(e.code!=='EINVAL')throw e}fs.writeFileSync('allowed.txt','Changed')\"",
@@ -123,6 +168,25 @@ export const scriptBoundaryCases = {
     ),
   ],
   negative: [
+    rejected(
+      "path descriptors cannot expose an outside write through proc links",
+      [
+        "bun -e \"const fs=require('node:fs');const fd=fs.openSync('../outside.txt',fs.constants.O_PATH);try{fs.writeFileSync('/proc/self/fd/'+fd,'Changed');process.exit(8)}catch(e){if(e.code!=='EACCES')throw e;process.exit(9)}\"",
+        ["allowed.txt"],
+        true,
+      ],
+      true,
+    ),
+    rejected(
+      "named pipes cannot be created in the project",
+      ["mkfifo unlisted.txt", ["."], true],
+      true,
+    ),
+    rejected(
+      "private temporary device nodes remain forbidden",
+      ['mknod "$TMPDIR/device" c 1 3', ["allowed.txt"], true],
+      true,
+    ),
     rejected(
       "read-only outside descriptors cannot change file modes",
       [
@@ -368,21 +432,45 @@ export const scriptReadClaimCases = {
   positive: [
     positive(
       "read proof can inspect its claimed file",
-      ["test $(cat allowed.txt) = Original", false],
+      ["test $(cat allowed.txt) = Original", false, false],
       true,
     ),
     positive(
       "read proof can use its private scratch directory",
-      ['printf Scratch > "$TMPDIR/output" && test $(cat "$TMPDIR/output") = Scratch', false],
+      ['printf Scratch > "$TMPDIR/output" && test $(cat "$TMPDIR/output") = Scratch', false, false],
+      true,
+    ),
+    positive(
+      "approved proof can update its declared output",
+      ["printf Changed > allowed.txt", false, false],
+      true,
+    ),
+    positive(
+      "retain a proof output across server replacement",
+      ["printf Changed > allowed.txt", false, true],
       true,
     ),
   ],
   negative: [
     rejected(
-      "read proof cannot update its claimed file",
-      ["printf Changed > allowed.txt", true],
+      "changed proof evidence blocks after server replacement",
+      ["printf Changed > allowed.txt", false, "candidate"],
       true,
     ),
-    rejected("read proof cannot create a project file", ["printf Changed > extra.txt", true], true),
+    rejected(
+      "an external edit after a completed proof blocks without reconciliation",
+      ["printf Changed > allowed.txt", false, "live"],
+      true,
+    ),
+    rejected(
+      "proof cannot update a file outside the project",
+      ["printf Changed > ../outside.txt", true, false],
+      true,
+    ),
+    rejected(
+      "read proof cannot create a project file",
+      ["printf Changed > extra.txt", true, true],
+      true,
+    ),
   ],
 };

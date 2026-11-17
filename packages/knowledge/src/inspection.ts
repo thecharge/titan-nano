@@ -17,6 +17,7 @@ import {
   Newline,
   PersonaReferencePattern,
   PersonaRegister,
+  PersonaState,
   TextSymbol,
   Verdict,
 } from "@titan/constants";
@@ -113,6 +114,30 @@ async function readInspectedEntry(root: string, row: KnowledgeRow, settings: Kno
   )
     throw new TitanError(ErrorCode.KnowledgeCorrupt, KnowledgeMessage.Corrupt);
   return entry;
+}
+
+export async function listPersonaVersions(home: string) {
+  const settings = KnowledgeSettingsSchema.parse({});
+  const data = await snapshot(home, settings);
+  const versions = [];
+  for (const row of data.rows) {
+    if (
+      row.kind !== KnowledgeKind.Persona ||
+      !PersonaReferencePattern.test(row.title) ||
+      row.id !== personaEntryId(row.title)
+    )
+      continue;
+    const entry = await readInspectedEntry(join(home, KnowledgeFile.Directory), row, settings);
+    const { name, version } = splitReference(row.title);
+    const record = personaRecord(entry, name, version);
+    versions.push({
+      name,
+      version,
+      state: record.state ?? PersonaState.Proposed,
+      reference: row.title,
+    });
+  }
+  return versions;
 }
 
 export async function inspectPersona(home: string, input: unknown) {

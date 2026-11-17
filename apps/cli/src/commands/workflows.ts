@@ -66,9 +66,9 @@ async function checkedPlan(context: CommandContext) {
   const plan = validateWorkflow(workflow, config.value.limits.max_group_depth);
   if (plan.nodes.length > config.value.limits.max_steps)
     throw new TitanError(ErrorCode.StepLimit, CliDiagnostic.StepLimit);
-  await checkPersonaUses(context.home, plan.workflow);
+  await checkPersonaUses(context.home, plan.workflow, context.project);
   const resolved = validateWorkflow(
-    await resolvePersonaWorkflow(context.home, plan.workflow),
+    await resolvePersonaWorkflow(context.home, plan.workflow, context.project),
     config.value.limits.max_group_depth,
   );
   validatePlanTools(resolved, config.value.defaults.backend ?? undefined);

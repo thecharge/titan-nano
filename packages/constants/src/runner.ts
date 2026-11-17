@@ -166,6 +166,7 @@ export const FileReconciliation = {
   ExpiresMs: 604800000,
 } as const;
 export const ScriptExecution = {
+  ActionTimeoutSeconds: 300,
   ProofTimeoutSeconds: 300,
   CaptureSuffix: ".capture.json",
   PhasePattern: /^(worker|check-(0|[1-9]\d*)|proof-(0|[1-9]\d*)-(0|1)|falsifier-(0|[1-9]\d*))$/,

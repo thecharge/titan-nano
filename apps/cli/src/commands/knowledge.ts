@@ -34,6 +34,8 @@ import {
   ScopedKnowledgeListSchema,
 } from "@titan/types";
 
+import { rememberHome } from "../known-homes.ts";
+
 function knowledgeScope(options: CliOptions): KnowledgeScope {
   const parsed = KnowledgeScopeSchema.safeParse(options.scope ?? KnowledgeScope.Project);
   if (!parsed.success) throw new TitanError(ErrorCode.Arguments, KnowledgeMessage.ScopeInvalid);
@@ -63,6 +65,7 @@ async function withProject<T>(
   context: CommandContext,
   action: (hub: KnowledgeHub) => Promise<T>,
 ): Promise<T> {
+  await rememberHome(context.home);
   const hub = await openProject(projectHubHome(context.project), context.home);
   try {
     return await action(hub);

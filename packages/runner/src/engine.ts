@@ -15,6 +15,7 @@ import {
   BoardParty,
   BoardPostKind,
   ErrorCode,
+  Improver,
   NativeTool,
   NativeToolAudit,
   NativeToolOutcome,
@@ -44,7 +45,7 @@ import {
 } from "@titan/constants";
 import { assertSafeId, hash, isActiveRun, newId, settle } from "@titan/core";
 import { errorMessage, OperationalError, TitanError } from "@titan/errors";
-import { recordRunPersonas } from "@titan/knowledge";
+import { recordRunPersonas, retainWorkspaceSkills } from "@titan/knowledge";
 import {
   NativeToolMessage,
   RequestMessage,
@@ -63,7 +64,9 @@ import type {
   EventPage,
   EventQueryInput,
   NativeFileChange,
+  NativeImproverBinding,
   NativeToolAuditRecord,
+  NativeToolExecutionOwner,
   NativeToolScope,
   NodeState,
   OpenCall,
@@ -84,6 +87,7 @@ import {
   ArtifactHashSchema,
   type EngineSettingsInput,
   EngineSettingsSchema,
+  NativeToolBoardSchema,
   OperationRequestSchema,
   type RunCreation,
   RunSchema,
@@ -97,7 +101,7 @@ import {
   validatePlanTools,
   workflowFile,
 } from "@titan/workflow";
-import { exists, readTree, treeHash, writeTree } from "@titan/workspace";
+import { exists, readWorkspaceSnapshot, treeHash, writeTree } from "@titan/workspace";
 import { assembleRun } from "./artifacts.ts";
 import { Capacity } from "./capacity.ts";
 import { FileAccess } from "./file-access.ts";
@@ -117,6 +121,7 @@ import { writeProofReport } from "./proof-report.ts";
 import { limitReset, nextRetry, projectRunStatus, retryAt, waitForRetry } from "./recovery.ts";
 import { projectRequests } from "./request-projection.ts";
 import { RunHubFlow } from "./run-hub-flow.ts";
+import { isSkillPath, readSkill } from "./skill-role.ts";
 import { StatementLocks } from "./statement-locks.ts";
 import { RunSteps } from "./steps.ts";
 import { summarizeUsage } from "./usage.ts";
@@ -124,6 +129,8 @@ import { summarizeUsage } from "./usage.ts";
 const terminal = [RunStatus.Passed, RunStatus.Failed, RunStatus.Cancelled, RunStatus.TimedOut];
 const journaled = [...terminal, RunStatus.Blocked];
 export class Engine {
+  private improvers = new Map<string, NativeImproverBinding>();
+  private nativeTools: NativeToolExecutionOwner | undefined;
   private nativeWrites = new KeyedQueue(RuntimeLimit.PendingOperations);
   private active: BoundedStore<string, Promise<void>>;
   private controllers: BoundedStore<string, AbortController>;
@@ -169,6 +176,7 @@ export class Engine {
     this.settings = EngineSettingsSchema.parse(settings);
     this.projectRun = services.projectRun;
     this.runtimeBuild = ArtifactHashSchema.optional().parse(services.runtimeBuild);
+    this.nativeTools = services.nativeTools;
     this.runtimePaths = services.runtimePaths ?? [];
     this.files = new FileAccess(
       (run, type, data) => this.commit(run, type, data),
@@ -313,7 +321,19 @@ export class Engine {
         .map((path) => relative(canonical, path))
         .filter((path) => WorkspaceRelativePathSchema.safeParse(path).success),
     );
-    const files = await readTree(project, config.value.limits, undefined, runtimePaths);
+    const selectedSkills = new Set(
+      Object.keys(plan.workflow.personas ?? {}).flatMap(
+        (name) => resolvedPersona(plan.workflow, name).skills ?? [],
+      ),
+    );
+    const workspaceSkills = await retainWorkspaceSkills(project, process.env, selectedSkills);
+    const files = await readWorkspaceSnapshot(
+      project,
+      config.value.limits,
+      undefined,
+      runtimePaths,
+      plan.nodes.flatMap((step) => step.files ?? []),
+    );
     await writeTree(base, files, config.value.limits);
     const format =
       (plan.workflow.verify ?? []).some((check) => check.kind === VerifyKind.Script) ||
@@ -339,6 +359,8 @@ export class Engine {
       client_id,
       request_hash: requestHash(options.plan, project, config, backend),
       project,
+      omit_generated_workspace: true,
+      ...(workspaceSkills.index.length ? { workspace_skills: workspaceSkills } : {}),
       ...(runtimePaths.length ? { runtime_paths: runtimePaths } : {}),
       root,
       version: 0,
@@ -362,6 +384,42 @@ export class Engine {
     this.retain(run, store);
     return run;
   }
+  private async runImprover(run: Run, signal: AbortSignal): Promise<void> {
+    const name = run.plan.workflow.improve?.persona ?? Improver.DefaultPersona;
+    const persona = resolvedPersona(run.plan.workflow, name);
+    if (
+      !this.nativeTools ||
+      !persona.tools.includes(AgentTool.Read) ||
+      !persona.skills?.length ||
+      !run.workspace_skills
+    ) {
+      await improveRun(this.factory, run, signal);
+      return;
+    }
+    const execution_id = newId();
+    const scope = {
+      run_id: run.run_id,
+      step_id: Improver.InvocationId,
+      candidate_id: Improver.InvocationId,
+      part_id: null,
+      attempt: 1,
+      role: NativeToolRole.Improver,
+      execution_id,
+    } as const;
+    const active = { name, persona, scope };
+    this.improvers.set(execution_id, active);
+    try {
+      const tools = this.nativeTools.open(scope, () => !signal.aborted, run.root);
+      try {
+        await improveRun(this.factory, run, signal, {}, tools);
+      } finally {
+        await tools.close();
+      }
+    } finally {
+      this.improvers.delete(execution_id);
+    }
+  }
+
   async load(root: string): Promise<Run> {
     const store = this.createStore(root);
     const run = await store.read();
@@ -438,6 +496,7 @@ export class Engine {
         await this.personaDecision(
           OperationRequestSchema.parse(event.data),
           PersonaDecisionStage.Publish,
+          this.get(id).project,
         );
     if (this.requestEffects.get(id) === pending) this.requestEffects.delete(id);
   }
@@ -455,7 +514,7 @@ export class Engine {
     const previous = run.schema_version;
     if (kind === RunEventKind.RequestAnswered) {
       await this.replayRequestEffects(id);
-      await this.personaDecision?.(request, PersonaDecisionStage.Validate);
+      await this.personaDecision?.(request, PersonaDecisionStage.Validate, run.project);
     }
     if (request.origin.execution && run.schema_version < RunFormat.ExecutionRequests)
       run.schema_version = RunFormat.ExecutionRequests;
@@ -470,7 +529,7 @@ export class Engine {
     if (kind === RunEventKind.RequestAnswered && this.personaDecision) {
       const through = run.version;
       this.requestEffects.set(id, through);
-      await this.personaDecision?.(request, PersonaDecisionStage.Publish);
+      await this.personaDecision?.(request, PersonaDecisionStage.Publish, run.project);
       if (this.requestEffects.get(id) === through) this.requestEffects.delete(id);
     }
   }
@@ -584,6 +643,20 @@ export class Engine {
 
   async recordNativeTool(scope: NativeToolScope, record: NativeToolAuditRecord): Promise<void> {
     const run = this.get(scope.run_id);
+    if (scope.role === NativeToolRole.Improver) {
+      const { name } = this.activeImprover(scope);
+      await this.commit(
+        run,
+        NativeToolAudit.Kind,
+        NativeToolBoardSchema.parse({
+          ...scope,
+          ...record,
+          kind: NativeToolAudit.Kind,
+          from: name,
+        }),
+      );
+      return;
+    }
     const data = nativeToolBoard(run, scope, record);
     const phase = Object.values(run.nodes[scope.step_id]?.phases ?? {}).find(
       (phase) => phase.execution_id === scope.execution_id,
@@ -607,9 +680,39 @@ export class Engine {
     }
   }
 
+  private activeImprover(scope: NativeToolScope) {
+    const active = this.improvers.get(scope.execution_id);
+    if (
+      !active ||
+      active.scope.run_id !== scope.run_id ||
+      active.scope.step_id !== scope.step_id ||
+      active.scope.candidate_id !== scope.candidate_id ||
+      active.scope.attempt !== scope.attempt ||
+      active.scope.part_id !== scope.part_id
+    )
+      throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+    return active;
+  }
+
   async readNativeFile(scope: NativeToolScope, path: string) {
+    if (scope.role === NativeToolRole.Improver) {
+      const { persona } = this.activeImprover(scope);
+      const run = this.get(scope.run_id);
+      if (!persona.tools.includes(AgentTool.Read) || !isSkillPath(run, path))
+        throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+      return readSkill(run, path, persona);
+    }
     const run = await this.nativeFileRun(scope);
-    return readNativeFile(run, nativeFileRoot(run, scope), path);
+    if (isSkillPath(run, path)) {
+      const identity = nativeToolBoard(run, scope, {
+        tool: NativeTool.Ready,
+        outcome: NativeToolOutcome.Returned,
+        entry_ids: [],
+      });
+      return readSkill(run, path, resolvedPersona(run.plan.workflow, identity.from));
+    }
+    const root = nativeFileRoot(run, scope);
+    return readNativeFile(run, root, path, true);
   }
 
   async listNativeFiles(scope: NativeToolScope, directory: string) {
@@ -708,7 +811,7 @@ export class Engine {
       await this.hub.open(run);
       await this.execute(run, controller);
       if ([RunStatus.Passed, RunStatus.Failed].includes(run.state) && improvementRounds(run) > 0)
-        await improveRun(this.factory, run, controller.signal);
+        await this.runImprover(run, controller.signal);
     })()
       .catch(async (error: unknown) => {
         if (!terminal.includes(run.state)) {

@@ -54,9 +54,14 @@ function authorized(engine: Engine, execution: ScriptExecution, script: string, 
     throw new TitanError(ErrorCode.PermissionDenied, RunnerMessage.ScriptApproval);
   const phase = execution.phase;
   let command: string | undefined;
-  let timeout_ms: number | undefined;
+  let timeout_ms = Script.ActionTimeoutSeconds * Script.MillisecondsPerSecond;
   let directory = state.work;
-  if (phase === ExecutionPhase.Worker && WorkflowField.Script in step.do) command = step.do.script;
+  if (phase === ExecutionPhase.Worker && WorkflowField.Script in step.do) {
+    command = step.do.script;
+    timeout_ms = Math.ceil(
+      (step.do.timeout_s ?? Script.ActionTimeoutSeconds) * Script.MillisecondsPerSecond,
+    );
+  }
   if (phase.startsWith(Script.CheckPrefix))
     command = step.checks[Number(phase.slice(Script.CheckPrefix.length))];
   if (phase.startsWith(Script.ProofPrefix)) {
@@ -72,6 +77,10 @@ function authorized(engine: Engine, execution: ScriptExecution, script: string, 
     const index = Number(phase.slice(ExecutionPhase.FalsifierPrefix.length));
     const action = step.falsify[index];
     command = action && WorkflowField.Script in action ? action.script : undefined;
+    if (action && WorkflowField.Script in action)
+      timeout_ms = Math.ceil(
+        (action.timeout_s ?? Script.ActionTimeoutSeconds) * Script.MillisecondsPerSecond,
+      );
     directory =
       (run.config.value.workspace?.mode ?? WorkspaceModeSetting.Live) === WorkspaceModeSetting.Live
         ? run.project

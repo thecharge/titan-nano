@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   AgentRuntime,
@@ -30,6 +30,26 @@ import {
 import { runCliCommand } from "../support/command.ts";
 import { serverReady, spawnServer } from "./server-process.ts";
 
+export async function seedNativeSkill(project: string, cache = false) {
+  const skill = resolve(project, ".agents/skills/review");
+  const references = resolve(skill, "references");
+  const aliases = resolve(project, ".codex/skills");
+  await mkdir(references, { recursive: true });
+  await mkdir(aliases, { recursive: true });
+  const instructions = resolve(skill, "SKILL.md");
+  await writeFile(
+    instructions,
+    "---\ndescription: Synthetic review\n---\nUse the synthetic reference." +
+      (cache ? "\nRead the synthetic generated file." : ""),
+  );
+  const reference = resolve(references, "example.md");
+  await writeFile(reference, "Synthetic reference.");
+  await symlink(reference, resolve(references, "alias.md"));
+  await symlink(resolve(project, "source.txt"), resolve(references, "escape.md"));
+  await symlink(skill, resolve(aliases, "linked"));
+  return { instructions, reference };
+}
+
 export async function sdkProcessRecovery(
   backend: BackendId,
   crash: boolean,
@@ -51,13 +71,25 @@ async function sdkProcessRecoveryAtRoot(
   paths: SdkProbePaths,
 ) {
   const { home, project } = await prepareSdkProject(root, backend, allowance, false, paths.vendors);
+  const skill = await seedNativeSkill(project, true);
+  await mkdir(resolve(project, ".cache"));
+  await writeFile(resolve(project, ".cache/generated.txt"), "Explicit managed cache read.");
   const children: ReturnType<typeof spawnServer>[] = [];
+
   try {
     const first = spawnServer(home, paths.cli, SdkProcessFixture.DaemonTimeout);
     children.push(first);
     if (!(await waitUntil(() => serverReady(home, first.pid), SdkProcessFixture.ObserveAttempts)))
       throw new Error("SDK daemon did not start");
-    const workflow = vendorRecoveryWorkflow(task);
+    const original = vendorRecoveryWorkflow(task);
+    const workflow = {
+      ...original,
+      personas: {
+        worker: { ...original.personas.worker, skills: ["linked"] },
+        checker: { ...original.personas.checker, skills: ["linked"] },
+      },
+      steps: original.steps.map((step) => ({ ...step, files: ["DELIVERED.txt"] })),
+    };
     const run = RunSchema.parse(
       await call(home, "/runs", "POST", {
         project,
@@ -79,6 +111,11 @@ async function sdkProcessRecoveryAtRoot(
     const hash = await readFile(checkpoint);
     first.kill(crash ? "SIGKILL" : "SIGTERM");
     await first.exited;
+    await writeFile(
+      skill.instructions,
+      "---\ndescription: Changed review\n---\nChanged instructions.",
+    );
+    await writeFile(skill.reference, "Changed reference.");
     const next = spawnServer(home, paths.cli, SdkProcessFixture.DaemonTimeout);
     children.push(next);
     if (!(await waitUntil(() => serverReady(home, next.pid), SdkProcessFixture.ObserveAttempts)))
@@ -90,6 +127,21 @@ async function sdkProcessRecoveryAtRoot(
     }, SdkProcessFixture.ObserveAttempts);
     if (!finished) throw new Error("SDK recovery did not settle");
     const after = RunSchema.parse(await call(home, `/runs/${run.run_id}`));
+    assert.ok(before.workspace_skills);
+    assert.ok(
+      before.workspace_skills.files.some(
+        (file) => file.name === "linked" && file.path === "SKILL.md" && file.hash.length === 64,
+      ),
+    );
+    assert.deepEqual(after.workspace_skills, before.workspace_skills);
+    assert.ok(
+      before.nodes.deliver?.phases[ExecutionPhase.Worker]?.file_reads?.some(
+        (observation) =>
+          "path" in observation &&
+          observation.path === ".cache/generated.txt" &&
+          observation.hash !== null,
+      ),
+    );
     const node = after.nodes.deliver;
     assert.deepEqual(node?.evidence, []);
     const checker = node?.phases[`${ExecutionPhase.FalsifierPrefix}0`];

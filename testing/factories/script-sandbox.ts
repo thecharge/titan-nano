@@ -16,7 +16,7 @@ import { createRunClient } from "@titan/server/client";
 import { createRequestClient } from "@titan/server/requests";
 import { waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
-import { NodeStateSchema, ObjectSchema } from "@titan/types";
+import { NodeStateSchema, ObjectSchema, SavedCommandCaptureSchema } from "@titan/types";
 import { serverReady, spawnServer } from "./server-process.ts";
 
 export function scriptBoundary(
@@ -239,13 +239,18 @@ export function scriptLifetime(mode: string, script: string) {
   });
 }
 
-export function scriptReadClaim(script: string, refused: boolean, cli?: string) {
+export function scriptReadClaim(
+  script: string,
+  refused: boolean,
+  restart: boolean | string,
+  cli?: string,
+) {
   return withTemporaryDirectory(async (root) => {
     const project = resolve(root, "project");
     const home = resolve(root, "home");
     await mkdir(project);
     await writeFile(resolve(project, "allowed.txt"), "Original");
-    const server = spawnServer(home, cli, 15000);
+    let server = spawnServer(home, cli, 15000);
     const client = createRunClient(home);
     const requests = createRequestClient(home);
     try {
@@ -257,7 +262,7 @@ export function scriptReadClaim(script: string, refused: boolean, cli?: string) 
         submission_id: "script-reader",
         workflow: {
           name: "script-reader",
-          goal: "Preserve a read claim during script verification",
+          goal: "Verify approved scripts keep their exact output scope",
           backends: {
             fake: {
               script: {
@@ -301,6 +306,27 @@ export function scriptReadClaim(script: string, refused: boolean, cli?: string) 
         ),
       );
       for (let round = 0; round < 2; round++) {
+        if (round === 1 && restart) {
+          server.kill("SIGTERM");
+          await server.exited;
+          if (typeof restart === "string") {
+            const state = ObjectSchema.parse(
+              await Bun.file(resolve(run.root, "state.json")).json(),
+            );
+            const node = NodeStateSchema.parse(ObjectSchema.parse(state.nodes).read);
+            const receipt = SavedCommandCaptureSchema.parse(node.phases["proof-0-0"]?.answer);
+            assert.ok(receipt.candidate);
+            await writeFile(
+              resolve(
+                restart === "live" ? project : resolve(run.root, receipt.candidate.path),
+                "allowed.txt",
+              ),
+              "Unrelated edit",
+            );
+          }
+          server = spawnServer(home, cli, 15000);
+          assert.ok(await waitUntil(() => serverReady(home, server.pid)));
+        }
         const pending = (await requests.list({ run_id: run.run_id })).requests
           .map((entry) => entry.request)
           .find((entry) => entry.answer === null);
@@ -311,7 +337,7 @@ export function scriptReadClaim(script: string, refused: boolean, cli?: string) 
             request_id: pending.request_id,
             version: pending.version,
             decision: RequestDecision.Approve,
-            reason: "Reviewed proof under a read claim",
+            reason: "Reviewed proof and declared output scope",
             client_id: "owner",
           },
           ApprovalLevel.Human,
@@ -334,8 +360,19 @@ export function scriptReadClaim(script: string, refused: boolean, cli?: string) 
       }
       const final = await client.get(run.run_id);
       const proof = NodeStateSchema.parse(final.nodes.read).phases["proof-0-0"];
-      assert.equal(proof?.file_claim?.mode, FileAccessMode.Read);
+      assert.equal(proof?.file_claim?.mode, FileAccessMode.Write);
       const answer = ObjectSchema.parse(proof?.answer);
+      if (typeof restart === "string") {
+        assert.equal(final.state, RunStatus.Blocked);
+        assert.equal(proof?.completed, true);
+        assert.equal(answer.exit_code, 0);
+        assert.equal(NodeStateSchema.parse(final.nodes.read).reconciliations, undefined);
+        assert.equal(
+          await readFile(resolve(project, "allowed.txt"), "utf8"),
+          restart === "live" ? "Unrelated edit" : "Changed",
+        );
+        return true;
+      }
       assert.equal(answer.exit_code === 0, !refused, String(answer.stderr));
       assert.equal(final.state === RunStatus.Passed, !refused);
       if (refused)
@@ -346,8 +383,23 @@ export function scriptReadClaim(script: string, refused: boolean, cli?: string) 
             ).evidence,
           ).includes('"act":"deny"'),
         );
-      assert.equal(await readFile(resolve(project, "allowed.txt"), "utf8"), "Original");
+      const changed = script === "printf Changed > allowed.txt";
+      assert.equal(
+        await readFile(resolve(project, "allowed.txt"), "utf8"),
+        changed ? "Changed" : "Original",
+      );
+      if (changed) {
+        const state = NodeStateSchema.parse(final.nodes.read);
+        assert.notEqual(state.snapshot, resolve(run.root, "steps/read/attempt-1/candidate"));
+        assert.equal(
+          await readFile(resolve(run.root, "steps/read/attempt-1/candidate/allowed.txt"), "utf8"),
+          "Original",
+        );
+        assert.ok(state.snapshot);
+        assert.equal(await readFile(resolve(state.snapshot, "allowed.txt"), "utf8"), "Changed");
+      }
       assert.equal(await Bun.file(resolve(project, "extra.txt")).exists(), false);
+      assert.equal(await Bun.file(resolve(root, "outside.txt")).exists(), false);
       return true;
     } finally {
       if (server.exitCode === null) server.kill("SIGTERM");
