@@ -32,7 +32,7 @@ export interface CliServices {
   loadData(path: string): Promise<unknown>;
   loadKnowledge(path: string): Promise<KnowledgeInput>;
   knowledge(home: string): KnowledgeClient;
-  output(value: unknown, json: boolean, context?: CliOutputContext): void;
+  output(value: unknown, json: boolean, context?: CliOutputContext): unknown;
   client(home: string): RunClient;
   knownHomes?(after?: string): Promise<(string | null)[]>;
   existingRunClient?(home: string): RunClient;

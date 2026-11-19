@@ -12,6 +12,7 @@ import {
   HookFile,
   HttpHeader,
   McpIdentity,
+  Newline,
   Packaging,
   ProbeOption,
   RunStatus,
@@ -101,6 +102,8 @@ export async function cliOutputObservationProcess(
   cli = resolve(import.meta.dir, HookFile.RepositoryRoot, Packaging.CliSource),
 ): Promise<boolean> {
   let reads = 0;
+  const event = { id: 1, time: 0, type: "sample", data: "sample ω".repeat(32_768) };
+  const largePage = { ...page, events: [event], next_cursor: event.id, has_more: true };
   return withClientAddress(
     (request) => {
       if (new URL(request.url).pathname === ServerRoute.Health)
@@ -113,7 +116,7 @@ export async function cliOutputObservationProcess(
           { headers: { [HttpHeader.RuntimeBuild]: EmbeddedRuntimeBuild } },
         );
       if (new URL(request.url).pathname.endsWith("/events"))
-        return Response.json(invalid ? { ...page, next_cursor: 1 } : page);
+        return Response.json(invalid ? { ...page, next_cursor: 1 } : largePage);
       reads++;
       if (invalid && watch && reads > 1)
         return Response.json({ ...snapshot, run_id: "crossed-run" });
@@ -137,13 +140,20 @@ export async function cliOutputObservationProcess(
         result.output.toString() + result.error.toString(),
       );
       assert.equal(result.error.length, 0);
-      const envelope = CliOutputSchema.parse(JSON.parse(result.output.toString()));
+      const output = result.output.toString();
+      assert(output.endsWith(Newline));
+      const envelope = CliOutputSchema.parse(JSON.parse(output));
       assert.equal(envelope.identifiers.run_id, snapshot.run_id);
       if (invalid) {
         assert.equal(envelope.state, null);
         assert.equal(envelope.error?.code, ErrorCode.InvalidResponse);
         assert.equal(envelope.error.recovery?.action, CliRecoveryAction.Observe);
-      } else assert.equal(envelope.state, watch ? RunStatus.Passed : RunStatus.Running);
+      } else {
+        assert.equal(envelope.state, watch ? RunStatus.Passed : RunStatus.Running);
+        assert.deepEqual(envelope.events, largePage.events);
+        assert.equal(envelope.next_cursor, largePage.next_cursor);
+        assert.equal(envelope.has_more, true);
+      }
       return true;
     },
   );

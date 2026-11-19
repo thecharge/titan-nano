@@ -1,4 +1,4 @@
-import { expect } from "bun:test";
+import { expect, spyOn } from "bun:test";
 import { strict as assert } from "node:assert";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -195,6 +195,25 @@ export const cliEntrypointDiagnostics = async () => {
   expect(await runEntry(["schema", "unknown"], writeOutput, writeError)).toBe(2);
   expect(errors).toHaveLength(1);
   expect(await runEntry(["--version", "--json"])).toBe(0);
+  const closedPipe = new Error("Downstream reader closed");
+  const write = spyOn(process.stdout, "write").mockImplementationOnce((_chunk, callback) => {
+    if (typeof callback === "function") callback(closedPipe);
+    return false;
+  });
+  try {
+    expect(await runEntry(["--version", "--json"], writeOutput, writeError)).toBe(
+      ExitCode.Transport,
+    );
+    expect(output).toHaveLength(1);
+    expect(errors.at(-1)).toBe(closedPipe.message);
+  } finally {
+    write.mockRestore();
+  }
+  await expect(
+    runEntry(["schema", "unknown", "--json"], () => {
+      throw closedPipe;
+    }),
+  ).rejects.toBe(closedPipe);
   const { renderOutput } = await import("../../apps/cli/src/bootstrap.ts");
   const rendered: string[] = [];
   renderOutput("message", false, (value) => rendered.push(String(value)));

@@ -54,6 +54,7 @@ import { handoff, launch } from "./launch.ts";
 import { outputEnvelope } from "./output.ts";
 import { recoverRunRuntime, recoverRuntimeConnection } from "./runtime-recovery.ts";
 import { sdkInstalled } from "./sdk.ts";
+import { writeStdoutLine } from "./stdout.ts";
 import { prepareSubmission } from "./submissions.ts";
 import { runAutomaticUpdate } from "./update-install.ts";
 import { checkUpdateNotice } from "./updates.ts";
@@ -125,12 +126,14 @@ export function renderCommandOutput(
     );
     return;
   }
+  renderOutput(json ? boundedJsonOutput(value, context) : value, json, write);
+}
+
+function boundedJsonOutput(value: unknown, context?: CliOutputContext): unknown {
   const rendered =
-    json && context && context.operation !== CliCommand.Serve
-      ? outputEnvelope(value, context)
-      : value;
-  if (json) jsonByteLength(rendered, IoLimit.ResponseBytes);
-  renderOutput(rendered, json, write);
+    context && context.operation !== CliCommand.Serve ? outputEnvelope(value, context) : value;
+  jsonByteLength(rendered, IoLimit.ResponseBytes);
+  return rendered;
 }
 
 function runtimeConnection(home: string) {
@@ -164,7 +167,11 @@ export const defaultServices: CliServices = {
   loadData,
   loadKnowledge,
   knowledge: (home) => createKnowledgeClient(home, runtimeConnection(home).connect),
-  output: renderCommandOutput,
+  output: (value, json, context) => {
+    if (json && context?.operation !== CliCommand.Serve)
+      return writeStdoutLine(JSON.stringify(boundedJsonOutput(value, context)));
+    renderCommandOutput(value, json, context);
+  },
   knownHomes,
   existingRunClient: (home) => createRunClient(home),
   client: (home) => {

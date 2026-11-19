@@ -24,14 +24,14 @@ export function createCli(services: CliServices) {
         : invocation.kind === CliInvocationKind.Help
           ? CliOutputOperation.Help
           : invocation.name;
-    const emit = (value: unknown): void =>
+    const emit = (value: unknown) =>
       services.output(value, invocation.values.json ?? false, { operation });
     if (invocation.kind === CliInvocationKind.Version) {
-      emit({ version: services.version, release: CliDiagnostic.Release });
+      await emit({ version: services.version, release: CliDiagnostic.Release });
       return ExitCode.Success;
     }
     if (invocation.kind === CliInvocationKind.Help) {
-      emit({
+      await emit({
         usage: CliMessage.Usage,
         commands: commands.map((name) => ({
           name,
@@ -44,7 +44,7 @@ export function createCli(services: CliServices) {
     }
     if (invocation.kind === CliInvocationKind.CommandHelp) {
       const { definition, name } = invocation;
-      emit({
+      await emit({
         command: name,
         description: definition.description,
         positionals: definition.positionals ?? [],
@@ -92,7 +92,7 @@ export function createCli(services: CliServices) {
         return { exitCode: exit };
       });
     if (result?.data !== undefined)
-      services.output(result.data, invocation.values.json ?? false, {
+      await services.output(result.data, invocation.values.json ?? false, {
         operation,
         ...(result.events ? { events: result.events } : {}),
       });

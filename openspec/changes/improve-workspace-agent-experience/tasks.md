@@ -8,6 +8,7 @@
 - [x] 2.1 Add compact run inspection and state-filtered project, selected-home and known-home listing with regression evidence.
 - [x] 2.2 Add workflow and persona creation commands that validate output and preserve existing files.
 - [x] 2.3 Expose registered persona versions and demonstrate exact-version reuse.
+- [x] 2.4 Wait for complete piped JSON delivery while preserving output limits and failure codes.
 
 ## 3. Skills and resources
 

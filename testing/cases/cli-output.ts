@@ -49,8 +49,8 @@ export const cliOutputObservationCases = {
 
 export const cliOutputObservationProcessCases = {
   positive: [
-    positive("status renders its active run and page", [false, false], true),
-    positive("watched status renders its final run and page", [true, false], true),
+    positive("status drains a large active page through a pipe", [false, false], true),
+    positive("watched status drains a large final page through a pipe", [true, false], true),
   ],
   negative: [
     rejected("process retains run recovery when its page fails", [false, true], true),

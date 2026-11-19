@@ -65,3 +65,9 @@ Implementation commit `1c5006e28adb029663199fffe51146aa50f2b15f` was pushed to `
 The source CLI successfully discovered all six repository skills in the separate private editorial workspace, reported their linked alternatives, and listed its twenty-seven retained home persona versions. Its project persona catalogue was empty and was reported as such. These were ordinary read-only CLI commands. Its waiting script run retains the earlier pinned runtime until application settles. Private records and authored content remain in that private repository.
 
 Bounded web acquisition remains unimplemented, so this change stays open. Live vendor authentication and production deployment were not verified by the offline suite. The public push completed after the requested two-hour delivery target.
+
+## Piped JSON output on 2026-11-19
+
+The coordinator observed a 198,464-byte event response that failed JSON parsing when read through a pipe. The response written directly to a file was valid. Codex SDK implementation run `de50d0c6-96a3-411d-9137-56a07843fedf` investigated the output path and timed out before retaining an accepted change.
+
+The coordinator implemented the completion wait and extended the existing process cases with synthetic UTF-8 payloads and cursor assertions. The same real event query delivered all 198,464 bytes through a pipe after the change. It parsed with all eleven events and the original continuation cursor. Closing the consumer after twelve bytes returned transport exit status four. No run content or private workspace identity is included in the repository.
