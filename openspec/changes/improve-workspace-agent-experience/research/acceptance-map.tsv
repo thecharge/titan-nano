@@ -16,3 +16,5 @@ workspace-skill-discovery	Repository and user skill discovery	A project override
 workspace-skill-discovery	Native skill access	A worker follows a linked repository skill	3.2	local	integration	implemented
 workspace-skill-discovery	Native skill access	A reference escapes its skill directory	3.2	local	integration	implemented
 workspace-skill-discovery	Retained skill evidence	The live skill changes during a paused run	3.2	local	integration	implemented
+workspace-skill-discovery	Check selected skills before submission	A declared skill is missing or unavailable	5.2	local	integration	implemented
+workspace-skill-discovery	Check selected skills before submission	Two harnesses share a canonical project skill	5.2	local	integration	implemented

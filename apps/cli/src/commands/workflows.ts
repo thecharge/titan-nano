@@ -11,7 +11,7 @@ import {
 } from "@titan/constants";
 import { hash, jsonByteLength } from "@titan/core";
 import { errorMessage, SubmissionUncertainError, TitanError } from "@titan/errors";
-import { checkPersonaUses, resolvePersonaWorkflow } from "@titan/knowledge";
+import { checkPersonaUses, resolvePersonaWorkflow, retainWorkspaceSkills } from "@titan/knowledge";
 import {
   addableStepsLine,
   CliDiagnostic,
@@ -28,6 +28,7 @@ import {
   type SubmissionIntent,
   SubmissionIntentSchema,
   type SubmissionReceiptRecord,
+  type Workflow,
   WorkflowCheckBatchSchema,
   type WorkflowCheckItem,
   WorkflowCheckItemSchema,
@@ -38,6 +39,7 @@ import {
   stepRoom,
   validatePlanTools,
   validateWorkflow,
+  workflowSkillBindings,
 } from "@titan/workflow";
 import { detectedBackend } from "../harness-backend.ts";
 import { cliSettingOverrides } from "../setting-overrides.ts";
@@ -73,12 +75,37 @@ async function checkedPlan(context: CommandContext) {
   );
   validatePlanTools(resolved, config.value.defaults.backend ?? undefined);
   await assertStatementPaths(plan, context.project);
-  return { plan, config, overrides };
+  return { plan, resolved, config, overrides };
+}
+
+async function checkedSkills(project: string, workflow: Workflow) {
+  const personas = workflowSkillBindings(workflow);
+  const names = new Set(Object.values(personas).flat());
+  if (!names.size) return undefined;
+  const { index, files } = await retainWorkspaceSkills(project, process.env, names);
+  return {
+    personas,
+    origins: index.filter(({ name }) => names.has(name)),
+    files: files.map(({ name, path, hash }) => ({ name, path, hash })),
+  };
+}
+
+function checkData(
+  { plan, config }: Awaited<ReturnType<typeof checkedPlan>>,
+  skills?: Awaited<ReturnType<typeof checkedSkills>>,
+) {
+  return {
+    ok: true as const,
+    revision: plan.revision,
+    nodes: plan.nodes,
+    config,
+    ...(skills && { skills }),
+  };
 }
 
 async function checkedOutput(context: CommandContext) {
-  const { plan, config } = await checkedPlan(context);
-  return { ok: true as const, revision: plan.revision, nodes: plan.nodes, config };
+  const checked = await checkedPlan(context);
+  return checkData(checked, await checkedSkills(context.project, checked.resolved.workflow));
 }
 
 async function checkedFile(context: CommandContext, path: string) {
@@ -159,14 +186,16 @@ export const workflowHandlers = {
   }),
   check: checkWorkflows,
   run: async (context) => {
-    const { plan, config, overrides } = await checkedPlan(context);
+    const checked = await checkedPlan(context);
+    const { plan, config, overrides, resolved } = checked;
     if (context.options[CliOption.DryRun]) {
+      const skills = await checkedSkills(context.project, resolved.workflow);
       if (!context.options[CliOption.Json]) {
         context.emit(staticPlanLine(maxAgents(plan, config.value.defaults)));
         context.emit(addableStepsLine(stepRoom(plan, config.value.limits.max_steps)));
       }
       return {
-        data: { ok: true, revision: plan.revision, nodes: plan.nodes, config },
+        data: checkData(checked, skills),
         exitCode: ExitCode.Success,
       };
     }

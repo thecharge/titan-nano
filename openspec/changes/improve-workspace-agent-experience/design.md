@@ -49,3 +49,7 @@ The real delivery exposed missing-path errno loss, executable argument rewriting
 ## Native command telemetry
 
 A real repository search returned about 8 MB of historical run records. The raw Codex command event exceeded the one-MiB host frame and repeated on resume. Bound command/output telemetry excerpts before the host boundary. Preserve the original UTF-8 byte count and SHA-256 in the excerpt notice. Leave final answers, usage, command status, native session identity and frame refusal unchanged. Retained telemetry is explicitly partial. Test ordinary, large, UTF-8 and JSON-escaped output across new and resumed sessions.
+
+## Offline skill preflight
+
+Check and dry run resolve the same declared skill names and bounded files as run admission. JSON reports each persona’s selection, the skill origins and file hashes. It omits file contents. Admission still retains and validates its own input, since the workspace can change after a check. Normal submission keeps its existing retry behavior. A successful check confirms which inputs can be supplied. It cannot grade what a model learned from them.

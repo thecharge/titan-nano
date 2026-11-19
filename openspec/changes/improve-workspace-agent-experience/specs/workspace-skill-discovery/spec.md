@@ -31,3 +31,17 @@ Titan SHALL retain the selected skill content and hashes for a run and resume wi
 
 - **WHEN** the run resumes after its selected skill file changes
 - **THEN** its retained instructions remain identifiable and its recorded hash still describes the instructions used.
+
+### Requirement: Check selected skills before submission
+
+The CLI SHALL check the selected skills of resolved personas during workflow checks and dry runs without starting the engine. JSON results SHALL identify the skills selected by each persona, their origins and file hashes without including file contents.
+
+#### Scenario: A declared skill is missing or unavailable
+
+- **WHEN** a workflow declares a skill the selected project and user skill roots cannot supply
+- **THEN** the check or dry run fails and identifies the missing skill before dispatch.
+
+#### Scenario: Two harnesses share a canonical project skill
+
+- **WHEN** a workflow is checked for Codex and Claude using the same canonical project skill
+- **THEN** both checks report the same selected origin and instruction and reference hashes.

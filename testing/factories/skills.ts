@@ -5,26 +5,111 @@ import { matchesClaudeRegistration } from "@titan/config";
 import {
   CliInvocationKind,
   CliRuntime,
+  ExitCode,
   type Harness,
   HarnessPlugin,
   HarnessSkillDirectory,
   IoLimit,
   SkillDocument,
 } from "@titan/constants";
+import { TitanError } from "@titan/errors";
 import { installedSkill } from "@titan/messages";
 import { readFileBytes } from "@titan/streams";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
-import { SkillHeaderSchema } from "@titan/types";
+import { CliOutputSchema, SkillHeaderSchema, WorkflowCheckItemSchema } from "@titan/types";
 import { validateWorkflow } from "@titan/workflow";
 import { createCli } from "../../apps/cli/src/application.ts";
 import { defaultServices } from "../../apps/cli/src/bootstrap.ts";
 import { resolveCommand } from "../../apps/cli/src/catalog.ts";
 import { renderGuide } from "../../apps/cli/src/guide.ts";
 import { parseInvocation } from "../../apps/cli/src/parser.ts";
+import { captureCli } from "../support/command.ts";
 
 const PresentTool = "/usr/bin/tool";
 const OldBunName = "bun";
 const OldBunVersion = "1.3.9";
+
+export async function workflowSkillPreflight(harness: Harness, present: boolean) {
+  return withTemporaryDirectory(async (project) => {
+    const skill = "editorial-review-fixture";
+    const origin = resolve(project, dirname(HarnessSkillDirectory[harness]), skill);
+    const canonical = resolve(project, "shared-skill");
+    if (present) {
+      await mkdir(dirname(origin), { recursive: true });
+      await mkdir(resolve(canonical, "references"), { recursive: true });
+      await writeFile(resolve(canonical, "SKILL.md"), "Review these private instructions.\n");
+      await writeFile(resolve(canonical, "references", "voice.md"), "Review this private guide.\n");
+      await symlink(canonical, origin);
+    }
+    const workflow = resolve(project, "review.yaml");
+    const home = resolve(project, "home");
+    await writeFile(
+      workflow,
+      Bun.YAML.stringify({
+        name: "Editorial preflight",
+        goal: "Check the review configuration offline",
+        personas: {
+          reviewer: { description: "Reviewer", role: "Review a draft", skills: [skill] },
+          checker: { description: "Checker", role: "Check the review" },
+        },
+        steps: [
+          {
+            id: "review",
+            do: { persona: "reviewer", task: "Review the draft" },
+            falsify: [{ persona: "checker", task: "Check the review" }],
+          },
+        ],
+      }),
+    );
+    const cli = resolve(import.meta.dir, "../../apps/cli/src/main.ts");
+    const selectors = [
+      workflow,
+      "--project",
+      project,
+      "--home",
+      home,
+      "--harness",
+      harness,
+      "--json",
+    ];
+    const main = createCli({ ...defaultServices, output: () => undefined });
+    for (const args of [
+      ["check", ...selectors],
+      ["run", ...selectors, "--dry-run"],
+    ]) {
+      if (present) assert.equal(await main(args), ExitCode.Success);
+      else {
+        await assert.rejects(
+          () => main(args),
+          (error: unknown) =>
+            error instanceof TitanError &&
+            error.exitCode === ExitCode.Input &&
+            error.message.includes(skill),
+        );
+      }
+      const result = await captureCli(cli, args);
+      const output = result.output.toString();
+      const envelope = CliOutputSchema.parse(JSON.parse(output));
+      assert.equal(
+        result.code,
+        present ? ExitCode.Success : ExitCode.Input,
+        envelope.error?.message ?? result.error.toString(),
+      );
+      if (present) {
+        const checked = WorkflowCheckItemSchema.omit({ path: true }).parse(envelope.data);
+        assert.deepEqual(checked.skills?.personas, { reviewer: [skill] });
+        assert.equal(checked.skills?.origins[0]?.origin, origin);
+        assert.deepEqual(
+          checked.skills?.files.map(({ path }) => path),
+          ["SKILL.md", "references/voice.md"],
+        );
+        assert.equal(output.includes("private instructions"), false);
+        assert.equal(output.includes("private guide"), false);
+      } else assert.ok(envelope.error?.message.includes(skill));
+    }
+    return true;
+  });
+}
 
 export function checkSkillDocument(text: string, canonical: string): string {
   const match = SkillDocument.Header.exec(text);

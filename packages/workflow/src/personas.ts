@@ -11,6 +11,14 @@ export function resolvedPersona(workflow: Workflow, name: string): Persona {
   return entry;
 }
 
+export function workflowSkillBindings(workflow: Workflow): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.keys(workflow.personas)
+      .map((name) => [name, resolvedPersona(workflow, name).skills ?? []] as const)
+      .filter(([, skills]) => skills.length > 0),
+  );
+}
+
 export function personaAction(action: StepAction): PersonaAction | undefined {
   return WorkflowField.Persona in action ? action : undefined;
 }

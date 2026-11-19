@@ -31,7 +31,7 @@ export { maxAgents, stepRoom } from "./dry-run.ts";
 export { assertBuiltFeatures } from "./features.ts";
 export { checkAnswer, outputSchema } from "./formats.ts";
 export { validatePlanTools } from "./permissions.ts";
-export { personaAction, resolvedPersona } from "./personas.ts";
+export { personaAction, resolvedPersona, workflowSkillBindings } from "./personas.ts";
 export { assertStatementPaths } from "./statements.ts";
 
 function reachedDiscriminator(branch: z.core.$ZodIssue[]): boolean {

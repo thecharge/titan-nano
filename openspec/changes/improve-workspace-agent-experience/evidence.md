@@ -71,3 +71,9 @@ Bounded web acquisition remains unimplemented, so this change stays open. Live v
 The coordinator observed a 198,464-byte event response that failed JSON parsing when read through a pipe. The response written directly to a file was valid. Codex SDK implementation run `de50d0c6-96a3-411d-9137-56a07843fedf` investigated the output path and timed out before retaining an accepted change.
 
 The coordinator implemented the completion wait and extended the existing process cases with synthetic UTF-8 payloads and cursor assertions. The same real event query delivered all 198,464 bytes through a pipe after the change. It parsed with all eleven events and the original continuation cursor. Closing the consumer after twelve bytes returned transport exit status four. No run content or private workspace identity is included in the repository.
+
+## Offline workflow skill preflight
+
+Four CLI regressions verify that check and dry run resolve a linked skill and its reference and reject an unavailable skill for each harness. JSON reports the persona bindings, selected origins, paths and hashes. The focused offline suite recorded 70 passes and zero test failures across skill, CLI and retention cases. The command exited one at the repository-wide coverage gate for the focused selection. Type checking, documentation and TypeScript policy checks, and strict OpenSpec validation passed. No live vendor calls were made.
+
+The complete offline commit snapshot recorded 7,197 passes, one skip and zero failures. The coverage report identified six lines and two functions in the new CLI reporting branch because the subprocess fixtures ran outside the coverage process. The same regressions now also exercise the CLI application in process with explicit Codex and Claude selectors. The updated skill selection recorded 22 passes and zero failures.

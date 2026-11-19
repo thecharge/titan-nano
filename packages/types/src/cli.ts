@@ -11,18 +11,26 @@ import {
 import { z } from "zod";
 import { EventPageSchema } from "./board.ts";
 import { EffectiveConfigSchema } from "./config.ts";
+import { Sha256Schema } from "./hash.ts";
 import { LocalModelStatusSchema } from "./local-model.ts";
 import { PrerequisiteStatusSchema } from "./prerequisites.ts";
 import { UpdateBackupSchema, UpdateCatalogSchema } from "./updates.ts";
 import { PlanSchema } from "./workflow.ts";
+import { WorkspaceSkillEntrySchema } from "./workspace.ts";
 
 export const CliArgumentsSchema = z.array(z.string().min(1)).max(CliRuntime.MaximumPositionals);
+const WorkflowCheckedSkillsSchema = z.strictObject({
+  personas: z.record(z.string(), z.array(z.string())),
+  origins: z.array(WorkspaceSkillEntrySchema),
+  files: z.array(z.strictObject({ name: z.string(), path: z.string(), hash: Sha256Schema })),
+});
 export const WorkflowCheckItemSchema = z.strictObject({
   path: z.string(),
   ok: z.literal(true),
   revision: PlanSchema.shape.revision,
   nodes: PlanSchema.shape.nodes,
   config: EffectiveConfigSchema,
+  skills: WorkflowCheckedSkillsSchema.optional(),
 });
 export type WorkflowCheckItem = z.infer<typeof WorkflowCheckItemSchema>;
 export const WorkflowCheckBatchSchema = z.strictObject({

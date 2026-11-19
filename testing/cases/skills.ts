@@ -1,6 +1,17 @@
 import { ErrorCode, Harness } from "@titan/constants";
 import { negative, positive, rejected } from "@titan/test-factories";
 
+export const workflowSkillPreflightCases = {
+  positive: [
+    positive("checks a linked Codex skill and its reference", [Harness.Codex, true], true),
+    positive("checks a linked Claude skill and its reference", [Harness.Claude, true], true),
+  ],
+  negative: [
+    rejected("refuses a missing Codex skill before dispatch", [Harness.Codex, false], true),
+    rejected("refuses a missing Claude skill before dispatch", [Harness.Claude, false], true),
+  ],
+};
+
 export const projectSkillCases = {
   positive: [
     positive(

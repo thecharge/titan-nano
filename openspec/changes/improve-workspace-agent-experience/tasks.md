@@ -28,3 +28,8 @@
 - [x] 4.3 Run required local checks and package acceptance and record actual results and corrections.
 - [x] 4.4 Inspect public-safe changes, preserve unrelated work and confirm Actions is disabled before committing and pushing main.
 - [x] 4.5 Record the remote revision and use the delivered capabilities in the separate private editorial workflow.
+
+## 5. Check workflow skill bindings
+
+- [x] 5.1 Check resolved persona skills in offline CLI checks and dry runs. Report selected origins and hashes without skill text.
+- [x] 5.2 Verify missing skills fail and a linked skill and its reference resolve for both harnesses.

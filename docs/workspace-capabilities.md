@@ -27,6 +27,8 @@ Discovery checks `.agents/skills`, `.codex/skills` and `.claude/skills` in that 
 
 Select required skills on a persona using its `skills` array. Titan retains the selected `SKILL.md` and supported files under `references/` when admitting the run. Codex and Claude receive the retained instructions. They can read retained references through `titan_file_read` using paths such as `@titan-skills/coding-practices/references/review.md`. Changing the source skill after admission leaves that run's retained instructions available for recovery. Links must remain inside the admitted skill directory. Entry and byte limits bound discovery and retention.
 
+Run `titan check workflow.yaml --project . --json` before starting work. The `skills` field lists the skills selected by each persona, their origins and hashes for the instruction and reference files. The output omits their contents. A missing declared skill fails the check. Dry runs use the same preflight, and admission checks the files again for the new run. Add each referenced skill to the persona that needs it. An available skill listed by discovery is separate from the skills selected on that persona.
+
 ## Create a workflow and save a persona
 
 ```sh

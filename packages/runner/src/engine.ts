@@ -100,6 +100,7 @@ import {
   resolvedPersona,
   validatePlanTools,
   workflowFile,
+  workflowSkillBindings,
 } from "@titan/workflow";
 import { exists, readWorkspaceSnapshot, treeHash, writeTree } from "@titan/workspace";
 import { assembleRun } from "./artifacts.ts";
@@ -321,12 +322,11 @@ export class Engine {
         .map((path) => relative(canonical, path))
         .filter((path) => WorkspaceRelativePathSchema.safeParse(path).success),
     );
-    const selectedSkills = new Set(
-      Object.keys(plan.workflow.personas ?? {}).flatMap(
-        (name) => resolvedPersona(plan.workflow, name).skills ?? [],
-      ),
+    const workspaceSkills = await retainWorkspaceSkills(
+      project,
+      process.env,
+      new Set(Object.values(workflowSkillBindings(plan.workflow)).flat()),
     );
-    const workspaceSkills = await retainWorkspaceSkills(project, process.env, selectedSkills);
     const files = await readWorkspaceSnapshot(
       project,
       config.value.limits,
