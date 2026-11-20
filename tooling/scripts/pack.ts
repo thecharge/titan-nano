@@ -16,7 +16,6 @@ import {
   PackagingAssets,
   ProcessIo,
   ScriptSandbox,
-  TextSymbol,
   VendorPackage,
 } from "@titan/constants";
 import { readFileBytes } from "@titan/streams";
@@ -25,10 +24,11 @@ import {
   DashboardPackedAssetsSchema,
   WorkspacePackageManifestSchema,
 } from "@titan/types";
+import { verifyReleaseArchive } from "./check-package-registry.ts";
 import { packageOutput } from "./package-output.ts";
 import { nativeCodexVersion } from "./package-vendors.ts";
 import { prepareScriptSandbox } from "./prepare-script-sandbox.ts";
-import { verifySandboxDistribution, verifySandboxFiles } from "./sandbox-distribution.ts";
+import { verifySandboxDistribution } from "./sandbox-distribution.ts";
 
 const root = resolve(import.meta.dir, HookFile.RepositoryRoot);
 const distribution = resolve(root, process.argv[2] ?? Packaging.Distribution);
@@ -94,6 +94,7 @@ await writeFile(
       private: true,
       type: Packaging.Module,
       bin: { titan: Packaging.BundleExport },
+      exports: Packaging.BundleExport,
       files: [
         Packaging.Bundle,
         Packaging.AgentBundle,
@@ -196,10 +197,11 @@ if (code === 0) {
     distribution,
     Packaging.ArchivePrefix + manifest.version + Packaging.ArchiveExtension,
   );
-  const files = await packageOutput(
-    [ScriptSandbox.Source.Tar, ScriptSandbox.Source.List, archive],
-    root,
-  );
-  verifySandboxFiles(files.toString(FileEncoding.Utf8).split(TextSymbol.Newline));
+  try {
+    await verifyReleaseArchive(archive);
+  } catch (error) {
+    await rm(archive, { force: true });
+    throw error;
+  }
 }
 process.exit(code);

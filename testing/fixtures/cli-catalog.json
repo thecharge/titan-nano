@@ -46,6 +46,11 @@
     "options": ["home", "project", "harness", "force", "no-model"],
     "handler": "<function>"
   },
+  "uninstall": {
+    "description": "Remove the managed Titan launcher and its installer-created PATH link",
+    "options": ["home"],
+    "handler": "<function>"
+  },
   "check": {
     "description": "Validate one or more workflow files without execution",
     "positionals": [

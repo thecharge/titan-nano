@@ -102,6 +102,13 @@ export const UpdateTransactionSchema = z
 export type UpdateTransaction = z.infer<typeof UpdateTransactionSchema>;
 export type UpdateInstallObserver = (phase: UpdatePhase) => Promise<void>;
 
+export const InstallCommandLinkSchema = z.strictObject({
+  path: z.string().min(1),
+  device: z.string().regex(UpdatePolicy.NumericPattern),
+  inode: z.string().regex(UpdatePolicy.NumericPattern),
+  changed_ns: z.string().regex(UpdatePolicy.NumericPattern),
+});
+
 export const UpdateDoctorSchema = z.object({
   prerequisites: z.array(PrerequisiteStatusSchema),
 });

@@ -126,6 +126,7 @@ export enum CliCommand {
   Guide = "guide",
   Schema = "schema",
   Install = "install",
+  Uninstall = "uninstall",
   Check = "check",
   Run = "run",
   Resume = "resume",

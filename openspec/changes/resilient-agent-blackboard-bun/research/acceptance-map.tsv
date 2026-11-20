@@ -62,9 +62,9 @@ harness-adapters	One interface for every agent tool	Adapter for another version 
 harness-adapters	Each adapter states what it can do	Codex adapter flags	6.1	foundation	contract	pending
 harness-adapters	Sessions can be cancelled and closed	Cancel a running fake session	22.20	local	contract	pending
 harness-adapters	Every agent starts with a fresh context	Falsifier does not see the worker's session	10.2	local	contract	implemented
-harness-adapters	A persona's tools and skills reach its agent	Claude persona with two tools	6.3	adapter	contract	pending
+harness-adapters	A persona's tools and skills reach its agent	Claude persona with two tools	6.3	adapter	contract	implemented
 harness-adapters	A persona's tools and skills reach its agent	Field an agent tool cannot apply	6.6	adapter	contract	pending
-harness-adapters	An agent's session can continue	Answer reaches the same session	6.3	adapter	contract	pending
+harness-adapters	An agent's session can continue	Answer reaches the same session	6.3	adapter	contract	implemented
 harness-adapters	Claude adapter uses the Claude Agent SDK	Live Claude agent	6.3	adapter	live	pending
 harness-adapters	Codex adapter uses the Codex SDK	Codex persona with a tool server	6.4	adapter	contract	pending
 harness-adapters	Codex adapter uses the Codex SDK	Live Codex agent	6.4	adapter	live	pending
@@ -459,9 +459,9 @@ configuration	Runs freeze their effective configuration	Edited config during a p
 configuration	Runs freeze their effective configuration	Approved extra recovery allowance	29.4	local	integration	pending
 configuration	Configuration tools explain and safely change settings	Concurrent config writers	29.6	local	integration	implemented
 configuration	Configuration tools explain and safely change settings	Inspect a blocked run config	29.5	local	integration	pending
-distribution	Release packages install independently of the monorepo	Install without workspace links	31.1	local	integration	pending
+distribution	Release packages install independently of the monorepo	Install without workspace links	31.1	local	integration	implemented
 distribution	Release packages install independently of the monorepo	Missing transitive package	31.1	local	integration	pending
-distribution	Release packages install independently of the monorepo	Secret in package files	31.1	local	integration	pending
+distribution	Release packages install independently of the monorepo	Secret in package files	31.1	local	integration	implemented
 distribution	Environment and optional capabilities are explicit	Minimal environment first use	31.2	local	integration	implemented
 distribution	Environment and optional capabilities are explicit	Unsupported native dependency	31.2	local	integration	pending
 distribution	A first working version has an executable acceptance path	Installed preview survives restart	31.3	local	end-to-end	pending
@@ -975,3 +975,8 @@ knowledge-hub	Every run keeps a journal and every workflow shares what it learns
 knowledge-hub	Every run keeps a journal and every workflow shares what it learns	A failed run leaves a journal	33.2	local	integration	implemented
 knowledge-hub	Every run keeps a journal and every workflow shares what it learns	A run that cannot write its journal is blocked	33.2	local	integration	implemented
 knowledge-hub	Every run keeps a journal and every workflow shares what it learns	The next workflow reads the earlier journal	33.2	local	integration	implemented
+distribution	Managed installation can be removed and reinstalled without losing work	Managed uninstall and reinstall preserve existing work	31.14	local	integration	implemented
+distribution	Managed installation can be removed and reinstalled without losing work	Uninstall refuses active work	31.14	local	integration	implemented
+distribution	Managed installation can be removed and reinstalled without losing work	Uninstall preserves foreign command links	31.14	local	integration	implemented
+distribution	Managed installation can be removed and reinstalled without losing work	Direct package uninstall names the package manager	31.14	local	integration	implemented
+distribution	Managed installation can be removed and reinstalled without losing work	Uninstall leaves an external daemon running	31.14	local	integration	implemented

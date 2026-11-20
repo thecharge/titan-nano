@@ -21,10 +21,11 @@ The [shared fabric delivery sequence](research/shared-fabric-delivery.md) expand
 ## 2. Set up the monorepo
 
 - [x] 2.1 Create the Bun workspace with `apps/cli` and the foundation packages, with shared versions in the root catalog. Add remaining packages with their implementation. Done when installation and foundation tests pass without empty later-stage packages.
-- [x] 2.2 Add the `titan` command and its 35 subcommands, each printing "not built yet". Done when `bun apps/cli/src/main.ts --help` lists all 34. The subcommands are:
+- [x] 2.2 Add the `titan` command and its 36 subcommands. Done when `bun apps/cli/src/main.ts --help` lists all 36. The subcommands are:
   - `guide`
   - `schema`
   - `install`
+  - `uninstall`
   - `check`
   - `run`
   - `resume`
@@ -412,6 +413,7 @@ Apply design decision 38 during the foundation stage. The sibling comparison and
 - [x] 31.11 Write the update check, the one-line notice and the `update.source` and `update.check` settings. Done when the scenarios "Newer version exists" and "Check turned off" pass.
 - [x] 31.12 Write `titan update` with `--check`, `--from`, the backup, the side-by-side install, the doctor gate and the rollback. Done when the scenarios "Update that passes" and "Update that fails" pass.
 - [x] 31.13 Run Titan's own deliveries with the installed `titan` command and document it in `docs/install.md`. Done when a run is started and resumed through the installed command and the guide names the update steps.
+- [x] 31.14 Deliver the managed install, update, uninstall and reinstall lifecycle. Done when the installed launcher preserves saved runs, their runtime pins and knowledge, and refuses active work, external daemons and unsafe command links.
 - [ ] 31.3 Ship and verify the installed mixed-plan interruption recovery preview. Done when the scenario "Installed preview survives restart" passes with its complete mapped cases.
 - [ ] 31.4 Ship checked code, document, research and stubbed operation examples. Done when the scenario "Remote operation response is lost" passes with its complete mapped cases.
 - [ ] 31.5 Verify shared live self-development with an immutable installed controller and compatible runtime recovery. Done when the scenario "Titan edits Titan" passes with its complete mapped cases.

@@ -160,3 +160,27 @@ export const installBootstrapCases = {
     }),
   ],
 };
+
+export const managedLifecycleCases = {
+  positive: [
+    positive(
+      "installs, updates, uninstalls and reinstalls through the stable launcher",
+      ["owned"],
+      true,
+    ),
+    positive("uninstall preserves a matching unrecorded PATH link", ["pre-existing"], true),
+  ],
+  negative: [
+    rejected("uninstall refuses a replaced PATH link with an identical target", ["replaced"], true),
+    rejected("uninstall refuses a held maintenance lease", ["locked"], true),
+    rejected("uninstall refuses an active run in an external home", ["active"], true),
+    rejected("uninstall leaves another installation's idle daemon available", ["idle"], true),
+    rejected("uninstall refuses an external writer without a daemon", ["external-locked"], true),
+    rejected("uninstall refuses a standalone knowledge writer", ["knowledge-locked"], true),
+    rejected(
+      "uninstall refuses external maintenance without a daemon",
+      ["external-maintenance"],
+      true,
+    ),
+  ],
+};

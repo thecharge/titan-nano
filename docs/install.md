@@ -94,6 +94,24 @@ Commands for older pinned runs automatically locate a retained managed release, 
 
 CLI run and request clients and MCP run and request tools use this same compatible-runtime recovery. Each operation retries once after a successful idle-owner handoff. Repeated compatibility errors remain visible. A persistent MCP connection can inspect an older run and then use current-release tools, with idle daemon discovery selecting the required owner for each operation. Person-authorized request operations retain their authority through recovery.
 
+## Uninstall and reinstall Titan
+
+Run `titan uninstall` through the command installed by `install.sh`. You can also run `~/titan/titan uninstall`, or use the launcher in your chosen installation folder.
+
+Use `--home /path/to/home` to select a Titan home. If the home and installation are separate folders, uninstall checks the home without writing to it or stopping its daemon. It refuses if it finds a running daemon, a held write lock, or an unfinished update.
+
+Finish or pause any runs before stopping that home's daemon. If you started it with `titan serve`, stop it from the same terminal with Ctrl+C. Let maintenance finish before retrying. If an update was interrupted, recover it through the launcher that started it.
+
+If the home is the installation folder itself, uninstall can stop its idle daemon before removing the launcher.
+
+Uninstall removes the verified launcher and the matching PATH link that the installer recorded when it created the link. A pre-existing link without a record stays in place. If a recorded link has been replaced, Titan refuses and leaves both paths in place.
+
+Runs, their runtime pins, knowledge, settings, backups, custom files and agent registrations stay on disk. Titan keeps old releases so runs pinned to those releases can use them after reinstall.
+
+Run `sh install.sh /path/to/installation` again to restore the launcher. From any directory, run `titan status RUN_ID --home /path/to/home` to inspect a retained run in that home. Titan recovers interrupted runs using the retained release when the run requires it.
+
+For a copy added with `bun add`, run `bun remove @titan/cli` from the folder where you added it.
+
 ## Verification and current limits
 
 Complete local source and installed-package acceptance use pinned SDKs with vendor stubs. A retained [real Codex self-development run](../docs/examples/self-development/README.md) exercised workers, independent reviewers and scripts. It required manual recovery and a reviewer-schema repair. The later [delivery evidence](../openspec/changes/archive/2026-11-16-repair-harness-delivery/evidence.md#2026-11-15-self-development-delivery-and-readiness-audit) records the committed implementation and complete verification. Complete live Claude acceptance and native permission and recovery contracts remain open.
@@ -116,7 +134,7 @@ titan requests --run-id RUN_ID --home HOME
 titan resume RUN_ID --watch --home HOME
 ```
 
-Titan reports missing Python, Lean and local embedding files in doctor. The offline example works with those capabilities absent. See the [installed acceptance record](../openspec/changes/resilient-agent-blackboard-bun/research/installation-acceptance.md) for the verified environment and run outcomes.
+Titan reports missing Python, Lean and local embedding files in doctor. The offline example works with those capabilities absent. See the [distribution checks](distribution.md) for the tested Linux and Bun setup and the isolated registry check. See the [Claude adapter guide](../packages/backend-claude/README.md#verification) for Claude setup and offline checks.
 
 ## Linux script sandbox
 

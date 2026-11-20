@@ -13,6 +13,15 @@ export const UpdateMessage = {
   BackupPath: "Update backup roots must be real directories",
   BackupSpecial: "Update backup contains an unsupported special file",
   ManagedRequired: "Run updates through the managed Titan launcher created by install.sh",
+  UninstallUnmanaged:
+    "For a package-manager installation, run bun remove @titan/cli from the folder where you added Titan",
+  UninstallOwnership: "Titan could not verify ownership of the managed launcher or PATH link",
+  UninstallExternalBusy:
+    "The selected Titan home is in use. Finish or pause its runs, stop its daemon separately, then retry uninstall",
+  UninstallExternalMaintenance:
+    "The selected Titan home has maintenance in progress or an unfinished update. Let maintenance finish or recover the update through that home's launcher, then retry uninstall",
+  UninstallExternalLease:
+    "Titan could not check the selected home's lease safely. Check that home before retrying uninstall",
   PackageRequired: "Select a local Titan release package with titan update --from FILE",
   LauncherChanged: "The managed launcher changed during the update",
   PackageFailed:

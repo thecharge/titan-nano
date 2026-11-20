@@ -9,20 +9,27 @@ import {
   rename,
   rm,
   symlink,
+  unlink,
 } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import {
   CliCommand,
   CliRuntime,
+  ConfigWrite,
   DaemonStartup,
   ErrorCode,
+  ErrorField,
   ExitCode,
+  FileErrorCode,
   FileOpenMode,
   HookFile,
   IoLimit,
+  KnowledgeFile,
   PackageManagerArgument,
   Packaging,
   ProbeOption,
+  ServerDatabaseAdapter,
+  ServerFile,
   ServerLimit,
   UpdateFile,
   UpdateMode,
@@ -43,6 +50,7 @@ import { atomicWrite, readFileBytes } from "@titan/streams";
 import {
   CliOutputSchema,
   type CommandContext,
+  InstallCommandLinkSchema,
   UpdateDoctorSchema,
   type UpdateInstallObserver,
   type UpdateTransaction,
@@ -75,17 +83,23 @@ function managedTarget(installation: string, target: string): boolean {
   return UpdateFile.LauncherPattern.test(relative(installation, resolve(installation, target)));
 }
 
-async function managedInstallation(context: CommandContext) {
-  const executable = context.services.executable;
-  if (!executable) throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
-  const entry = await realpath(executable[1]);
+function managedRelease(entry: string) {
   const release = resolve(dirname(entry), Packaging.ReleaseFromBundle);
   if (
     basename(dirname(release)) !== Packaging.Releases ||
     !basename(release).startsWith(Packaging.ArchivePrefix) ||
     entry !== resolve(release, Packaging.InstalledPath, Packaging.Bundle)
   )
-    throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+    return null;
+  return release;
+}
+
+async function managedInstallation(context: CommandContext) {
+  const executable = context.services.executable;
+  if (!executable) throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
+  const entry = await realpath(executable[1]);
+  const release = managedRelease(entry);
+  if (!release) throw new TitanError(ErrorCode.Arguments, UpdateMessage.ManagedRequired);
   const installation = resolve(release, Packaging.InstallationFromRelease);
   const launcher = join(installation, UpdateFile.Launcher);
   if (!(await lstat(launcher)).isSymbolicLink())
@@ -165,6 +179,136 @@ async function recoverUpdate(home: string, installation: string): Promise<boolea
 async function stopForUpdate(context: CommandContext): Promise<void> {
   const running = await probeDaemon(context.home, DaemonStartup.ProbeMilliseconds, null);
   if (running) await requestServerStop(context.home, context.options.force !== true);
+}
+
+function unsafeUninstall(): TitanError {
+  return new TitanError(ErrorCode.ConfigConflict, UpdateMessage.UninstallOwnership);
+}
+
+function optionalMetadata(path: string) {
+  return lstat(path, { bigint: true }).catch((error: unknown) => {
+    if (error instanceof Error && Reflect.get(error, ErrorField.Code) === FileErrorCode.Missing)
+      return null;
+    throw error;
+  });
+}
+
+async function ownsDirectory(path: string): Promise<boolean> {
+  const metadata = await optionalMetadata(path);
+  return (
+    metadata?.isDirectory() === true &&
+    metadata.uid === BigInt(process.getuid?.() ?? -1) &&
+    (metadata.mode & BigInt(UpdateFile.UnsafeWriteMode)) === 0n &&
+    (await realpath(path)) === path
+  );
+}
+
+async function uninstallLauncher(context: CommandContext) {
+  const executable = context.services.executable;
+  if (!executable) throw new TitanError(ErrorCode.Arguments, UpdateMessage.UninstallUnmanaged);
+  const entry = await realpath(executable[1]);
+  const release = managedRelease(entry);
+  if (!release) throw new TitanError(ErrorCode.Arguments, UpdateMessage.UninstallUnmanaged);
+  const installation = resolve(release, Packaging.InstallationFromRelease);
+  const launcher = join(installation, UpdateFile.Launcher);
+  const metadata = await optionalMetadata(launcher);
+  if (
+    !metadata?.isSymbolicLink() ||
+    metadata.uid !== BigInt(process.getuid?.() ?? -1) ||
+    !(await ownsDirectory(installation)) ||
+    (await readlink(launcher)) !== relative(installation, join(release, Packaging.CliPath)) ||
+    (await realpath(launcher)) !== entry
+  )
+    throw unsafeUninstall();
+  return { installation, launcher, metadata };
+}
+
+async function ownedPathLink(installation: string, launcher: string) {
+  const file = join(installation, UpdateFile.CommandOwnership);
+  const record = await optionalMetadata(file);
+  if (!record) return null;
+  if (
+    !record.isFile() ||
+    record.nlink !== 1n ||
+    record.uid !== BigInt(process.getuid?.() ?? -1) ||
+    (record.mode & BigInt(UpdateFile.UnsafeWriteMode)) !== 0n
+  )
+    throw unsafeUninstall();
+  const value = InstallCommandLinkSchema.safeParse(
+    JSON.parse((await readFileBytes(file, IoLimit.DataBytes)).toString()),
+  );
+  if (!value.success) throw unsafeUninstall();
+  const { path, device, inode, changed_ns } = value.data;
+  if (path !== resolve(path) || path === launcher || basename(path) !== UpdateFile.Launcher)
+    throw unsafeUninstall();
+  const metadata = await optionalMetadata(path);
+  if (!metadata) return null;
+  if (
+    !(await ownsDirectory(dirname(path))) ||
+    !metadata.isSymbolicLink() ||
+    metadata.uid !== BigInt(process.getuid?.() ?? -1) ||
+    metadata.dev.toString() !== device ||
+    metadata.ino.toString() !== inode ||
+    metadata.ctimeNs.toString() !== changed_ns ||
+    (await readlink(path)) !== launcher
+  )
+    throw unsafeUninstall();
+  return path;
+}
+
+export async function uninstallManaged(context: CommandContext) {
+  const { installation, launcher, metadata } = await uninstallLauncher(context);
+  await using resources = new AsyncDisposableStack();
+  await ownMaintenance(installation, resources);
+  const command = await ownedPathLink(installation, launcher);
+  const home = (await optionalMetadata(context.home)) ? await realpath(context.home) : null;
+  if (unfinished(await readTransaction(installation)))
+    throw new TitanError(ErrorCode.ServerLocked, UpdateMessage.RecoveryRequired);
+  if (home && home !== installation) await checkExternalHome(home);
+  if (await probeDaemon(installation, DaemonStartup.ProbeMilliseconds, null))
+    await requestServerStop(installation);
+  await ownStoppedHome(installation, resources);
+  await ownKnowledge(installation, resources);
+  const current = await uninstallLauncher(context);
+  if (current.metadata.ino !== metadata.ino || current.metadata.dev !== metadata.dev)
+    throw unsafeUninstall();
+  if ((await ownedPathLink(installation, launcher)) !== command) throw unsafeUninstall();
+  if (command) await unlink(command);
+  await unlink(launcher);
+  return { data: { launcher, path_link: command }, exitCode: ExitCode.Success };
+}
+
+async function externalLeaseBusy(home: string, name: string): Promise<boolean> {
+  const filename = join(home, name);
+  const metadata = await optionalMetadata(filename);
+  if (!metadata) return false;
+  if (!metadata.isFile() || metadata.size !== 0n)
+    throw new TitanError(ErrorCode.ServerLocked, UpdateMessage.UninstallExternalLease);
+  const database = new Bun.SQL({ adapter: ServerDatabaseAdapter, filename, readonly: true });
+  try {
+    await database.unsafe(UpdateFile.ReadLease);
+    return false;
+  } catch (error) {
+    if (error instanceof Error && Reflect.get(error, ErrorField.Code) === ConfigWrite.Busy)
+      return true;
+    throw error;
+  } finally {
+    await database.close();
+  }
+}
+
+async function checkExternalHome(home: string): Promise<void> {
+  if (
+    (await probeDaemon(home, DaemonStartup.ProbeMilliseconds, null)) ||
+    (await externalLeaseBusy(home, ServerFile.Lease)) ||
+    (await externalLeaseBusy(home, KnowledgeFile.Lease))
+  )
+    throw new TitanError(ErrorCode.ServerBusy, UpdateMessage.UninstallExternalBusy);
+  if (
+    (await externalLeaseBusy(home, ServerFile.MaintenanceLease)) ||
+    unfinished(await readTransaction(home))
+  )
+    throw new TitanError(ErrorCode.ServerLocked, UpdateMessage.UninstallExternalMaintenance);
 }
 
 async function stagedCommand(runtime: string, entry: string, args: readonly string[], cwd: string) {

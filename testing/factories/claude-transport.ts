@@ -1,10 +1,18 @@
 import { strict as assert } from "node:assert";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { ClaudeBackend } from "@titan/backend-claude";
 import {
+  AgentTool,
   Backend,
   ClaudeEventKind,
+  ExecutionPhase,
+  ExitCode,
+  type NativeToolTransport,
+  Packaging,
+  RunStatus,
+  SdkProcessFixture,
   type SnapshotMutation,
   type VendorStubMode,
 } from "@titan/constants";
@@ -18,9 +26,84 @@ import {
   observeVendorRetry,
   observeVendorSession,
   observeVendorSessionBytes,
+  vendorRecoveryWorkflow,
 } from "@titan/test-factories";
-import { thrownBy } from "@titan/test-framework";
+import { thrownBy, waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
+import { PersonaInspectionSchema, RunSchema, type SdkProbePaths } from "@titan/types";
+import { runCliCommand, stopCommand } from "../support/command.ts";
+import { prepareSdkProject, seedNativeSkill } from "./sdk-process.ts";
+import { serverReady, spawnServer } from "./server-process.ts";
+
+export async function claudePersona(
+  transport: NativeToolTransport,
+  skill: boolean,
+  grep: boolean,
+  model: string,
+  paths: SdkProbePaths = {},
+) {
+  return withTemporaryDirectory(async (root) => {
+    const { home, project } = await prepareSdkProject(
+      root,
+      Backend.Claude,
+      0,
+      false,
+      paths.vendors,
+      transport,
+    );
+    await seedNativeSkill(project);
+    const base = vendorRecoveryWorkflow("claude_persona_contract");
+    const tools = grep ? [AgentTool.Read, AgentTool.Grep] : [AgentTool.Read];
+    const skills = skill ? ["linked"] : [];
+    const workflow = {
+      ...base,
+      personas: {
+        ...base.personas,
+        checker: { ...base.personas.checker, tools, skills, model },
+      },
+      steps: base.steps.map((step) => ({ ...step, files: ["DELIVERED.txt"] })),
+    };
+    const path = join(project, "claude-persona.json");
+    await writeFile(path, Buffer.from(JSON.stringify(workflow)));
+    const cli = paths.cli ?? Packaging.CliSource;
+    const daemon = spawnServer(home, cli, SdkProcessFixture.DaemonTimeout);
+    const passed = skill && grep && model === "stub-persona-model";
+    try {
+      assert.ok(
+        await waitUntil(() => serverReady(home, daemon.pid), SdkProcessFixture.ObserveAttempts),
+      );
+      const run = RunSchema.parse(
+        await runCliCommand(
+          cli,
+          home,
+          ["run", path, "--project", project, "--backend", Backend.Claude, "--watch"],
+          passed ? ExitCode.Success : ExitCode.Blocked,
+        ),
+      );
+      const reference = run.persona_references?.checker;
+      assert.ok(reference);
+      const inspection = PersonaInspectionSchema.parse(
+        await runCliCommand(cli, home, ["persona", "show", reference]),
+      );
+      const recorded = inspection.versions[0]?.persona;
+      assert.deepEqual(recorded?.tools, tools);
+      assert.deepEqual(recorded?.skills ?? [], skills);
+      assert.equal(recorded?.model, model);
+      assert.equal(
+        run.workspace_skills?.files.some(
+          (file) => file.name === "linked" && file.path === "SKILL.md",
+        ) ?? false,
+        skill,
+      );
+      const phases = run.nodes.deliver?.phases;
+      assert.equal(phases?.[ExecutionPhase.Worker]?.completed, true);
+      assert.equal(phases?.[`${ExecutionPhase.FalsifierPrefix}0`]?.completed, passed);
+      return run.state === (passed ? RunStatus.Passed : RunStatus.Blocked);
+    } finally {
+      await stopCommand(daemon);
+    }
+  });
+}
 
 function backend(cwd: string) {
   const backend = new ClaudeBackend(({ prompt, options }) => {

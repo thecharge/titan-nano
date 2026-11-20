@@ -84,6 +84,7 @@ import { candidateCommitmentProcessCases } from "../../testing/cases/candidate-c
 import { claudeBackoffCases } from "../../testing/cases/claude-backoff.ts";
 import { claudeBackoffBranchCases } from "../../testing/cases/claude-backoff-branch.ts";
 import { claudeProcessRetryCases } from "../../testing/cases/claude-retry-process.ts";
+import { claudePersonaCases } from "../../testing/cases/claude-transport.ts";
 import { cliEventFollowProcessCases } from "../../testing/cases/cli-event-follow.ts";
 import {
   cliEnvelopeProcessCases,
@@ -159,6 +160,7 @@ import { attemptInputProcess } from "../../testing/factories/attempt-input-proce
 import { candidateCommitmentProcess } from "../../testing/factories/candidate-commitment-process.ts";
 import { claudeBackoff, claudeBackoffBranch } from "../../testing/factories/claude-backoff.ts";
 import { claudeProcessRetry } from "../../testing/factories/claude-retry-process.ts";
+import { claudePersona } from "../../testing/factories/claude-transport.ts";
 import { scriptedFakeProcess, scriptedFakeWatch } from "../../testing/factories/cli-contract.ts";
 import { cliEventFollowProcess } from "../../testing/factories/cli-event-follow-process.ts";
 import { cliEnvelopeProcess, cliEnvelopeQuery } from "../../testing/factories/cli-output.ts";
@@ -1078,6 +1080,19 @@ await all(
   TestScheduling.Maximum,
 );
 console.log(JSON.stringify({ installed_claude_retry_cases: 4 }));
+
+const personaCases = [...claudePersonaCases.positive, ...claudePersonaCases.negative];
+await all(
+  personaCases.map((scenario) => async () => {
+    const result = await Reflect.apply(claudePersona, undefined, [
+      ...scenario.args,
+      { cli, vendors: resolve(Packaging.VendorStubs) },
+    ]);
+    assert.deepEqual(result, scenario.expected, scenario.name);
+  }),
+  TestScheduling.Maximum,
+);
+console.log(JSON.stringify({ installed_claude_persona_cases: personaCases.length }));
 await all(
   [...claudeBackoffCases.positive, ...claudeBackoffCases.negative].map((scenario) => async () => {
     const result = await Reflect.apply(claudeBackoff, undefined, [

@@ -20,6 +20,7 @@ export const CliDescription = {
   Guide: "Read the agent workflow guide",
   Schema: "Inspect an input schema",
   Install: "Install a project skill",
+  Uninstall: "Remove the managed Titan launcher and its installer-created PATH link",
   Check: "Validate one or more workflow files without execution",
   Run: "Run a validated workflow and watch until it settles. Use --detach for accepted submission",
   Resume: "Continue an existing run",

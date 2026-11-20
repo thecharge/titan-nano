@@ -1,11 +1,14 @@
 import {
   HarnessCommands,
+  KnowledgeMeaningLocal,
+  KnowledgeMemoryDatabase,
   MinimumBunVersion,
   OptionalPrerequisites,
   PrerequisiteName,
   RequiredPrerequisites,
 } from "@titan/constants";
-import { harnessRepair, prerequisiteRepair } from "@titan/messages";
+import { openVectorIndex } from "@titan/knowledge";
+import { harnessRepair, prerequisiteRepair, sqliteVectorRepair } from "@titan/messages";
 import type { CliServices, PrerequisiteStatus } from "@titan/types";
 import { compareRelease, releaseVersion } from "./updates.ts";
 
@@ -45,4 +48,19 @@ export function checkPrerequisites(
     ),
   );
   return [...tools, ...agent];
+}
+
+export async function checkSqliteVector(load = openVectorIndex): Promise<PrerequisiteStatus> {
+  try {
+    const index = await load(KnowledgeMemoryDatabase);
+    await index.close();
+    return { name: KnowledgeMeaningLocal.SqliteVec, required: false, ready: true, repair: null };
+  } catch {
+    return status(
+      KnowledgeMeaningLocal.SqliteVec,
+      false,
+      false,
+      sqliteVectorRepair(process.platform, process.arch),
+    );
+  }
 }

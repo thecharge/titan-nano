@@ -15,11 +15,11 @@ const value = (flag) =>
 if (
   value("--output-format") !== "stream-json" ||
   value("--input-format") !== "stream-json" ||
-  !["", "Read", "Read,Write"].includes(value("--tools")) ||
+  !["", "Read", "Read,Write", "Read,Grep"].includes(value("--tools")) ||
   value("--permission-mode") !== "default" ||
   value("--setting-sources") !== "" ||
   !args.includes("--strict-mcp-config") ||
-  value("--model") !== "stub-model" ||
+  !["stub-model", "stub-persona-model"].includes(value("--model")) ||
   value("--max-turns") !== "3"
 )
   throw new Error("Claude 0.3.329 request contract mismatch");
@@ -46,6 +46,7 @@ async function emit(event) {
 const writePolicy =
   "Project writes must stay within the declared file scope. Use titan_file_read to obtain a version and titan_file_write with that expected_version to create or replace a file when a native editor is refused. Use null only for a missing file. A changed version requires a fresh read and reconciliation. Shell commands cannot create, rename or remove project files.";
 let initialized = false;
+let retainedRole;
 async function handleLine(line) {
   if (Buffer.byteLength(line) > 262144) throw new Error("Stub input exceeds contract limit");
   const message = JSON.parse(line);
@@ -69,6 +70,7 @@ async function handleLine(line) {
       await nativeTools.verifySkills(role);
     }
     initialized = true;
+    retainedRole = role;
     const initializedResponse = {
       commands: [],
       models: [],
@@ -106,6 +108,17 @@ async function handleLine(line) {
         ? content[0].text
         : null;
   const task = typeof text === "string" && text.startsWith("{") ? JSON.parse(text).task : text;
+  if (task === "claude_persona_contract") {
+    if (
+      value("--tools") !== "Read,Grep" ||
+      value("--model") !== "stub-persona-model" ||
+      !retainedRole?.includes(
+        "Skill linked:\n---\ndescription: Synthetic review\n---\nUse the synthetic reference.",
+      )
+    )
+      throw new Error("Claude persona contract mismatch");
+  } else if (value("--model") !== "stub-model" || value("--tools") === "Read,Grep")
+    throw new Error("Unexpected Claude persona arguments");
   const delivery = deliveryTask(task);
   const final = finalAttempt(task, process.cwd(), Boolean(resultSchema.properties.verdict), text);
   let mode = final
@@ -115,7 +128,7 @@ async function handleLine(line) {
       : task === "delayed_recover_once"
         ? "recover_once"
         : await nativeTask(
-            task,
+            task === "claude_persona_contract" ? "complete" : task,
             nativeTools,
             text,
             process.cwd(),

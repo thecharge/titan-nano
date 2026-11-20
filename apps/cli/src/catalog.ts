@@ -28,6 +28,7 @@ import { runHandlers, runListOptions, validateEventOptions } from "./commands/ru
 import { serviceHandlers } from "./commands/services.ts";
 import { updateDefinition } from "./commands/update.ts";
 import { workflowHandlers } from "./commands/workflows.ts";
+import { uninstallManaged } from "./update-install.ts";
 
 const inspectOptions = [
   CliOption.Home,
@@ -43,6 +44,11 @@ const runOptions = [CliOption.Home, CliOption.Watch] as const;
 const pending: CommandDefinition = { description: CliDescription.Pending, options: [] };
 const catalog = {
   [CliCommand.Update]: updateDefinition,
+  [CliCommand.Uninstall]: {
+    description: CliDescription.Uninstall,
+    options: [CliOption.Home],
+    handler: uninstallManaged,
+  },
   [CliCommand.WebRead]: {
     description: WebResourceMessage.Description,
     positionals: CliPositionals.WebRead,

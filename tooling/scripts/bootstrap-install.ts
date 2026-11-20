@@ -22,9 +22,11 @@ import {
   FileOpenMode,
   Harness,
   HookFile,
+  IoLimit,
   PackageManagerArgument,
   Packaging,
   ProbeOption,
+  ServerLimit,
   TextSymbol,
   UpdateFile,
 } from "@titan/constants";
@@ -33,7 +35,8 @@ import { TitanError } from "@titan/errors";
 import { UpdateMessage } from "@titan/messages";
 import { captureCommand } from "@titan/process";
 import { ownMaintenance } from "@titan/server/maintenance";
-import { BootstrapHarnessSchema } from "@titan/types";
+import { atomicWrite, readFileBytes } from "@titan/streams";
+import { BootstrapHarnessSchema, InstallCommandLinkSchema } from "@titan/types";
 import { exists } from "@titan/workspace";
 
 async function run(command: readonly string[], directory: string): Promise<void> {
@@ -51,13 +54,17 @@ async function run(command: readonly string[], directory: string): Promise<void>
     );
 }
 
-async function launcherTarget(installation: string): Promise<string | null> {
-  const launcher = join(installation, UpdateFile.Launcher);
-  const metadata = await lstat(launcher).catch((error: unknown) => {
+function optionalMetadata(path: string) {
+  return lstat(path, { bigint: true }).catch((error: unknown) => {
     if (error instanceof Error && Reflect.get(error, ErrorField.Code) === FileErrorCode.Missing)
       return null;
     throw error;
   });
+}
+
+async function launcherTarget(installation: string): Promise<string | null> {
+  const launcher = join(installation, UpdateFile.Launcher);
+  const metadata = await optionalMetadata(launcher);
   if (!metadata) return null;
   if (!metadata.isSymbolicLink())
     throw new TitanError(ErrorCode.Arguments, UpdateMessage.BootstrapLauncher);
@@ -111,20 +118,64 @@ async function installRelease(installation: string, archive: string): Promise<st
   return relative(installation, entry);
 }
 
-async function installCommand(installation: string, command: string): Promise<boolean> {
-  await mkdir(dirname(command), { recursive: true });
+async function installCommand(installation: string, requested: string): Promise<boolean> {
+  await mkdir(dirname(requested), { recursive: true, mode: ServerLimit.DirectoryMode });
+  const parent = await realpath(dirname(requested));
+  const command = join(parent, basename(requested));
   const launcher = join(installation, UpdateFile.Launcher);
+  const existing = await optionalMetadata(command);
+  if (existing)
+    return existing.isSymbolicLink() && resolve(parent, await readlink(command)) === launcher;
+  const owner = BigInt(process.getuid?.() ?? -1);
+  const folder = await lstat(parent, { bigint: true });
+  if (
+    basename(command) !== UpdateFile.Launcher ||
+    folder.uid !== owner ||
+    (folder.mode & BigInt(UpdateFile.UnsafeWriteMode)) !== 0n
+  )
+    throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.UninstallOwnership);
+  const file = join(installation, UpdateFile.CommandOwnership);
+  const record = await optionalMetadata(file);
+  if (record) {
+    if (
+      !record.isFile() ||
+      record.nlink !== 1n ||
+      record.uid !== owner ||
+      (record.mode & BigInt(UpdateFile.UnsafeWriteMode)) !== 0n
+    )
+      throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.UninstallOwnership);
+    const previous = InstallCommandLinkSchema.parse(
+      JSON.parse((await readFileBytes(file, IoLimit.DataBytes)).toString()),
+    );
+    if (previous.path !== command)
+      throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.UninstallOwnership);
+  }
   try {
     await symlink(launcher, command);
-    return true;
   } catch (error) {
     if (!(error instanceof Error) || Reflect.get(error, ErrorField.Code) !== FileErrorCode.Exists)
       throw error;
+    return false;
   }
-  const metadata = await lstat(command);
-  return (
-    metadata.isSymbolicLink() && resolve(dirname(command), await readlink(command)) === launcher
+  const metadata = await lstat(command, { bigint: true });
+  if (
+    !metadata.isSymbolicLink() ||
+    metadata.uid !== owner ||
+    (await readlink(command)) !== launcher
+  )
+    throw new TitanError(ErrorCode.ConfigConflict, UpdateMessage.UninstallOwnership);
+  await atomicWrite(
+    file,
+    JSON.stringify(
+      InstallCommandLinkSchema.parse({
+        path: command,
+        device: metadata.dev.toString(),
+        inode: metadata.ino.toString(),
+        changed_ns: metadata.ctimeNs.toString(),
+      }),
+    ),
   );
+  return true;
 }
 
 async function bootstrapInstall(
@@ -132,7 +183,7 @@ async function bootstrapInstall(
   source: string,
   command?: string,
 ): Promise<void> {
-  await mkdir(installation, { recursive: true });
+  await mkdir(installation, { recursive: true, mode: ServerLimit.DirectoryMode });
   const target = await realpath(installation);
   await using resources = new AsyncDisposableStack();
   await ownMaintenance(target, resources);

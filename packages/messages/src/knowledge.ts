@@ -56,3 +56,7 @@ export const KnowledgeMessage = {
 export function knowledgeIndexRow(fields: readonly string[], path: string): string {
   return `| ${fields.join(" | ")} | [${path}](${path}) |\n`;
 }
+
+export function sqliteVectorRepair(platform: string, architecture: string): string {
+  return `Optional SQLite vector search could not load its native extension on ${platform}/${architecture}. Support is unverified for this installation. Reinstall with the matching sqlite-vec native package, then rerun titan doctor. Word search remains available.`;
+}

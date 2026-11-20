@@ -1,11 +1,55 @@
 import { strict as assert } from "node:assert";
-import { chmod, copyFile, mkdir, readFile, readlink, symlink, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { ErrorField, MissingProcessCode, ProcessSignal } from "@titan/constants";
-import { ownMaintenance } from "@titan/server/maintenance";
+import {
+  chmod,
+  copyFile,
+  lstat,
+  mkdir,
+  readFile,
+  readlink,
+  symlink,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { FakeBackend } from "@titan/backend-fake";
+import {
+  Backend,
+  BoardFile,
+  ConfigFile,
+  ErrorCode,
+  ErrorField,
+  KnowledgeKind,
+  KnowledgeMeaningLocal,
+  MissingProcessCode,
+  Packaging,
+  ProcessSignal,
+  RunEventKind,
+  RunStatus,
+  ServerFile,
+  ServerRoute,
+  SignalEvent,
+  TitanRelease,
+  UpdateFile,
+  VendorPackage,
+} from "@titan/constants";
+import { KnowledgeHub, ownKnowledge } from "@titan/knowledge";
+import { call, readAddress, startServer } from "@titan/server";
+import { ownMaintenance, ownOfflineHome, requestServerStop } from "@titan/server/maintenance";
 import { waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
+import {
+  CliOutputSchema,
+  InstallCommandLinkSchema,
+  RunEventSchema,
+  ServerHealthSchema,
+  ServerOwnerSchema,
+} from "@titan/types";
 import { exists } from "@titan/workspace";
+import { createCli } from "../../apps/cli/src/application.ts";
+import { defaultServices } from "../../apps/cli/src/bootstrap.ts";
+import { schemaFakeAnswer } from "../support/backend.ts";
+import { checkedWorkflow } from "./hardening.ts";
+import { createUpdateRun } from "./update-backup.ts";
 
 const Shell = resolve(import.meta.dir, "../fixtures/run-shell.sh");
 const Script = resolve(import.meta.dir, "../../install.sh");
@@ -206,5 +250,316 @@ export async function installBootstrap(scenario: string) {
     else if (scenario !== "concurrent")
       assert.equal(await readlink(command), resolve(target, "titan"));
     return { code, preserved: true };
+  });
+}
+
+async function lifecycleArchive(root: string, version: string): Promise<string> {
+  const workspace = resolve(import.meta.dir, "../..");
+  const source = resolve(root, version);
+  await mkdir(source);
+  const result = await Bun.build({
+    entrypoints: [resolve(workspace, Packaging.CliSource)],
+    root: workspace,
+    outdir: source,
+    naming: Packaging.Bundle,
+    target: Packaging.Target,
+    external: [
+      VendorPackage.CodexCli,
+      VendorPackage.Claude,
+      VendorPackage.Transformers,
+      KnowledgeMeaningLocal.SqliteVec,
+    ],
+    plugins: [
+      {
+        name: "lifecycle-version",
+        setup(builder) {
+          builder.onLoad({ filter: /packages\/constants\/src\/runtime\.ts$/ }, () => ({
+            contents: `export const TitanRelease = ${JSON.stringify(version)};`,
+            loader: "ts",
+          }));
+          builder.onLoad({ filter: /\.ts$/ }, async ({ path }) => ({
+            contents: await readFile(path),
+            loader: "ts",
+          }));
+          builder.onLoad({ filter: /\.[cm]?js$/ }, async ({ path }) => ({
+            contents: await readFile(path),
+            loader: "js",
+          }));
+        },
+      },
+    ],
+  });
+  if (!result.success) throw new AggregateError(result.logs);
+  const entry = resolve(source, Packaging.Bundle);
+  await chmod(entry, 0o755);
+  await writeFile(
+    resolve(source, "package.json"),
+    JSON.stringify({
+      name: Packaging.CliPackage,
+      version,
+      bin: { titan: Packaging.Bundle },
+    }),
+  );
+  const pack = Bun.spawn([process.execPath, "pm", "pack", "--destination", root], {
+    cwd: source,
+    stdout: "ignore",
+    stderr: "pipe",
+  });
+  assert.equal(await pack.exited, 0, await new Response(pack.stderr).text());
+  return resolve(root, `${Packaging.ArchivePrefix}${version}${Packaging.ArchiveExtension}`);
+}
+
+async function idleUninstall(
+  launcher: string,
+  home: string,
+  cwd: string,
+  refuse: () => Promise<void>,
+) {
+  const daemon = Bun.spawn([process.execPath, launcher, "serve", "--home", home, "--json"], {
+    cwd,
+    env: { HOME: cwd },
+    stdout: "ignore",
+    stderr: "inherit",
+  });
+  const ownerFile = resolve(home, ServerFile.Lock, ServerFile.Owner);
+  const health = async () => ServerHealthSchema.parse(await call(home, ServerRoute.Health, "GET"));
+  try {
+    assert.ok(await waitUntil(async () => (await health().catch(() => null))?.ready === true));
+    const owner = ServerOwnerSchema.parse(JSON.parse(await readFile(ownerFile, "utf8")));
+    assert.equal(owner.pid, daemon.pid);
+    const { url } = await readAddress(home);
+    const version = (await health()).version;
+    await refuse();
+    assert.equal(daemon.exitCode, null);
+    assert.deepEqual(JSON.parse(await readFile(ownerFile, "utf8")), owner);
+    assert.equal((await readAddress(home)).url, url);
+    assert.equal((await health()).version, version);
+  } finally {
+    if (daemon.exitCode === null) daemon.kill();
+    await daemon.exited;
+  }
+}
+
+async function recoverReinstalledRun(
+  command: string,
+  home: string,
+  cwd: string,
+  retained: Awaited<ReturnType<typeof createUpdateRun>>,
+  journal: Buffer,
+  run: (args: string[], expected: number, cwd?: string) => Promise<string>,
+) {
+  try {
+    const status = CliOutputSchema.parse(
+      JSON.parse(
+        await run(
+          [process.execPath, command, "status", retained.run_id, "--home", home, "--json"],
+          0,
+          cwd,
+        ),
+      ),
+    );
+    assert.equal(status.identifiers.run_id, retained.run_id);
+    const recovered = await readFile(resolve(retained.root, BoardFile.Journal));
+    assert.deepEqual(recovered.subarray(0, journal.length), journal);
+    const events = recovered.subarray(journal.length).toString().trim().split("\n");
+    assert.equal(events.length, 1);
+    const event = RunEventSchema.parse(JSON.parse(events[0] ?? ""));
+    assert.equal(event.type, RunEventKind.Restart);
+    assert.equal(event.state.state, RunStatus.Blocked);
+    assert.equal(event.state.runtime_version, retained.runtime_version);
+  } finally {
+    if (await exists(resolve(home, ServerFile.Lock))) await requestServerStop(home);
+  }
+}
+
+async function activeUninstall(home: string, project: string, invoke: () => Promise<unknown>) {
+  let entered = false;
+  const server = await startServer(
+    home,
+    () =>
+      new FakeBackend(async (spec, _prompt, signal) => {
+        entered = true;
+        await new Promise<void>((done) =>
+          signal.addEventListener(SignalEvent.Abort, () => done(), { once: true }),
+        );
+        return schemaFakeAnswer(spec);
+      }),
+  );
+  try {
+    await call(home, "/runs", "POST", {
+      project,
+      workflow: checkedWorkflow(),
+      backend: Backend.Fake,
+      client_id: "uninstall",
+      submission_id: "active",
+    });
+    assert.ok(await waitUntil(async () => entered));
+    await invoke();
+  } finally {
+    await server.stop();
+  }
+}
+
+export async function managedLifecycle(scenario: string) {
+  return withTemporaryDirectory(async (root) => {
+    const source = resolve(root, "source");
+    const project = resolve(root, "other project");
+    const installation = resolve(root, "managed install");
+    const launcher = resolve(installation, "titan");
+    const command = resolve(root, ".local/bin/titan");
+    const ownership = resolve(installation, UpdateFile.CommandOwnership);
+    const home = resolve(root, "home");
+    const toolBin = resolve(root, "tools");
+    for (const folder of [source, project, home, installation, toolBin, dirname(command)])
+      await mkdir(folder, { recursive: true });
+    await symlink(resolve(import.meta.dir, "../../node_modules"), resolve(root, "node_modules"));
+    await symlink(process.execPath, resolve(toolBin, "bun"));
+    if (scenario === "pre-existing") await symlink(launcher, command);
+    const original = await lifecycleArchive(root, TitanRelease);
+    await copyFile(Script, resolve(source, "install.sh"));
+    await symlink(resolve(import.meta.dir, "../../tooling"), resolve(source, "tooling"));
+    await writeFile(
+      resolve(source, "package.json"),
+      JSON.stringify({ private: true, scripts: { "pack:preview": "bun pack.ts" } }),
+    );
+    const pack = (archive: string) =>
+      writeFile(
+        resolve(source, "pack.ts"),
+        `import {copyFile} from "node:fs/promises"; await copyFile(${JSON.stringify(archive)}, process.argv[2] + "/titan-cli-local.tgz");`,
+      );
+    await pack(original);
+    const paths = [resolve(installation, "custom"), resolve(home, ConfigFile.User)];
+    for (const path of paths) await writeFile(path, "{}");
+    async function run(args: string[], expected: number, cwd = project) {
+      const process = Bun.spawn(args, {
+        cwd,
+        env: { HOME: root, PATH: `${toolBin}:/usr/bin:/bin` },
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+      const out = await new Response(process.stdout).text();
+      const errors = await new Response(process.stderr).text();
+      assert.equal(await process.exited, expected, out + errors);
+      return out;
+    }
+    const install = [Shell, resolve(source, "install.sh"), installation];
+    const uninstall = [process.execPath, launcher, "uninstall", "--home", home, "--json"];
+    await run(install, 0);
+    const previous = await readlink(launcher);
+    const args = uninstall.slice(2);
+    const direct = createCli({
+      ...defaultServices,
+      executable: [process.execPath, launcher],
+      cwd: () => project,
+      output: () => {},
+    });
+    if (scenario === "pre-existing") await assert.rejects(lstat(ownership), { code: "ENOENT" });
+    else
+      assert.equal(
+        InstallCommandLinkSchema.parse(JSON.parse(await readFile(ownership, "utf8"))).path,
+        command,
+      );
+    if (scenario === "replaced") {
+      await unlink(command);
+      await symlink(launcher, command);
+    }
+    if (
+      [
+        "active",
+        "idle",
+        "replaced",
+        "locked",
+        "external-locked",
+        "external-maintenance",
+        "knowledge-locked",
+      ].includes(scenario)
+    ) {
+      await using lease = new AsyncDisposableStack();
+      if (scenario === "locked") await ownMaintenance(installation, lease);
+      if (scenario === "external-locked") await ownOfflineHome(home, lease);
+      if (scenario === "external-maintenance") await ownMaintenance(home, lease);
+      if (scenario === "knowledge-locked") await ownKnowledge(home, lease);
+      const refuse = async () => {
+        const result = CliOutputSchema.parse(JSON.parse(await run(uninstall, 2)));
+        const code = ["active", "idle", "external-locked", "knowledge-locked"].includes(scenario)
+          ? ErrorCode.ServerBusy
+          : scenario === "replaced"
+            ? ErrorCode.ConfigConflict
+            : ErrorCode.ServerLocked;
+        assert.equal(result.error?.code, code);
+        await assert.rejects(() => direct(args), { code });
+        assert.equal(await readlink(launcher), previous);
+        assert.equal(await readlink(command), launcher);
+      };
+      if (scenario === "active") await activeUninstall(home, project, refuse);
+      else if (scenario === "idle") {
+        const other = resolve(root, "other install");
+        await run([Shell, resolve(source, "install.sh"), other], 0);
+        await idleUninstall(resolve(other, "titan"), home, project, refuse);
+      } else await refuse();
+      return true;
+    }
+    const unmanaged = await run(
+      [process.execPath, resolve(root, TitanRelease, Packaging.Bundle), "uninstall", "--json"],
+      2,
+    );
+    assert.match(unmanaged, /bun remove @titan\/cli/);
+    const unmanagedCli = createCli({ ...defaultServices, executable: undefined });
+    await assert.rejects(() => unmanagedCli(args), { code: ErrorCode.Arguments });
+    await assert.rejects(
+      () => direct(["uninstall", "--home", resolve(paths[1] ?? home, "child")]),
+      {
+        code: "ENOTDIR",
+      },
+    );
+    const retained = await createUpdateRun(home, project);
+    const journalPath = resolve(retained.root, BoardFile.Journal);
+    const journal = await readFile(journalPath);
+    const hub = await KnowledgeHub.open(home);
+    const { entry } = await hub
+      .add({ kind: KnowledgeKind.Fact, title: "Retained fact", body: "Keep this fact." })
+      .finally(() => hub.close());
+    if (scenario === "owned") {
+      const update = await lifecycleArchive(root, Packaging.UpdateVersion);
+      await run(
+        [process.execPath, launcher, "update", "--home", home, "--from", update, "--json"],
+        0,
+      );
+      assert.notEqual(await readlink(launcher), previous);
+      assert.match(
+        await run([process.execPath, command, "--version", "--json"], 0),
+        /0\.1\.0-alpha\.2/,
+      );
+      await pack(update);
+    }
+    const selected = await readlink(launcher);
+    const leasePaths = [ServerFile.Lease, ServerFile.MaintenanceLease].map((name) =>
+      resolve(home, name),
+    );
+    if (scenario === "pre-existing")
+      for (const path of leasePaths) await assert.rejects(lstat(path), { code: "ENOENT" });
+    await run(uninstall, 0);
+    if (scenario === "pre-existing")
+      for (const path of leasePaths) await assert.rejects(lstat(path), { code: "ENOENT" });
+    await assert.rejects(lstat(launcher), { code: "ENOENT" });
+    if (scenario === "pre-existing") assert.equal(await readlink(command), launcher);
+    else await assert.rejects(lstat(command), { code: "ENOENT" });
+    for (const release of [previous, selected])
+      assert.ok(await exists(resolve(installation, release)));
+    await run(install, 0);
+    assert.equal(await readlink(command), launcher);
+    const reinstalled = await run([process.execPath, command, "--version", "--json"], 0, source);
+    if (scenario === "owned") assert.match(reinstalled, /0\.1\.0-alpha\.2/);
+    for (const path of paths) assert.equal(await readFile(path, "utf8"), "{}");
+    assert.deepEqual(await readFile(journalPath), journal);
+    await recoverReinstalledRun(command, home, source, retained, journal, run);
+    const reopened = await KnowledgeHub.open(home);
+    assert.equal(
+      (await reopened.get(entry.id).finally(() => reopened.close())).entry.body,
+      "Keep this fact.",
+    );
+    assert.equal(await direct(args), 0);
+    await assert.rejects(lstat(launcher), { code: "ENOENT" });
+    return true;
   });
 }

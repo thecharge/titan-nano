@@ -1,5 +1,37 @@
-import { ErrorCode, SnapshotMutation, VendorStubMode } from "@titan/constants";
+import { ErrorCode, NativeToolTransport, SnapshotMutation, VendorStubMode } from "@titan/constants";
 import { positive, rejected } from "@titan/test-factories";
+
+export const claudePersonaCases = {
+  positive: [
+    positive(
+      "retains the Claude persona through HTTP",
+      [NativeToolTransport.Http, true, true, "stub-persona-model"],
+      true,
+    ),
+    positive(
+      "retains the Claude persona through stdio",
+      [NativeToolTransport.Stdio, true, true, "stub-persona-model"],
+      true,
+    ),
+  ],
+  negative: [
+    rejected(
+      "an indexed skill does not count as a selected skill",
+      [NativeToolTransport.Http, false, true, "stub-persona-model"],
+      true,
+    ),
+    rejected(
+      "the stub refuses a missing Grep tool",
+      [NativeToolTransport.Http, true, false, "stub-persona-model"],
+      true,
+    ),
+    rejected(
+      "the stub refuses the standard test model for this persona",
+      [NativeToolTransport.Http, true, true, "stub-model"],
+      true,
+    ),
+  ],
+};
 
 export const claudeTransportCases = {
   positive: [

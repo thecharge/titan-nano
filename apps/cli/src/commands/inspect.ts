@@ -20,7 +20,7 @@ import {
 } from "@titan/messages";
 import type { CliServices, CommandHandler } from "@titan/types";
 import { renderGuide, schemaText } from "../guide.ts";
-import { checkPrerequisites } from "../prerequisites.ts";
+import { checkPrerequisites, checkSqliteVector } from "../prerequisites.ts";
 import { verifyUpdateBackup } from "../update-backup.ts";
 import { modelStatus } from "./model.ts";
 
@@ -66,7 +66,7 @@ export const inspectHandlers = {
           toolLine(services.program(entry.command) !== null, services.sdk(sdkName(entry.harness))),
         ]),
       ),
-      prerequisites: checkPrerequisites(services, null),
+      prerequisites: [...checkPrerequisites(services, null), await checkSqliteVector()],
       bun: services.runtimeVersion,
       node: services.program(CliRuntime.Node),
       codex: services.program(Harness.Codex),

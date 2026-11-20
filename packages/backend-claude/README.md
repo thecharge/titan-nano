@@ -14,6 +14,31 @@ Existing Write and Edit targets must be regular files with exactly one hard link
 
 ## Verification
 
+Offline checks use the pinned Claude Agent SDK with a local executable stub in place of Claude Code.
+
+### Set up Claude with an installed Titan
+
+1. Install Claude Code and sign in using its interactive setup.
+2. In your project, run `titan install --harness claude` to register Titan with Claude Code.
+3. Open a new Claude Code session in that project and enter `/titan`.
+4. Run `titan doctor --json` to inspect local readiness. Run `titan backends --json` to find the `claude-sdk` backend.
+
+See the [Titan installation guide](../../docs/install.md) for launcher and registration details.
+
+### Check the adapter offline
+
+From the checkout, run:
+
+```sh
+bun run test testing/integration/claude-transport.test.ts testing/e2e/request-turn-process.test.ts testing/e2e/helper-process.test.ts
+```
+
+The persona test checks the role and retained skill text in the Claude process request. It also checks the exact Read and Grep list, the explicit model, and the persona saved with the run. Titan captures workspace skills and sends the selected instructions as part of the role. The native tool server serves retained skill files during the run.
+
+Run `bun run check:package` after preparing the offline test image to repeat the persona cases, verify that answers reach the original native session, and verify that retained skills survive a restart through the installed CLI. The focused test command still requires full product coverage, so use `bun run test` to run the complete local gate. Live Claude verification requires an authenticated run with recorded output, a session ID, and usage.
+
+### Other adapter checks
+
 Run offline adapter contract tests, including denied tools and malformed usage. Caller and session cancellation are checked before SDK invocation and after streamed event handling. Pinned Claude Agent SDK 0.3.329 process tests use a versioned executable stub for initialization, required arguments, start and resume, fragmented output, broken streams, nonzero exits and cancellation. Cases assert one invocation, correct output and usage, no fallback timeout and observed child exit. Installed offline recovery covers checker continuation after graceful and forced daemon restart, including exhausted allowances. Live native continuation and permission behavior remain unverified. Shared path cases cover malformed inputs, conflicting fields, escaping patterns and outside symlinks.
 
 ## Limits

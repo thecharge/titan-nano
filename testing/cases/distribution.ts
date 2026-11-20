@@ -1,6 +1,12 @@
-import { ErrorCode, IoLimit, Packaging } from "@titan/constants";
+import {
+  ErrorCode,
+  IoLimit,
+  KnowledgeMeaningLocal,
+  PackageRegistryGate,
+  Packaging,
+} from "@titan/constants";
 import { VerificationMessage } from "@titan/messages";
-import { negative, positive } from "@titan/test-factories";
+import { negative, positive, rejected } from "@titan/test-factories";
 
 export const distributionVersionCases = {
   positive: [
@@ -119,4 +125,48 @@ export const distributionOutputAdmissionCases = {
     ),
   ],
   negative: distributionOutputOptionsCases.negative,
+};
+
+const optionalVector = { name: KnowledgeMeaningLocal.SqliteVec, required: false };
+
+export const nativeDistributionCases = {
+  positive: [
+    positive("loads the SQLite vector extension in memory", ["native"], {
+      ...optionalVector,
+      ready: true,
+      repair: null,
+    }),
+    positive("closes the probe after the extension opens", ["close"], {
+      ...optionalVector,
+      ready: true,
+      repair: null,
+    }),
+  ],
+  negative: [
+    rejected("reports a fault-injected SQLite vector loader failure", ["load-fault"], {
+      ...optionalVector,
+      ready: false,
+      repair: true,
+    }),
+    rejected("reports a fault-injected SQLite vector probe cleanup failure", ["close-fault"], {
+      ...optionalVector,
+      ready: false,
+      repair: true,
+    }),
+  ],
+};
+
+export const archiveDistributionCases = {
+  positive: [
+    positive("accepts a clean package archive", ["clean"], true),
+    positive("accepts public first-use files", ["example"], true),
+  ],
+  negative: [
+    negative("rejects a synthetic secret in a shipped file", ["secret"], {
+      message: PackageRegistryGate.Secret,
+    }),
+    negative("rejects a private run record in a public directory", ["private-run"], {
+      message: PackageRegistryGate.InvalidArchive,
+    }),
+  ],
 };

@@ -68,6 +68,7 @@ export function createCli(services: CliServices) {
     };
     if (
       invocation.name !== CliCommand.Update &&
+      invocation.name !== CliCommand.Uninstall &&
       services.environment[UpdateFile.PinnedRuntime] !== services.version &&
       !(invocation.name === CliCommand.Doctor && invocation.values.backup)
     ) {

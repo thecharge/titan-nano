@@ -260,3 +260,33 @@ A setting `update.mode` SHALL be `notify`, `auto` or `off`, with `notify` as the
 
 - **WHEN** the new version fails the doctor check
 - **THEN** the old version runs again and the person's data is unchanged
+
+### Requirement: Managed installation can be removed and reinstalled without losing work
+
+The installed CLI SHALL offer `titan uninstall` for a managed installation. It MUST acquire the installation maintenance lease shared by installation and update, resolve the invoking managed release, and refuse active work before it removes the launcher. An external Titan home supplied by path MUST be checked without stopping its daemon or acquiring a write lease there. It MUST remove only the managed launcher and any unchanged command link that the installation can prove it created. It MUST preserve run records, project and home knowledge, settings, credentials, backups, retained runtime releases and unrelated files. A direct package installation MUST name the package-manager removal command without modifying shared state. Reinstalling MUST reconnect the stable command and continue to resolve saved run pins.
+
+#### Scenario: Managed uninstall and reinstall preserve existing work
+
+- **WHEN** a person installs, updates, uninstalls and reinstalls Titan in the same managed folder
+- **THEN** uninstall removes the owned command links and reinstall restores the stable command
+- **AND** the retained installation reads its existing runs and knowledge, including runs pinned to earlier releases
+
+#### Scenario: Uninstall refuses active work
+
+- **WHEN** the selected installation has an active run
+- **THEN** uninstall refuses and leaves the launcher and the run unchanged
+
+#### Scenario: Uninstall leaves an external daemon running
+
+- **WHEN** an installed launcher receives `titan uninstall --home HOME` targeting an external home with a daemon
+- **THEN** uninstall refuses and leaves that daemon, its home and the invoking launcher unchanged
+
+#### Scenario: Uninstall preserves foreign command links
+
+- **WHEN** a command link predates the managed installation or was replaced after installation
+- **THEN** uninstall leaves that command link unchanged
+
+#### Scenario: Direct package uninstall names the package manager
+
+- **WHEN** a person invokes `titan uninstall` through a directly installed package
+- **THEN** Titan reports the supported package-manager command and changes no files
