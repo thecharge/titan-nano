@@ -115,8 +115,16 @@ export const guideRulesCases = {
 
 export const guideSchemaCases = {
   positive: [
-    positive("guide holds the titan schema text and the four examples", [["schema"], four], true),
-    positive("guide schema equals titan schema workflow", [workflowSchema, ["code-fix"]], true),
+    positive(
+      "piped guide holds the titan schema text and the four examples",
+      [["schema"], four, true],
+      true,
+    ),
+    positive(
+      "piped guide schema equals titan schema workflow",
+      [workflowSchema, ["code-fix"], true],
+      true,
+    ),
   ],
   negative: [
     rejected("the config schema is not the schema in the guide", [configSchema, four], false),

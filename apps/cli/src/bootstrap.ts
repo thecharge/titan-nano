@@ -170,6 +170,7 @@ export const defaultServices: CliServices = {
   output: (value, json, context) => {
     if (json && context?.operation !== CliCommand.Serve)
       return writeStdoutLine(JSON.stringify(boundedJsonOutput(value, context)));
+    if (!json && typeof value === DataKind.String) return writeStdoutLine(String(value));
     renderCommandOutput(value, json, context);
   },
   knownHomes,

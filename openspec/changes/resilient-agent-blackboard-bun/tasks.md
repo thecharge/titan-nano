@@ -161,7 +161,7 @@ The [shared fabric delivery sequence](research/shared-fabric-delivery.md) expand
 
 ## 12. Write the guide for the main agent
 
-- [ ] 12.1 Write `titan guide` and `titan schema`. Done when the scenarios "Guide lists the steps" and "Schema in the guide matches titan schema" pass.
+- [x] 12.1 Write `titan guide` and `titan schema`. Done when the scenarios "Guide lists the steps" and "Schema in the guide matches titan schema" pass.
 - [x] 12.2 Write `titan install --harness claude|codex|antigravity`, with the plug-in folder, the skill and `titan mcp`. Done when the scenarios "Install into a project", "Install for Codex", "Someone else's file is there" and "Skill header" pass.
 - [ ] 12.3 Check that each agent tool loads the skill and can start it by name, using the findings of task 1.7. Done when each agent tool finds the guide in a live test, saved in `research/live/guide-<tool>.txt`.
 
@@ -246,7 +246,7 @@ Each task here starts from the probe in `research/probes/swarm/`.
 - [ ] 21.1 Write the stall count and the `replan` request kind at level `main`. Done when the scenarios "Repeated results start a new plan" and "Steady progress never starts a new plan" pass with the fake backend.
 - [ ] 21.2 Add the field `failure` with the 14 failure kinds to the falsifier's answer schema, and count the kinds in `result.md`. Done when the scenarios "Failure kinds in the result" and "Unknown failure kind" pass.
 - [ ] 21.3 Write `candidate_backends` for steps with several candidates. Done when the scenario "Three candidates on two backends" passes with two fake backends.
-- [ ] 21.4 Add the rules on when not to split work to the guide. Done when the scenario "Guide warns about sequential work" passes.
+- [x] 21.4 Add the rules on when not to split work to the guide. Done when the scenario "Guide warns about sequential work" passes.
 - [ ] 21.5 Write the blocking check that no task text holds a key value. Done when the scenario "Key value in a task" passes with a made-up key.
 - [ ] 21.6 Write `titan trace` with `@opentelemetry/sdk-trace-base`, from `research/probes/swarm/test/otel.test.ts`. Done when the scenario "Spans of a run with a tool call" passes.
 - [ ] 21.7 Serve the agent card at `/.well-known/agent-card.json`, built with the types of `@a2a-js/sdk`, from `research/probes/swarm/test/a2a.test.ts`. Done when the scenario "Card without a token" passes.

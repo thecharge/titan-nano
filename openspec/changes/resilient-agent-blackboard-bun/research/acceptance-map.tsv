@@ -129,7 +129,7 @@ main-agent-guide	titan plugs into each agent tool as a skill and a tool server	I
 main-agent-guide	titan plugs into each agent tool as a skill and a tool server	Someone else's file is there	12.2	adapter	integration	implemented
 main-agent-guide	The person can start titan by name	Skill header	12.2	adapter	integration	implemented
 main-agent-guide	The main agent can design and run a workflow from a problem alone	Live main agent in Claude Code	19.4	full	live	pending
-main-agent-guide	The guide says when not to split work	Guide warns about sequential work	21.4	full	end-to-end	pending
+main-agent-guide	The guide says when not to split work	Guide warns about sequential work	21.4	full	end-to-end	implemented
 main-agent-guide	The guide asks for proof checks where a claim can be proven	Guide text on proof checks	24.12	full	end-to-end	pending
 persona-board	Every message goes onto the board	Board after a run with a question	9.1	local	integration	implemented
 persona-board	Every message goes onto the board	Parallel steps write at the same time	9.1	local	integration	implemented

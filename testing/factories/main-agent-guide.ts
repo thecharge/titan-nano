@@ -30,6 +30,7 @@ import { createCli } from "../../apps/cli/src/application.ts";
 import { defaultServices, renderOutput } from "../../apps/cli/src/bootstrap.ts";
 import { renderGuide } from "../../apps/cli/src/guide.ts";
 import { launch } from "../../apps/cli/src/launch.ts";
+import { captureCli } from "../support/command.ts";
 
 const GitCommand = "git";
 const GitPath = "/usr/bin/git";
@@ -85,9 +86,11 @@ export async function guideRules(sentence: string): Promise<boolean> {
 export async function guideSchema(
   schemaArgs: readonly string[],
   names: readonly string[],
+  processOutput = false,
 ): Promise<boolean> {
-  const text = await printed(["guide"]);
-  const schema = await printed(schemaArgs);
+  const output = processOutput ? pipedGuideOutput : printed;
+  const text = await output(["guide"]);
+  const schema = await output(schemaArgs);
   const held = await all(
     names.map(
       (name) => async () =>
@@ -97,6 +100,13 @@ export async function guideSchema(
     ),
   );
   return SkillDocument.Schema.exec(text)?.[1] === schema && held.every(Boolean);
+}
+
+async function pipedGuideOutput(args: readonly string[]): Promise<string> {
+  const cli = resolve(import.meta.dir, "../../apps/cli/src/main.ts");
+  const result = await captureCli(cli, [...args]);
+  assert.equal(result.code, ExitCode.Success, result.error.toString());
+  return result.output.toString().replace(/\r?\n$/, "");
 }
 
 export function installProject(harness: Harness, part: InstallPart): Promise<string> {
