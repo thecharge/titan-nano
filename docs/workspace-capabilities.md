@@ -61,4 +61,4 @@ Generated cache directories are omitted from ordinary snapshots unless a step ex
 
 ## Delivery evidence
 
-The [active change evidence](../openspec/changes/improve-workspace-agent-experience/evidence.md) records the actual source and package checks. Bounded public web acquisition is still an open task in that change. Native skill coverage currently includes offline vendor fixtures. The recorded live implementation run reached its time limit before completing the whole change.
+The [archived change evidence](../openspec/changes/archive/2026-11-20-improve-workspace-agent-experience/evidence.md) records the source and package checks, including bounded public web acquisition. Native skill coverage uses offline vendor fixtures. The recorded live implementation run reached its time limit before completing the whole change.

@@ -100,6 +100,24 @@ Complete local source and installed-package acceptance use pinned SDKs with vend
 
 The installed command checks the daemon version and exact runtime bundle hash. An idle daemon from another build is replaced through the existing graceful handoff. A busy daemon keeps its work and reports the handoff refusal. Source development commands retain version-only discovery.
 
+For a first offline run, copy the shipped `examples` and `tests` directories to a project. Run these commands from that project with the installed launcher.
+
+```sh
+titan doctor --home HOME
+titan check examples/everyday-problem.yaml --harness fake --home HOME
+titan run examples/everyday-problem.yaml --harness fake --fake-script tests/everyday-problem.answers.yaml --home HOME
+```
+
+If a run stops for an answer or its daemon is interrupted, keep the original run ID and home. Check the status and requests, answer any pending request through the normal approval path, then resume.
+
+```sh
+titan status RUN_ID --compact --home HOME
+titan requests --run-id RUN_ID --home HOME
+titan resume RUN_ID --watch --home HOME
+```
+
+Titan reports missing Python, Lean and local embedding files in doctor. The offline example works with those capabilities absent. See the [installed acceptance record](../openspec/changes/resilient-agent-blackboard-bun/research/installation-acceptance.md) for the verified environment and run outcomes.
+
 ## Linux script sandbox
 
 Approved scripts require Linux 6.12 or newer with Landlock, seccomp user notification and parent-to-child ptrace enabled. The installer prepares Sandlock 0.9.1 with Titan's Apache-2.0 file-claim policy patch while building the package. The first source build requires Cargo or access to download the private Rust toolchain, a C compiler for linking, GNU tar and patch. When Cargo is missing, preparation installs checksum-pinned Rustup 1.29.3 and Rust 1.96.0 in Titan's private dependency cache. It leaves shell profiles unchanged. Later source builds reuse that cache. Direct archive installations contain the ready executable and need no Rust toolchain or C compiler. Preparation failures preserve the existing managed release.

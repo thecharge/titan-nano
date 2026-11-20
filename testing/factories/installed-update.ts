@@ -15,7 +15,9 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import {
   BoardFile,
+  KnowledgeKind,
   KnowledgeMeaningLocal,
+  KnowledgeScope,
   Packaging,
   RunEventKind,
   RunStatus,
@@ -23,6 +25,7 @@ import {
   UpdatePhase,
   VendorPackage,
 } from "@titan/constants";
+import { KnowledgeHub, projectHubHome } from "@titan/knowledge";
 import { captureCommand, ownedCommandProcesses } from "@titan/process";
 import { requestServerStop } from "@titan/server/maintenance";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
@@ -31,6 +34,7 @@ import {
   type CommandProcessPort,
   McpTextContentSchema,
   RunEventSchema,
+  UpdateBackupSchema,
   UpdateTransactionSchema,
   UpdateVersionSchema,
 } from "@titan/types";
@@ -184,8 +188,6 @@ export async function installedUpdate(cli: string, fixtures: string, mode: strin
       });
     await writeFile(join(home, "credential"), "retained credential", { mode: 0o600 });
     await writeFile(join(project, ".titan/journal"), "retained private journal");
-    const run = await createUpdateRun(home, project);
-    const journal = await readFile(join(run.root, BoardFile.Journal));
     if (mode === "earlier-backup") {
       await mkdir(join(home, "backups/earlier"), { recursive: true });
       await writeFile(join(home, "backups/earlier/data"), "earlier backup");
@@ -213,6 +215,38 @@ export async function installedUpdate(cli: string, fixtures: string, mode: strin
         });
       },
     };
+    const title = "Sample inventory";
+    const body = "The sample inventory contains three blue folders.";
+    const entries = new Map<KnowledgeScope, string>();
+    for (const [scope, directory] of [
+      [KnowledgeScope.Home, home],
+      [KnowledgeScope.Project, projectHubHome(project)],
+    ] as const) {
+      const hub = await KnowledgeHub.open(directory);
+      try {
+        const { entry: added } = await hub.add({ kind: KnowledgeKind.Fact, title, body });
+        entries.set(scope, added.id);
+      } finally {
+        await hub.close();
+      }
+    }
+    const run = await createUpdateRun(home, project);
+    const journal = await readFile(join(run.root, BoardFile.Journal));
+    async function checkKnowledge(selectedHome: string, selectedProject: string) {
+      for (const [scope, id] of entries) {
+        const directory =
+          scope === KnowledgeScope.Home ? selectedHome : projectHubHome(selectedProject);
+        const hub = await KnowledgeHub.open(directory);
+        try {
+          const { entry: retained } = await hub.get(id);
+          assert.equal(retained.id, id);
+          assert.equal(retained.title, title);
+          assert.equal(retained.body, body);
+        } finally {
+          await hub.close();
+        }
+      }
+    }
     const result = await captureCommand(
       [
         process.execPath,
@@ -288,6 +322,11 @@ export async function installedUpdate(cli: string, fixtures: string, mode: strin
       "retained private journal",
     );
     assert.ok(transaction.backup);
+    if (!succeeds) {
+      const failure = CliOutputSchema.parse(JSON.parse(result.stdout.toString()));
+      assert.ok(failure.error);
+      assert.ok(failure.error.message.includes(transaction.backup), failure.error.message);
+    }
     for (const _ of [0, 1]) {
       const inspected = await captureCommand(
         [
@@ -312,6 +351,19 @@ export async function installedUpdate(cli: string, fixtures: string, mode: strin
       (await readFile(join(transaction.backup, "home/credential"))).toString(),
       "retained credential",
     );
+    await checkKnowledge(home, project);
+    const inventory = UpdateBackupSchema.parse(
+      JSON.parse((await readFile(join(transaction.backup, UpdateFile.Manifest))).toString()),
+    );
+    const projectCopy = inventory.roots.find(({ source }) => source === projectHubHome(project));
+    assert.ok(projectCopy);
+    const restoredHome = join(root, "restore-home");
+    const restoredProject = join(root, "restore-project");
+    await cp(join(transaction.backup, UpdateFile.Home), restoredHome, { recursive: true });
+    await cp(join(transaction.backup, projectCopy.copy), projectHubHome(restoredProject), {
+      recursive: true,
+    });
+    await checkKnowledge(restoredHome, restoredProject);
     if (succeeds) {
       try {
         let recovered = journal;

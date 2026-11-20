@@ -462,7 +462,7 @@ configuration	Configuration tools explain and safely change settings	Inspect a b
 distribution	Release packages install independently of the monorepo	Install without workspace links	31.1	local	integration	pending
 distribution	Release packages install independently of the monorepo	Missing transitive package	31.1	local	integration	pending
 distribution	Release packages install independently of the monorepo	Secret in package files	31.1	local	integration	pending
-distribution	Environment and optional capabilities are explicit	Minimal environment first use	31.2	local	integration	pending
+distribution	Environment and optional capabilities are explicit	Minimal environment first use	31.2	local	integration	implemented
 distribution	Environment and optional capabilities are explicit	Unsupported native dependency	31.2	local	integration	pending
 distribution	A first working version has an executable acceptance path	Installed preview survives restart	31.3	local	end-to-end	pending
 distribution	A first working version has an executable acceptance path	Real adapter readiness needs evidence	31.3	local	end-to-end	pending
@@ -919,11 +919,11 @@ distribution	Install checks the needed tools first	Only optional tools missing	3
 distribution	A plain-language install guide exists	Install guide matches the package	31.9	local	integration	implemented
 distribution	A start script works before Bun exists	Bun absent at start	31.10	local	integration	implemented
 distribution	A start script works before Bun exists	Git absent at start	31.10	local	integration	implemented
-distribution	Titan tells the person when a newer version exists	Newer version exists	31.11	local	integration	pending
-distribution	Titan tells the person when a newer version exists	Check turned off	31.11	local	integration	pending
-distribution	Titan updates without losing data	Update that passes	31.12	local	integration	pending
-distribution	Titan updates without losing data	Update that fails	31.12	local	integration	pending
-distribution	The start script only starts the install	Later steps are commands	31.13	local	integration	pending
+distribution	Titan tells the person when a newer version exists	Newer version exists	31.11	local	integration	implemented
+distribution	Titan tells the person when a newer version exists	Check turned off	31.11	local	integration	implemented
+distribution	Titan updates without losing data	Update that passes	31.12	local	integration	implemented
+distribution	Titan updates without losing data	Update that fails	31.12	local	integration	implemented
+distribution	The start script only starts the install	Later steps are commands	31.13	local	integration	implemented
 knowledge-hub	The hub has a project scope and a home scope	A run saves a lesson in the project	33.1	local	integration	pending
 knowledge-hub	The hub has a project scope and a home scope	Search reads both hubs	33.1	local	integration	pending
 knowledge-hub	The hub has a project scope and a home scope	Promote an entry	33.1	local	integration	pending

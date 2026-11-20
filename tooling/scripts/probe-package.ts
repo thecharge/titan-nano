@@ -233,19 +233,14 @@ const cli = resolve(Packaging.CliPath);
 for (const mode of Object.values(DaemonBuildCase))
   assert.equal(await installedDaemonBuild(cli, mode), true);
 console.log(JSON.stringify({ installed_daemon_build_cases: 3 }));
-await all(
-  [...installedUpdateCases.positive, ...installedUpdateCases.negative].map(
-    (scenario) => async () => {
-      const result = await Reflect.apply(installedUpdate, undefined, [
-        cli,
-        resolve(Packaging.UpdateFixtures),
-        ...scenario.args,
-      ]);
-      assert.equal(result, scenario.expected, scenario.name);
-    },
-  ),
-  TestScheduling.Maximum,
-);
+for (const scenario of [...installedUpdateCases.positive, ...installedUpdateCases.negative]) {
+  const result = await Reflect.apply(installedUpdate, undefined, [
+    cli,
+    resolve(Packaging.UpdateFixtures),
+    ...scenario.args,
+  ]);
+  assert.equal(result, scenario.expected, scenario.name);
+}
 console.log(JSON.stringify({ installed_update_cases: 4 }));
 const installed = resolve(Packaging.InstalledPath);
 const home = resolve(Packaging.ProbeHome);

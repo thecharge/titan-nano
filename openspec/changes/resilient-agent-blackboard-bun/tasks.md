@@ -409,9 +409,9 @@ Apply design decision 38 during the foundation stage. The sibling comparison and
 - [ ] 31.2 Record tested environments and optional capability setup in doctor and installation docs. Done when the scenario "Minimal environment first use" passes with its complete mapped cases.
 - [x] 31.9 Check the needed tools during install and write the plain-language install guide `docs/install.md`. Done when the scenarios "Required tool missing", "Only optional tools missing" and "Install guide matches the package" pass.
 - [x] 31.10 Write `install.sh` that checks Bun and Git before Bun exists, and mention it first in `docs/install.md`. Done when the scenarios "Bun absent at start" and "Git absent at start" pass.
-- [ ] 31.11 Write the update check, the one-line notice and the `update.source` and `update.check` settings. Done when the scenarios "Newer version exists" and "Check turned off" pass.
-- [ ] 31.12 Write `titan update` with `--check`, `--from`, the backup, the side-by-side install, the doctor gate and the rollback. Done when the scenarios "Update that passes" and "Update that fails" pass.
-- [ ] 31.13 Run Titan's own deliveries with the installed `titan` command and document it in `docs/install.md`. Done when a run is started and resumed through the installed command and the guide names the update steps.
+- [x] 31.11 Write the update check, the one-line notice and the `update.source` and `update.check` settings. Done when the scenarios "Newer version exists" and "Check turned off" pass.
+- [x] 31.12 Write `titan update` with `--check`, `--from`, the backup, the side-by-side install, the doctor gate and the rollback. Done when the scenarios "Update that passes" and "Update that fails" pass.
+- [x] 31.13 Run Titan's own deliveries with the installed `titan` command and document it in `docs/install.md`. Done when a run is started and resumed through the installed command and the guide names the update steps.
 - [ ] 31.3 Ship and verify the installed mixed-plan interruption recovery preview. Done when the scenario "Installed preview survives restart" passes with its complete mapped cases.
 - [ ] 31.4 Ship checked code, document, research and stubbed operation examples. Done when the scenario "Remote operation response is lost" passes with its complete mapped cases.
 - [ ] 31.5 Verify shared live self-development with an immutable installed controller and compatible runtime recovery. Done when the scenario "Titan edits Titan" passes with its complete mapped cases.
