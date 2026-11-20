@@ -25,6 +25,10 @@ import {
   LogLevel,
   McpIdentity,
   NativeTool,
+  OperationWebRead,
+  RequestDecision,
+  RequestDefaults,
+  RequestKind,
   RequestOperation,
   RequestPageFormat,
   RequestProjection,
@@ -40,6 +44,7 @@ import {
   ServerRoute,
   ServerRuntimePaths,
   ServerSql,
+  StepCap,
   UsageLimit,
 } from "@titan/constants";
 import { isActiveRun, newId, settle } from "@titan/core";
@@ -61,6 +66,7 @@ import {
   DashboardMessage,
   localServerUrl,
   ServerMessage,
+  WebResourceMessage,
 } from "@titan/messages";
 import { Engine } from "@titan/runner";
 import { KeyedQueue } from "@titan/store";
@@ -80,6 +86,7 @@ import {
   ServerStopRequestSchema,
   StoredRootSchema,
   StoredRunSchema,
+  WebResourceSelectionSchema,
 } from "@titan/types";
 import { exists } from "@titan/workspace";
 
@@ -108,6 +115,7 @@ import { listRequests, parseRequestListSearch } from "./request-listing.ts";
 import { operateRequest, selectRequest } from "./requests.ts";
 import { scopedScripts } from "./scripts.ts";
 import { RunSubmissions } from "./submissions.ts";
+import { publicResourceURL, readPublicResource } from "./web-resource.ts";
 
 export { call, readAddress } from "./client.ts";
 export { scopedScripts } from "./scripts.ts";
@@ -180,6 +188,27 @@ async function startOwnedServer(
     (scope, path) => engine.readNativeFile(scope, path),
     (scope, directory) => engine.listNativeFiles(scope, directory),
     (scope, change) => engine.writeNativeFile(scope, change),
+    async (scope, value, requestId) => {
+      const url = publicResourceURL(value);
+      const decision = await engine.authorizeNativeWeb(scope, url.href, requestId);
+      if (decision === RequestDecision.Approve)
+        return { ...(await readPublicResource(url)), request_id: requestId };
+      if (decision !== null) return { decision };
+      return {
+        request: {
+          kind: RequestKind.Resource,
+          scope: {
+            operation: OperationWebRead,
+            resource: url.href,
+            content_hashes: {},
+            arguments: [],
+            environment_names: [],
+          },
+          expires_at: Date.now() + StepCap.ExpiresMs,
+        },
+        instruction: WebResourceMessage.RequestTurn,
+      };
+    },
   );
   resources.defer(() => nativeAuthority.close());
   const nativeTools = options.nativeTools
@@ -425,6 +454,66 @@ async function startOwnedServer(
     const id = decodeURIComponent(match[1]);
     return await operations.use(id, () => runResponse(request, url, match, id));
   }
+  async function webReadResponse(request: Request, address: URL, id: string) {
+    const selection = WebResourceSelectionSchema.safeParse(await request.json());
+    if (!selection.success || address.searchParams.size)
+      throw new TitanError(ErrorCode.Arguments, ServerMessage.Operation);
+    const url = publicResourceURL(selection.data.url);
+    const run = await engine.snapshot(id);
+    const scope = {
+      operation: OperationWebRead,
+      resource: url.href,
+      content_hashes: {},
+      arguments: [],
+      environment_names: [],
+    };
+    const now = Date.now();
+    const requestedId = selection.data.request_id;
+    if (
+      requestedId ||
+      (run.config.value.approvals?.resource ?? RequestDefaults.resource) !== ApprovalLevel.Auto
+    ) {
+      const requests = await engine.requests.list(id);
+      const selected = requests.find(
+        (record) =>
+          record.kind === RequestKind.Resource &&
+          record.scope.operation === scope.operation &&
+          record.scope.resource === scope.resource &&
+          record.scope.arguments.length === 0 &&
+          record.scope.environment_names.length === 0 &&
+          Object.keys(record.scope.content_hashes).length === 0 &&
+          record.origin.client_id === run.client_id &&
+          record.origin.harness_session_id === null &&
+          record.origin.execution === undefined &&
+          record.expires_at > now &&
+          (requestedId ? record.request_id === requestedId : record.answer === null),
+      );
+      if (!selected) {
+        if (requestedId) throw new TitanError(ErrorCode.PermissionDenied, ServerMessage.Operation);
+        return Response.json({
+          request: await engine.requests.open(id, {
+            request_id: newId(),
+            kind: RequestKind.Resource,
+            scope,
+            expires_at: now + StepCap.ExpiresMs,
+            origin: { client_id: run.client_id, harness_session_id: null },
+          }),
+        });
+      }
+      if (selected.answer?.decision !== RequestDecision.Approve)
+        return Response.json({ request: selected });
+    }
+    const result = await readPublicResource(url);
+    const { text: _text, ...evidence } = result;
+    await db.unsafe(ServerSql.RecordWebRead, [
+      newId(),
+      id,
+      requestedId ?? null,
+      JSON.stringify(evidence),
+    ]);
+    return Response.json({ ...result, request_id: requestedId });
+  }
+
   async function runResponse(
     request: Request,
     url: URL,
@@ -476,6 +565,7 @@ async function startOwnedServer(
       return Response.json(await inspectArtifacts(run));
     }
     if (request.method === HttpMethod.Post) {
+      if (action === CliCommand.WebRead) return webReadResponse(request, url, id);
       if (action === RunAction.Resume) {
         const backend = parseResumeBackend(url.searchParams.get(UsageLimit.Query));
         void observeRun(engine.resume(id, backend), id, logger);

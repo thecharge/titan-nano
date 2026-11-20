@@ -7,6 +7,8 @@ import {
   ExecutionPhase,
   ExitCode,
   McpIdentity,
+  NativeTool,
+  OperationWebRead,
   RequestDecision,
   RequestEscalationSurface,
   RequestProjection,
@@ -16,6 +18,7 @@ import {
   StepStatus,
 } from "@titan/constants";
 import { call } from "@titan/server";
+import { createRunClient } from "@titan/server/client";
 import { createRequestClient } from "@titan/server/requests";
 import { vendorRecoveryWorkflow } from "@titan/test-factories";
 import { waitUntil } from "@titan/test-framework";
@@ -24,6 +27,8 @@ import {
   type BackendId,
   McpRequestResultSchema,
   McpTextContentSchema,
+  NativeToolBoardSchema,
+  ObjectSchema,
   type OperationRequest,
   OperationRequestSchema,
   RunSchema,
@@ -41,10 +46,11 @@ export async function requestTurnProcess(
   crash: boolean,
   pending: boolean,
   surface: RequestEscalationSurface,
+  web: boolean,
   paths: SdkProbePaths = {},
 ) {
   return withTemporaryDirectory((root) =>
-    requestTurnProcessAtRoot(root, backend, checker, crash, pending, surface, paths),
+    requestTurnProcessAtRoot(root, backend, checker, crash, pending, surface, web, paths),
   );
 }
 
@@ -52,7 +58,7 @@ async function requestTurnProcessAtRoot(
   root: string,
   ...args: Parameters<typeof requestTurnProcess>
 ) {
-  const [backend, checker, crash, pending, surface, paths = {}] = args;
+  const [backend, checker, crash, pending, surface, web, paths = {}] = args;
   const { home, project } = await prepareSdkProject(root, backend, 0, false, paths.vendors);
   const cli = paths.cli ?? resolve("apps/cli/src/main.ts");
   const children: ReturnType<typeof spawnServer>[] = [];
@@ -69,7 +75,7 @@ async function requestTurnProcessAtRoot(
     const target = workflow.steps[0];
     assert.ok(target?.falsify[0]);
     if (checker) target.falsify[0].task = "request_turn";
-    else target.do.task = "request_turn";
+    else target.do.task = web ? "request_turn_web" : "request_turn";
     const path = resolve(project, "request-turn.json");
     await writeFile(path, Buffer.from(JSON.stringify(workflow)));
     const waiting = RunSchema.parse(
@@ -220,6 +226,51 @@ async function requestTurnProcessAtRoot(
       RunSchema.parse(await call(home, `/runs/${waiting.run_id}`)).state,
       RunStatus.Passed,
     );
+    if (web) {
+      assert.equal(request.scope.operation, OperationWebRead);
+      const events = await createRunClient(home).events(after.run_id, { limit: 1000 });
+      const acquisitions = events.events.filter((event) => {
+        if (event.type !== "tool") return false;
+        const record = NativeToolBoardSchema.safeParse(event.data);
+        return record.success && record.data.tool === NativeTool.ReadWeb && record.data.web;
+      });
+      assert.equal(acquisitions.length, crash ? 0 : 1);
+      if (!crash) {
+        const event = acquisitions[0];
+        assert.ok(event);
+        const record = NativeToolBoardSchema.parse(event.data);
+        assert.equal(record.web?.request_id, request.request_id);
+        assert.equal(record.web?.requested, request.scope.resource);
+        assert.match(record.web?.error ?? "", /public addresses/);
+      }
+
+      const url = request.scope.resource;
+      const read = [CliCommand.WebRead, after.run_id, url];
+      const pendingCli = ObjectSchema.parse(await runCliCommand(cli, home, read, ExitCode.Success));
+      const cliRequest = OperationRequestSchema.parse(pendingCli.request);
+      assert.notEqual(cliRequest.request_id, request.request_id);
+      assert.equal(cliRequest.origin.execution, undefined);
+      await requests.answer(
+        {
+          ...input,
+          request_id: cliRequest.request_id,
+          version: cliRequest.version,
+        },
+        ApprovalLevel.Main,
+      );
+      const cliResult = ObjectSchema.parse(
+        await runCliCommand(cli, home, [...read, cliRequest.request_id], ExitCode.Success),
+      );
+      if (crash) {
+        assert.equal(
+          OperationRequestSchema.parse(cliResult.request).answer?.decision,
+          RequestDecision.Deny,
+        );
+      } else {
+        assert.equal(cliResult.request_id, cliRequest.request_id);
+        assert.match(String(cliResult.error), /public addresses/);
+      }
+    }
     return true;
   } finally {
     for (const child of children) await stopCommand(child);

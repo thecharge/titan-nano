@@ -231,13 +231,13 @@ export async function installUpdate(context: CommandContext, observe?: UpdateIns
   if (resolve(context.home) !== managed.installation)
     await ownMaintenance(managed.installation, resources);
   await ownMaintenance(context.home, resources);
+  await stopForUpdate(context);
+  await ownStoppedHome(context.home, resources);
   if (!pending && selected) {
     const source = await mkdtemp(join(managed.installation, UpdateFile.SourcePrefix));
     resources.defer(() => rm(source, { recursive: true, force: true }));
     archive = await buildUpdateRelease(selected, source, managed.runtime);
   }
-  await stopForUpdate(context);
-  await ownStoppedHome(context.home, resources);
   const recovered = await recoverUpdate(context.home, managed.installation);
   if (recovered) return { recovered: true, launcher: managed.launcher };
   if (!archive) {

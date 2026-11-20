@@ -6,8 +6,8 @@ export const distributionVersionCases = {
   positive: [
     positive(
       "SDK native version is retained exactly",
-      ['{"dependencies":{"@openai/codex":"0.167.0"}}'],
-      "0.167.0",
+      ['{"dependencies":{"@openai/codex":"0.171.0"}}'],
+      "0.171.0",
     ),
     positive(
       "SDK native prerelease stays pinned",
@@ -18,7 +18,7 @@ export const distributionVersionCases = {
   negative: [
     negative(
       "a native range cannot enter the archive",
-      ['{"dependencies":{"@openai/codex":"^0.167.0"}}'],
+      ['{"dependencies":{"@openai/codex":"^0.171.0"}}'],
       {},
     ),
     negative("a missing native dependency cannot disappear silently", ['{"dependencies":{}}'], {}),

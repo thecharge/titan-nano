@@ -1,4 +1,6 @@
 export const ClaudeMessage = {
+  AuthenticationFailed:
+    "Claude Agent SDK authentication failed. Check the configured provider credentials before resuming.",
   QuotaExhausted: "Claude requires credits before this execution can continue",
   InvalidRetry: "Claude returned invalid retry fields",
   UnknownRetry: "Claude reported an unclassified retry; inspect its native session before resuming",

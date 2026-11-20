@@ -19,3 +19,19 @@ export const NativeToolMessage = {
 
 export const nativeWriteRole = (role: string): string =>
   `${role}\n\n${NativeToolMessage.WritePolicy}`;
+
+export const WebResourceMessage = {
+  Description: "Read a public HTTPS source under a run's resource policy",
+  Selection: "A run and public HTTPS URL are required",
+  InvalidUrl: "Only bounded public HTTPS URLs without credentials are supported",
+  PublicAddress: "Destination does not resolve exclusively to public addresses",
+  Timeout: "Read timed out",
+  RedirectLimit: "Redirect limit exceeded",
+  MissingLocation: "Redirect is missing its location",
+  FailedStatus: "Source returned an HTTP error",
+  UnsupportedEncoding: "Unsupported content encoding",
+  ByteLimit: "Response byte limit exceeded",
+  UnsupportedExtraction: "Text extraction for this media type is unsupported",
+  RequestTurn:
+    "Submit this request in the structured request turn and retry with the answered request_id",
+} as const;

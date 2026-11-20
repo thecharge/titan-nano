@@ -9,6 +9,11 @@ export async function nativeTask(task, tools, prompt, cwd, writable) {
     return "complete";
   }
   const input = typeof prompt === "string" && prompt.startsWith("{") ? JSON.parse(prompt) : null;
+  if (task === "request_turn_web") {
+    if (!tools || !writable) throw new Error("Web read requires the worker native binding");
+    await tools.executeWebRead(input?.request_answers?.[0]);
+    return "request_turn";
+  }
   if (
     writable &&
     (["capture_received", "sealed_received", "split_received"].includes(

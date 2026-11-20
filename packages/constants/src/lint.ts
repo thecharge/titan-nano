@@ -2,7 +2,7 @@ export const LintPolicy = {
   File: "biome.json",
   Cli: "node_modules/@biomejs/biome/bin/biome",
   TimeoutMilliseconds: 4000,
-  Schema: "https://biomejs.dev/schemas/2.6.6/schema.json",
+  Schema: "https://biomejs.dev/schemas/2.6.8/schema.json",
   Error: "error",
   Recommended: "recommended",
   Project: "all",

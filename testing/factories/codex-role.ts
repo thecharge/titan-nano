@@ -11,7 +11,7 @@ export async function codexRole(cancel: boolean, reverse: boolean) {
     const first = join(root, "first");
     const second = join(root, "second");
     await all([() => mkdir(first), () => mkdir(second)]);
-    const executable = join(import.meta.dir, "../fixtures/vendors/codex-0.167.0.mjs");
+    const executable = join(import.meta.dir, "../fixtures/vendors/codex-0.171.0.mjs");
     const backend = new CodexBackend(undefined, { executable });
     const roles = [
       'Transport contract role: worker "quoted"\nfeatures.hooks=true',

@@ -14,7 +14,7 @@
 
 - [x] 3.1 Add repository and user skill discovery with origin reporting, precedence and safe linked references.
 - [x] 3.2 Supply retained skill instructions and reference access to both native backends and verify resume behavior.
-- [ ] 3.3 Add native and CLI web resource acquisition through existing approvals with bounded reads and provenance checks.
+- [x] 3.3 Add native and CLI web resource acquisition through existing approvals with bounded reads and provenance checks.
 - [x] 3.4 Remove the need for local runtime cache patches by covering generated-cache snapshot handling while preserving scoped writes.
 
 - [x] 3.5 Repair demonstrated build-script deadlines, proof write claims and sandbox compatibility with preserved confinement.

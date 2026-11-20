@@ -24,6 +24,7 @@ import {
   type NativeToolName,
   NativeToolNameSchema,
   NativeToolReplyEnvelopeSchema,
+  WebResourceEvidenceSchema,
 } from "@titan/types";
 
 export async function nativeCallName(request: Request) {
@@ -82,5 +83,16 @@ export async function nativeCallRecord(
       entry_ids: [],
       observation: NativeFileListResultSchema.parse(value).observation,
     };
+  if (tool === NativeTool.ReadWeb) {
+    const evidence = WebResourceEvidenceSchema.strip().safeParse(value);
+    return evidence.success
+      ? {
+          tool,
+          outcome: evidence.data.error ? NativeToolOutcome.Refused : NativeToolOutcome.Returned,
+          entry_ids: [],
+          web: evidence.data,
+        }
+      : refused;
+  }
   return { tool, outcome: NativeToolOutcome.Returned, entry_ids: entryIds(tool, value) };
 }

@@ -214,6 +214,12 @@ export function createRunClient(
   const runPath = (id: string): string =>
     [LocalServer.Runs, encodeURIComponent(id)].join(LocalServer.Root);
   return {
+    webRead(id, url, requestId) {
+      return request([runPath(id), CliCommand.WebRead].join(LocalServer.Root), HttpMethod.Post, {
+        url,
+        request_id: requestId,
+      });
+    },
     async configuration(id) {
       return readRunConfiguration(
         await request([runPath(id), CliCommand.Config].join(LocalServer.Root)),

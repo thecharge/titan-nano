@@ -459,6 +459,11 @@ export const claudeRetryFieldsCases = {
       { code: ErrorCode.ClaudeProtocol, retryable: false, delay: 0 },
     ),
     rejected(
+      "failed authentication requires operator action before resume",
+      [{ error: "authentication_failed", error_status: 401, retry_delay_ms: 1 }],
+      { code: ErrorCode.ClaudeExecution, retryable: false, delay: 0 },
+    ),
+    rejected(
       "a nonnumeric delay is refused",
       [{ error: "rate_limit", error_status: 429, retry_delay_ms: "1" }],
       { code: ErrorCode.ClaudeProtocol, retryable: false, delay: 0 },

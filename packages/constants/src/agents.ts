@@ -135,6 +135,7 @@ export const ClaudeGlobPattern = {
 } as const;
 
 export enum ClaudeRetryCause {
+  AuthenticationFailed = "authentication_failed",
   BillingError = "billing_error",
   RateLimit = "rate_limit",
   Overloaded = "overloaded",

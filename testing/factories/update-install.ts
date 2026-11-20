@@ -241,7 +241,11 @@ export async function automaticUpdate(mode: string) {
       mode === "failed" || mode === "wrong-release" ? mode : "success",
       launcher,
     );
-    const source = await updateSourceRepository(directory, archive, "success");
+    const source = await updateSourceRepository(
+      directory,
+      archive,
+      mode === "busy" ? "failed-build" : "success",
+    );
     await writeFile(
       join(home, "config.yaml"),
       JSON.stringify({
@@ -312,6 +316,7 @@ export async function automaticUpdate(mode: string) {
       if (mode === "busy") {
         assert.ok(await call(home, "/health"));
         assert.equal((await readdir(home)).includes(UpdateFile.Transaction), false);
+        assert.equal(notices.length, 1);
       }
     } finally {
       await server?.stop();

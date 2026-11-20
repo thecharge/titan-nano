@@ -10,6 +10,7 @@ import {
 } from "@titan/board";
 import {
   AgentTool,
+  ApprovalLevel,
   BoardFile,
   BoardLimit,
   BoardParty,
@@ -20,6 +21,7 @@ import {
   NativeToolAudit,
   NativeToolOutcome,
   NativeToolRole,
+  OperationWebRead,
   PathPart,
   PersonaDecisionStage,
   PersonaRule,
@@ -745,6 +747,45 @@ export class Engine {
       file_claim: phase[1].file_claim,
     });
     return writeNativeFile(run, step, nativeFileRoot(run, scope), change);
+  }
+
+  async authorizeNativeWeb(scope: NativeToolScope, url: string, requestId?: string) {
+    const run = await this.nativeFileRun(scope);
+    if (scope.role !== NativeToolRole.Worker)
+      throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+    if (!requestId && run.config.value.approvals?.resource === ApprovalLevel.Auto)
+      return RequestDecision.Approve;
+
+    const phase = Object.entries(run.nodes[scope.step_id]?.phases ?? {}).find(
+      ([, value]) => value.execution_id === scope.execution_id,
+    );
+    const pending = phase?.[1].request_turn;
+    if (!requestId) return null;
+    if (!phase || pending?.waiting !== false)
+      throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+    const records = await this.requests.list(run.run_id);
+    const selected = records.find(
+      (record) =>
+        record.request_id === requestId &&
+        pending.request_ids.includes(record.request_id) &&
+        record.kind === RequestKind.Resource &&
+        record.scope.operation === OperationWebRead &&
+        record.scope.resource === url &&
+        record.scope.arguments.length === 0 &&
+        record.scope.environment_names.length === 0 &&
+        Object.keys(record.scope.content_hashes).length === 0 &&
+        record.origin.client_id === run.client_id &&
+        record.origin.harness_session_id === phase[1].session_id &&
+        record.origin.execution?.step_id === scope.step_id &&
+        record.origin.execution.attempt === scope.attempt &&
+        record.origin.execution.phase === phase[0] &&
+        record.origin.execution.execution_id === pending.execution_id &&
+        record.expires_at > Date.now(),
+    );
+    await this.nativeFileRun(scope);
+    if (!selected?.answer)
+      throw new OperationalError(ErrorCode.PermissionDenied, NativeToolMessage.Denied);
+    return selected.answer.decision;
   }
 
   private async nativeFileRun(

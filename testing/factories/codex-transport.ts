@@ -12,7 +12,7 @@ import {
 import { withTemporaryDirectory } from "@titan/test-framework/files";
 
 function backend() {
-  const executable = join(import.meta.dir, "../fixtures/vendors/codex-0.167.0.mjs");
+  const executable = join(import.meta.dir, "../fixtures/vendors/codex-0.171.0.mjs");
   return new CodexBackend(undefined, { executable });
 }
 

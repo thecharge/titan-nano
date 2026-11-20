@@ -22,7 +22,7 @@ if (
   value("--model") !== "stub-model" ||
   value("--max-turns") !== "3"
 )
-  throw new Error("Claude 0.3.319 request contract mismatch");
+  throw new Error("Claude 0.3.329 request contract mismatch");
 await using resources = new AsyncDisposableStack();
 const configuration = args.some((arg) => arg.startsWith("--mcp-config"))
   ? JSON.parse(value("--mcp-config")).mcpServers

@@ -121,6 +121,7 @@ export enum CliOption {
 }
 
 export enum CliCommand {
+  WebRead = "web-read",
   Update = "update",
   Guide = "guide",
   Schema = "schema",
@@ -169,6 +170,7 @@ export enum CliInvocationKind {
 }
 
 export enum CliArgument {
+  Url = "url",
   PersonaName = "persona name or version",
   SkillName = "skill name",
   Setting = "setting",

@@ -122,8 +122,8 @@ export const VendorFixture = {
   SourceFile: "source.txt",
   SourceContent: "Original project content",
   HeartbeatStabilityMilliseconds: 100,
-  Codex: "codex-0.167.0.mjs",
-  Claude: "claude-0.3.319.mjs",
+  Codex: "codex-0.171.0.mjs",
+  Claude: "claude-0.3.329.mjs",
 } as const;
 
 export enum EventInspectionTransport {

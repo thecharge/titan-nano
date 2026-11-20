@@ -61,7 +61,7 @@ export async function bundledSdkLookup(name: string, installed: boolean) {
       await mkdir(folder, { recursive: true });
       await writeFile(
         resolve(folder, "package.json"),
-        '{"name":"@openai/codex","version":"0.167.0"}',
+        '{"name":"@openai/codex","version":"0.171.0"}',
       );
     }
     return sdkInstalled(name, root);

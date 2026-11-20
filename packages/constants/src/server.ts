@@ -36,7 +36,7 @@ export const ServerRoute = {
   Stop: "/maintenance/stop",
   Stream: "stream",
   Pattern:
-    /^\/runs\/([^/]+)(?:\/(events|stream|usage|config|artifacts|resume|pause|cancel)(?:\/([^/]+))?)?$/,
+    /^\/runs\/([^/]+)(?:\/(events|stream|usage|config|artifacts|web-read|resume|pause|cancel)(?:\/([^/]+))?)?$/,
 } as const;
 export const ServerLimit = {
   IdentityCharacters: 128,
@@ -78,8 +78,10 @@ export enum SqlMethod {
   Unsafe = "unsafe",
 }
 export const ServerSql = {
+  RecordWebRead: "INSERT INTO web_reads (id, run_id, request_id, evidence) VALUES (?, ?, ?, ?)",
   ClaimWriter: ["PRAGMA busy_timeout=250", "BEGIN EXCLUSIVE"],
   Initialize: [
+    "CREATE TABLE IF NOT EXISTS web_reads (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, request_id TEXT, evidence TEXT NOT NULL)",
     "PRAGMA journal_mode=WAL",
     "PRAGMA synchronous=FULL",
     "CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, root TEXT UNIQUE NOT NULL, client TEXT NOT NULL, submission TEXT NOT NULL, request_hash TEXT NOT NULL, UNIQUE(client,submission))",

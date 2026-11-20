@@ -7,6 +7,7 @@ import type { RunSnapshot } from "../transport.ts";
 import type { RunUsage } from "../usage.ts";
 
 export interface RunClient {
+  webRead?(id: string, url: string, requestId?: string): Promise<unknown>;
   configuration(id: string): Promise<RunConfiguration>;
   usage(id: string): Promise<RunUsage>;
   artifact(id: string, file: string, query?: ArtifactQueryInput): Promise<ArtifactPage>;

@@ -1,3 +1,5 @@
+import type { ClientRequest, IncomingHttpHeaders, IncomingMessage } from "node:http";
+import type { RequestOptions } from "node:https";
 import type { NativeFileChange, NativeFileListResult, NativeFileResult } from "../native-files.ts";
 import type { NativeToolAuditRecord } from "../native-tool-audit.ts";
 import type { NativeToolConnection } from "../native-tool-connection.ts";
@@ -61,3 +63,27 @@ export type NativeToolPreflight = (
   connection: NativeToolConnection,
   signal: AbortSignal,
 ) => Promise<void>;
+
+export interface WebResourceResponse {
+  status: number | undefined;
+  headers: IncomingHttpHeaders;
+  body: AsyncIterable<Uint8Array | string>;
+  close(): void;
+}
+
+export type WebResourceDial = (
+  url: URL,
+  address: string,
+  signal: AbortSignal,
+) => Promise<WebResourceResponse>;
+
+export type WebResourceRequest = (
+  options: RequestOptions,
+  onResponse: (response: IncomingMessage) => void,
+) => ClientRequest;
+
+export type NativeWebReader = (
+  scope: NativeToolScope,
+  url: string,
+  requestId?: string,
+) => Promise<unknown>;

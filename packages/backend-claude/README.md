@@ -14,7 +14,7 @@ Existing Write and Edit targets must be regular files with exactly one hard link
 
 ## Verification
 
-Run offline adapter contract tests, including denied tools and malformed usage. Caller and session cancellation are checked before SDK invocation and after streamed event handling. Pinned Claude Agent SDK 0.3.319 process tests use a versioned executable stub for initialization, required arguments, start and resume, fragmented output, broken streams, nonzero exits and cancellation. Cases assert one invocation, correct output and usage, no fallback timeout and observed child exit. Installed offline recovery covers checker continuation after graceful and forced daemon restart, including exhausted allowances. Live native continuation and permission behavior remain unverified. Shared path cases cover malformed inputs, conflicting fields, escaping patterns and outside symlinks.
+Run offline adapter contract tests, including denied tools and malformed usage. Caller and session cancellation are checked before SDK invocation and after streamed event handling. Pinned Claude Agent SDK 0.3.329 process tests use a versioned executable stub for initialization, required arguments, start and resume, fragmented output, broken streams, nonzero exits and cancellation. Cases assert one invocation, correct output and usage, no fallback timeout and observed child exit. Installed offline recovery covers checker continuation after graceful and forced daemon restart, including exhausted allowances. Live native continuation and permission behavior remain unverified. Shared path cases cover malformed inputs, conflicting fields, escaping patterns and outside symlinks.
 
 ## Limits
 

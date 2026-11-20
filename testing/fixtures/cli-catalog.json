@@ -1,4 +1,23 @@
 {
+  "web-read": {
+    "description": "Read a public HTTPS source under a run's resource policy",
+    "positionals": [
+      {
+        "name": "run ID",
+        "required": true
+      },
+      {
+        "name": "url",
+        "required": true
+      },
+      {
+        "name": "request ID",
+        "required": false
+      }
+    ],
+    "options": ["home"],
+    "handler": "<function>"
+  },
   "update": {
     "description": "Check or install a release with a verified backup and managed launcher",
     "options": ["home", "check", "from", "force", "project"],

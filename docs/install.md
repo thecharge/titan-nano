@@ -84,6 +84,8 @@ Before selecting the new release, Titan copies the whole home and affected proje
 
 Set the home-owned `update.mode` to `auto` for idle installation during ordinary commands. After a successful update, the stable launcher receives the original command and its streams. `notify` is the default behavior and prints the availability notice. `off` disables release queries and automatic installation. `update.check: never` also disables release queries.
 
+Automatic updates use the same `titan update` installer. While a run is active, Titan defers the update before building the release. The next ordinary command can install it once the run has ended. The source must have a version tag newer than the installed release.
+
 An interrupted transaction blocks daemon startup. Run `titan update --home HOME` to verify its retained backup and restore the earlier launcher. Recovery reports its result before another installation. The next invocation can install the selected release. A changed launcher, damaged backup or transaction belonging to another installation retains the recovery barrier for owner review.
 
 Use `titan doctor --backup /path/to/backup --home HOME` to inspect a retained copy. Known journal formats retain their existing representation. Unsupported formats refuse selection of the new release.

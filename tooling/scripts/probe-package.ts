@@ -1133,14 +1133,23 @@ await all(
 );
 console.log(JSON.stringify({ active_sdk_recovery_cases: 4, installed: true }));
 
-for (const scenario of [...requestTurnProcessCases.positive, ...requestTurnProcessCases.negative]) {
+const installedRequestTurnCases = [
+  ...requestTurnProcessCases.positive,
+  ...requestTurnProcessCases.negative,
+];
+for (const scenario of installedRequestTurnCases) {
   const result = await Reflect.apply(requestTurnProcess, undefined, [
     ...scenario.args,
     { cli, vendors: resolve(Packaging.VendorStubs) },
   ]);
   assert.deepEqual(result, scenario.expected, scenario.name);
 }
-console.log(JSON.stringify({ installed_request_turn_cases: 8, native_backends: 2 }));
+console.log(
+  JSON.stringify({
+    installed_request_turn_cases: installedRequestTurnCases.length,
+    native_backends: 2,
+  }),
+);
 
 for (const scenario of [...helperProcessCases.positive, ...helperProcessCases.negative]) {
   const result = await Reflect.apply(helperProcess, undefined, [

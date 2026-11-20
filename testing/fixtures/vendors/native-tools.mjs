@@ -173,6 +173,38 @@ export async function vendorNativeTools(configuration, args, resources) {
       });
       assert.equal(search.isError === true, false, JSON.stringify(search));
     },
+    async executeWebRead(answered) {
+      const url = "https://127.0.0.1/";
+      const decision = answered?.answer?.decision;
+      const call = async (value, request_id) => {
+        const reply = await client.callTool({
+          name: NativeTool.ReadWeb,
+          arguments: { url: value, request_id },
+        });
+        assert.equal(reply.isError === true, false, JSON.stringify(reply));
+        return JSON.parse(reply.content[0].text);
+      };
+      const different = await call("https://127.0.0.1/other");
+      assert.equal(different.request.scope.resource, "https://127.0.0.1/other");
+      if (answered) {
+        const mismatched = await client.callTool({
+          name: NativeTool.ReadWeb,
+          arguments: { url: "https://127.0.0.1/other", request_id: answered.request_id },
+        });
+        assert.equal(mismatched.isError, true);
+      }
+      const result = await call(url, answered?.request_id);
+      if (decision === "approve") {
+        assert.equal(result.requested, url);
+        assert.match(result.error, /public addresses/);
+      } else if (decision === "deny") {
+        assert.deepEqual(result, { decision });
+      } else {
+        assert.equal(result.request.kind, "resource");
+        assert.equal(result.request.scope.operation, "web_read");
+        assert.equal(result.request.scope.resource, url);
+      }
+    },
     async executeFileWrite(writable, refusedScope) {
       const read = await client.callTool({
         name: NativeTool.ReadFile,

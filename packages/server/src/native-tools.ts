@@ -19,7 +19,7 @@ import {
 import { hash } from "@titan/core";
 import { OperationalError, TitanError } from "@titan/errors";
 import type { KnowledgeHub } from "@titan/knowledge";
-import { NativeToolMessage } from "@titan/messages";
+import { NativeToolMessage, WebResourceMessage } from "@titan/messages";
 import { BoundedStore, KeyedQueue } from "@titan/store";
 import {
   type KnowledgeNativeHub,
@@ -37,6 +37,8 @@ import {
   NativeToolScopeSchema,
   type NativeToolSettings,
   NativeToolSettingsSchema,
+  type NativeWebReader,
+  WebResourceSelectionSchema,
 } from "@titan/types";
 import { nativeCallName, nativeCallRecord } from "./native-audit.ts";
 import {
@@ -58,6 +60,7 @@ export class NativeToolAuthority {
     private readFile?: NativeFileReader,
     private listFiles?: NativeFileLister,
     private writeFile?: NativeFileWriter,
+    private readWeb?: NativeWebReader,
   ) {
     const settings = NativeToolSettingsSchema.parse(input);
     this.bindings = new BoundedStore<string, NativeToolRegistration>({
@@ -216,6 +219,20 @@ export class NativeToolAuthority {
             if (!this.writeFile)
               throw new TitanError(ErrorCode.ServerUnavailable, NativeToolMessage.Unavailable);
             return this.writeFile(binding.scope, change);
+          }),
+      );
+    if (binding.scope.role === NativeToolRole.Worker)
+      server.registerTool(
+        NativeTool.ReadWeb,
+        {
+          description: WebResourceMessage.Description,
+          inputSchema: WebResourceSelectionSchema,
+        },
+        async ({ url, request_id }) =>
+          nativeToolOperation(async () => {
+            if (!this.readWeb)
+              throw new TitanError(ErrorCode.ServerUnavailable, NativeToolMessage.Unavailable);
+            return this.readWeb(binding.scope, url, request_id);
           }),
       );
     server.registerTool(

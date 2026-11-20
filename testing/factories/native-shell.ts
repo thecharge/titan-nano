@@ -19,7 +19,7 @@ export function nativeShellSdk(command: string, refused: boolean) {
   return withTemporaryDirectory(async (project) => {
     await writeFile(resolve(project, "allowed.txt"), "Original");
     const backend = new ClaudeBackend(query, {
-      executable: resolve(import.meta.dir, "../fixtures/claude-shell-0.3.319.mjs"),
+      executable: resolve(import.meta.dir, "../fixtures/claude-shell-0.3.329.mjs"),
       runtime: AgentRuntime.Bun,
     });
     const session = await backend.start({

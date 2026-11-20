@@ -41,6 +41,16 @@ titan check workflow.yaml --project .
 
 Edit the generated goal, tasks and persona instructions for the actual work. The parallel template creates two independent preparation steps. `--verify` adds a following script step with an independent reviewer. Creation refuses an existing destination. Registered persona references retain the selected scope and exact version through admission, history, usage and approved deletion. Home-scoped references use names such as `reviewer@1`.
 
+## Read a public source
+
+```sh
+titan web-read RUN_ID https://example.com/ --home HOME --json
+```
+
+If the command returns an approval request, review it with `titan requests show RUN_ID REQUEST_ID --home HOME`. After approval, repeat `web-read` with `REQUEST_ID` as the third positional argument. A home owner can set `approvals.resource: auto` to permit public HTTPS reads for new runs. Workers using the native tool can request the same capability and continue with the recorded answer.
+
+Titan checks each redirect and reports the final URL, media type, retrieval time and content digest, or the observed failure. It caps the response size and duration. Binary responses can have a digest without usable text. The receipt records where the content came from. A factual claim still needs its own verification.
+
 ## Run approved scripts
 
 Script actions and falsifiers accept optional `timeout_s` values up to one hour. Their default deadline is five minutes. Checks use that default. Script proofs retain their explicit proof deadline. Cancellation and byte limits remain active throughout execution.

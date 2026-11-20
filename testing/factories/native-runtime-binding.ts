@@ -35,7 +35,7 @@ function adapter(backend: NativeBackendId, hosted: boolean, preflight: boolean) 
   const launch = {
     executable: resolve(
       "testing/fixtures/vendors",
-      backend === Backend.Codex ? "codex-0.167.0.mjs" : "claude-0.3.319.mjs",
+      backend === Backend.Codex ? "codex-0.171.0.mjs" : "claude-0.3.329.mjs",
     ),
     ...(backend === Backend.Claude ? { runtime: AgentRuntime.Bun } : {}),
   };

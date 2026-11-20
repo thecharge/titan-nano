@@ -2,13 +2,15 @@ import {
   CliCommand,
   CliOption,
   CliPositionals,
+  ErrorCode,
   ExitCode,
   SkillCommand,
   TextSymbol,
   WorkflowCommand,
 } from "@titan/constants";
+import { TitanError } from "@titan/errors";
 import { discoverWorkspaceSkills, showWorkspaceSkill } from "@titan/knowledge";
-import { CliDescription, NativeToolBridgeMessage } from "@titan/messages";
+import { CliDescription, NativeToolBridgeMessage, WebResourceMessage } from "@titan/messages";
 import type { CommandDefinition, CommandName } from "@titan/types";
 import { artifactDefinition } from "./commands/artifacts.ts";
 import { createWorkflow } from "./commands/authoring.ts";
@@ -41,6 +43,18 @@ const runOptions = [CliOption.Home, CliOption.Watch] as const;
 const pending: CommandDefinition = { description: CliDescription.Pending, options: [] };
 const catalog = {
   [CliCommand.Update]: updateDefinition,
+  [CliCommand.WebRead]: {
+    description: WebResourceMessage.Description,
+    positionals: CliPositionals.WebRead,
+    options: [CliOption.Home],
+    handler: async ({ services, home, positionals }) => {
+      const [id, url, requestId] = positionals;
+      const client = services.client(home);
+      if (!id || !url || !client.webRead)
+        throw new TitanError(ErrorCode.Arguments, WebResourceMessage.Selection);
+      return { data: await client.webRead(id, url, requestId), exitCode: ExitCode.Success };
+    },
+  },
   [CliCommand.Guide]: {
     description: CliDescription.Guide,
     options: [],

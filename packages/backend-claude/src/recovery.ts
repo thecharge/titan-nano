@@ -8,6 +8,8 @@ export function claudeRetry(event: unknown): OperationalError {
   if (!parsed.success)
     return new OperationalError(ErrorCode.ClaudeProtocol, ClaudeMessage.InvalidRetry);
   const retry = parsed.data;
+  if (retry.error === ClaudeRetryCause.AuthenticationFailed)
+    return new OperationalError(ErrorCode.ClaudeExecution, ClaudeMessage.AuthenticationFailed);
   if (
     retry.error === ClaudeRetryCause.RateLimit &&
     retry.error_status === ClaudeRetryLimit.RateLimitStatus

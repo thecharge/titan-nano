@@ -29,7 +29,7 @@ function backend(cwd: string) {
       prompt,
       options: {
         ...options,
-        pathToClaudeCodeExecutable: join(import.meta.dir, "../fixtures/vendors/claude-0.3.319.mjs"),
+        pathToClaudeCodeExecutable: join(import.meta.dir, "../fixtures/vendors/claude-0.3.329.mjs"),
         executable: "bun",
         env,
       },

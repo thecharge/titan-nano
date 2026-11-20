@@ -15,7 +15,7 @@ class ObservedHostBackend extends HostedBackend {
     super(id, {
       executable: resolve(
         "testing/fixtures/vendors",
-        id === Backend.Codex ? "codex-0.167.0.mjs" : "claude-0.3.319.mjs",
+        id === Backend.Codex ? "codex-0.171.0.mjs" : "claude-0.3.329.mjs",
       ),
       ...(id === Backend.Claude ? { runtime: AgentRuntime.Bun } : {}),
     });

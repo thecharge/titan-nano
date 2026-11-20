@@ -14,6 +14,7 @@ export const CliPositionals = {
     { name: CliArgument.Value, required: true },
   ],
   Run: [run],
+  WebRead: [run, { name: CliArgument.Url, required: true }, { ...request, required: false }],
   Workflow: [{ name: CliArgument.WorkflowFile, required: true }],
   Workflows: [{ name: CliArgument.WorkflowFile, required: true, multiple: true }],
   OptionalWorkflow: [{ name: CliArgument.WorkflowFile, required: false }],

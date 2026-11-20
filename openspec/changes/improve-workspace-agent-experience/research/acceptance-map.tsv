@@ -1,9 +1,9 @@
 capability	requirement	scenario	task	stage	test_level	status
-agent-web-resources	Policy-controlled public source reads	Approval is required	3.3	local	integration	pending
-agent-web-resources	Policy-controlled public source reads	Autonomous reads are configured	3.3	local	integration	pending
-agent-web-resources	Source acquisition evidence	A source redirects	3.3	local	integration	pending
-agent-web-resources	Bounded resource handling	A source exceeds its byte allowance	3.3	local	integration	pending
-agent-web-resources	Bounded resource handling	Binary source text is unavailable	3.3	local	integration	pending
+agent-web-resources	Policy-controlled public source reads	Approval is required	3.3	local	integration	implemented
+agent-web-resources	Policy-controlled public source reads	Autonomous reads are configured	3.3	local	integration	implemented
+agent-web-resources	Source acquisition evidence	A source redirects	3.3	local	integration	implemented
+agent-web-resources	Bounded resource handling	A source exceeds its byte allowance	3.3	local	integration	implemented
+agent-web-resources	Bounded resource handling	Binary source text is unavailable	3.3	local	integration	implemented
 workflow-persona-authoring	Discover registered personas	Reuse an existing reviewer	2.3	local	integration	implemented
 workflow-persona-authoring	Create portable persona definitions	A destination already exists	2.3	local	integration	implemented
 workflow-persona-authoring	Create executable workflow templates	Generate a parallel delivery	2.2	local	integration	implemented

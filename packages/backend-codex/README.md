@@ -12,7 +12,7 @@ Each default session constructs its own client with the captured role in config.
 
 ## Verification
 
-Run `bun run test` for adapter contracts and the pinned Codex 0.167.0 process transport. Versioned stubs check required arguments and schema, start and resume, fragmented lines, incomplete or malformed output, nonzero exits and cancellation. Cases assert one invocation, correct output and usage, no fallback timeout and observed child exit. Installed offline recovery now covers both graceful and forced daemon restart after a recorded checker interruption; live continuation remains an acceptance gap; live calls are outside the default test suite.
+Run `bun run test` for adapter contracts and the pinned Codex 0.171.0 process transport. Versioned stubs check required arguments and schema, start and resume, fragmented lines, incomplete or malformed output, nonzero exits and cancellation. Cases assert one invocation, correct output and usage, no fallback timeout and observed child exit. Installed offline recovery now covers both graceful and forced daemon restart after a recorded checker interruption; live continuation remains an acceptance gap; live calls are outside the default test suite.
 
 ## Limits
 

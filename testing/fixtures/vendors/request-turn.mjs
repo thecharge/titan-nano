@@ -57,9 +57,13 @@ export async function turnAnswer(schema, mode, native, prompt, cwd, normal) {
     )
       throw new Error("Automatic helper answer did not reach the asking native session");
   }
+  const web =
+    typeof prompt === "string" &&
+    prompt.startsWith("{") &&
+    JSON.parse(prompt).task === "request_turn_web";
   const scope = {
-    operation: "read",
-    resource: "reference",
+    operation: web ? "web_read" : "read",
+    resource: web ? "https://127.0.0.1/" : "reference",
     content_hashes: {},
     arguments: [],
     environment_names: [],
