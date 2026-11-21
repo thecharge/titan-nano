@@ -124,7 +124,9 @@ async function handleLine(line) {
   let mode = final
     ? final.mode
     : delivery
-      ? "delivery"
+      ? delivery.interrupt
+        ? "rate_wait_once"
+        : "delivery"
       : task === "delayed_recover_once"
         ? "recover_once"
         : await nativeTask(
@@ -249,7 +251,8 @@ async function handleLine(line) {
       subtype: "api_retry",
       attempt: 1,
       max_retries: 10,
-      retry_delay_ms: mode === "rate_wait_once" ? 60000 : mode === "invalid_retry" ? -1 : 1,
+      retry_delay_ms:
+        mode === "rate_wait_once" ? (delivery ? 3000 : 60000) : mode === "invalid_retry" ? -1 : 1,
       error_status:
         mode === "unknown_retry"
           ? null

@@ -1,0 +1,59 @@
+name: Mixed SDK restart
+goal: Keep two independent deliveries through an interrupted final check
+personas:
+  codex:
+    description: Worker
+    role: Transport contract role
+    model: stub-model
+    backend: codex-sdk
+    tools: [Read, Write]
+    outputs: { ok: { type: boolean }, marker: { type: string }, turn: { type: integer } }
+  claude:
+    description: Worker
+    role: Transport contract role
+    model: stub-model
+    backend: claude-sdk
+    tools: [Read, Write]
+    outputs: { ok: { type: boolean }, marker: { type: string }, turn: { type: integer } }
+  codexCheck:
+    description: Checker
+    role: Transport contract role
+    model: stub-model
+    backend: codex-sdk
+    tools: [Read]
+  claudeCheck:
+    description: Checker
+    role: Transport contract role
+    model: stub-model
+    backend: claude-sdk
+    tools: [Read]
+graph:
+  nodes:
+    - id: left
+      needs: []
+      files: [left.txt]
+      do:
+        persona: codex
+        task: '{"mode":"delivery","file":"left","content":"left","requires":[],"barrier":null}'
+      falsify:
+        - persona: claudeCheck
+          task: '{"mode":"delivery","file":"left","content":"left","requires":[],"barrier":null}'
+    - id: right
+      needs: []
+      files: [right.txt]
+      do:
+        persona: claude
+        task: '{"mode":"delivery","file":"right","content":"right","requires":[],"barrier":null}'
+      falsify:
+        - persona: codexCheck
+          task: '{"mode":"delivery","file":"right","content":"right","requires":[],"barrier":null}'
+    - id: finish
+      needs: [left, right]
+      files: [finish.txt]
+      do:
+        persona: codex
+        task: '{"mode":"delivery","file":"finish","content":"finish","requires":["left","right"],"barrier":null}'
+      falsify:
+        - persona: claudeCheck
+          task: '{"mode":"delivery","file":"finish","content":"finish","requires":["left","right"],"barrier":null,"interrupt":true}'
+limits: { max_parallel: 2 }

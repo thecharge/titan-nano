@@ -1,28 +1,33 @@
-import { KnowledgeKind, KnowledgePublicationStage } from "@titan/constants";
+import { Backend, KnowledgeKind, KnowledgePublicationStage } from "@titan/constants";
 import { positive, rejected } from "@titan/test-factories";
 
 export const knowledgeRunnerRecoveryCases = {
   positive: [
     positive(
       "checked fact intent survives owner restart",
-      [KnowledgePublicationStage.Journal, KnowledgeKind.Fact],
+      [KnowledgePublicationStage.Journal, KnowledgeKind.Fact, Backend.Codex],
       true,
     ),
     positive(
       "checked lesson intent survives owner restart",
-      [KnowledgePublicationStage.Journal, KnowledgeKind.Lesson],
+      [KnowledgePublicationStage.Journal, KnowledgeKind.Lesson, Backend.Claude],
       true,
     ),
   ],
   negative: [
     rejected(
       "file interruption cannot rerun checked fact agents",
-      [KnowledgePublicationStage.File, KnowledgeKind.Fact],
+      [KnowledgePublicationStage.File, KnowledgeKind.Fact, Backend.Codex],
       true,
     ),
     rejected(
       "lost receipt cannot duplicate checked lesson changes",
-      [KnowledgePublicationStage.Receipt, KnowledgeKind.Lesson],
+      [KnowledgePublicationStage.Receipt, KnowledgeKind.Lesson, Backend.Claude],
+      true,
+    ),
+    rejected(
+      "lost receipt cannot duplicate checked Codex delivery",
+      [KnowledgePublicationStage.Receipt, KnowledgeKind.Fact, Backend.Codex],
       true,
     ),
   ],

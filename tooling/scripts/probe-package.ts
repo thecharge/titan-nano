@@ -141,7 +141,7 @@ import {
   scriptReadClaimCases,
   scriptScopeProcessCases,
 } from "../../testing/cases/script-sandbox.ts";
-import { sdkMixedDeliveryCases } from "../../testing/cases/sdk-plan.ts";
+import { sdkMixedDeliveryCases, sdkMixedRestartCases } from "../../testing/cases/sdk-plan.ts";
 import { sdkProcessRecoveryCases } from "../../testing/cases/sdk-process.ts";
 import { daemonMaintenanceCases } from "../../testing/cases/server-maintenance.ts";
 import {
@@ -210,7 +210,7 @@ import { requestTurnProcess } from "../../testing/factories/request-turn-process
 import { runCompatibility } from "../../testing/factories/run-compatibility.ts";
 import { runtimePinProcess } from "../../testing/factories/runtime-pin.ts";
 import { scriptReadClaim, scriptScopeProcess } from "../../testing/factories/script-sandbox.ts";
-import { sdkMixedDelivery } from "../../testing/factories/sdk-plan.ts";
+import { sdkMixedDelivery, sdkMixedRestart } from "../../testing/factories/sdk-plan.ts";
 import { sdkProcessRecovery } from "../../testing/factories/sdk-process.ts";
 import { daemonMaintenance } from "../../testing/factories/server-maintenance.ts";
 import { serverHubProcess } from "../../testing/factories/server-run-hub.ts";
@@ -1128,6 +1128,17 @@ for (const scenario of [...sdkMixedDeliveryCases.positive, ...sdkMixedDeliveryCa
 console.log(
   JSON.stringify({ sdk_mixed_delivery_cases: 4, origins: 2, steps_per_run: 8, installed: true }),
 );
+
+for (const scenario of [...sdkMixedRestartCases.positive, ...sdkMixedRestartCases.negative]) {
+  const [reverse, mutant] = scenario.args;
+  const result = await Reflect.apply(sdkMixedRestart, undefined, [
+    reverse,
+    mutant,
+    { cli, vendors: resolve(Packaging.VendorStubs) },
+  ]);
+  assert.equal(result, scenario.expected, scenario.name);
+}
+console.log(JSON.stringify({ sdk_mixed_restart_cases: 4, installed: true }));
 
 await all(
   [...activeProcessRecoveryCases.positive, ...activeProcessRecoveryCases.negative].map(

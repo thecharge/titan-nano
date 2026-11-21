@@ -1,13 +1,20 @@
 import { strict as assert } from "node:assert";
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { copyFile, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   AgentRuntime,
   Backend,
+  CliCommand,
   ConfigFile,
   ErrorCode,
+  ExecutionPhase,
   FileEncoding,
+  IoLimit,
   Packaging,
+  ProbeOption,
+  RunEventKind,
+  RunFile,
   RunStatus,
   SdkDelivery,
   SdkPlanFixture,
@@ -16,22 +23,258 @@ import {
   WorkspaceMode,
   WorkspaceModeSetting,
 } from "@titan/constants";
-import { all } from "@titan/core";
+import { all, hash } from "@titan/core";
 import { createRunClient } from "@titan/server/client";
+import { readFileBytes } from "@titan/streams";
 import { vendorRecoveryWorkflow } from "@titan/test-factories";
 import { waitUntil } from "@titan/test-framework";
 import { withTemporaryDirectory } from "@titan/test-framework/files";
 import {
+  ArtifactExportSchema,
+  ArtifactInspectionSchema,
+  ArtifactPageSchema,
   type Run,
   type RunClient,
   RunSchema,
   type RunSummary,
   type SdkProbePaths,
+  VendorStubCallSchema,
+  WorkflowCheckItemSchema,
   WorkflowSchema,
 } from "@titan/types";
 import { exists } from "@titan/workspace";
+import { runCliCommand, stopCommand } from "../support/command.ts";
 import { serverReady, spawnServer } from "./server-process.ts";
 import { prepareVendorFixtures } from "./vendor-fixtures.ts";
+
+async function recoveryWorkflow(root: string, reverse: boolean, installed: boolean) {
+  const assets = installed ? Packaging.InstalledPath : ".";
+  const source = (
+    await readFileBytes(
+      resolve(assets, Packaging.Examples, "installed-recovery.yaml"),
+      IoLimit.DataBytes,
+    )
+  ).toString(FileEncoding.Utf8);
+  const workflow = WorkflowSchema.parse(Bun.YAML.parse(source));
+  assert.ok(workflow.graph);
+  for (const node of workflow.graph.nodes) {
+    if (node.needs?.length) continue;
+    assert.ok("persona" in node.do);
+    node.do.task = JSON.stringify({
+      ...JSON.parse(node.do.task),
+      barrier: {
+        directory: resolve(root, "overlap"),
+        member: node.id,
+        members: ["left", "right"],
+      },
+    });
+  }
+  for (const persona of Object.values(workflow.personas)) {
+    if (reverse)
+      persona.backend = persona.backend === Backend.Codex ? Backend.Claude : Backend.Codex;
+  }
+  return workflow;
+}
+
+export async function sdkMixedRestart(
+  reverse: boolean,
+  mutant?: string,
+  paths: SdkProbePaths = {},
+) {
+  return withTemporaryDirectory((root) => sdkMixedRestartAtRoot(root, reverse, paths, mutant));
+}
+
+async function sdkMixedRestartAtRoot(
+  root: string,
+  reverse: boolean,
+  paths: SdkProbePaths,
+  mutant?: string,
+) {
+  const { home, project } = await preparePlanProject(
+    root,
+    paths.vendors ?? resolve(Packaging.VendorSources),
+    8,
+    1,
+  );
+  const cli = paths.cli ?? resolve(Packaging.CliSource);
+  const controllerHash = paths.cli
+    ? hash(await readFileBytes(cli, Packaging.BundleMaximumBytes))
+    : null;
+  const children: ReturnType<typeof spawnServer>[] = [];
+  async function start() {
+    const child = spawnServer(home, cli, SdkDelivery.DaemonTimeout);
+    children.push(child);
+    assert(await waitUntil(() => serverReady(home, child.pid)), "Recovery daemon did not start");
+    return child;
+  }
+  try {
+    const first = await start();
+    const client = createRunClient(home);
+    const workflow = resolve(root, "recovery.yaml");
+    await writeFile(
+      workflow,
+      JSON.stringify(await recoveryWorkflow(root, reverse, Boolean(paths.cli))),
+    );
+    await runCliCommand(cli, home, [CliCommand.Check, workflow, ProbeOption.Project, project]);
+    const dryRun = WorkflowCheckItemSchema.omit({ path: true }).parse(
+      await runCliCommand(cli, home, [
+        CliCommand.Run,
+        workflow,
+        ProbeOption.Project,
+        project,
+        "--dry-run",
+      ]),
+    );
+    assert.deepEqual(
+      dryRun.nodes.map(({ id }) => id),
+      ["left", "right", "finish"],
+    );
+    assert.equal((await client.list({ limit: 1 })).runs.length, 0);
+    const submitted = RunSchema.parse(
+      await runCliCommand(cli, home, [
+        CliCommand.Run,
+        workflow,
+        ProbeOption.Project,
+        project,
+        "--detach",
+        "--backend",
+        Backend.Codex,
+      ]),
+    );
+    const interrupted = reverse ? RunStatus.Blocked : RunStatus.Recovering;
+    assert(
+      await waitUntil(
+        async () => (await client.get(submitted.run_id)).state === interrupted,
+        SdkDelivery.SettleAttempts,
+        SdkDelivery.PollMilliseconds,
+      ),
+      "Expected SDK interruption was not observed",
+    );
+    const before = RunSchema.parse(await client.get(submitted.run_id));
+    assert.equal(before.state, interrupted);
+    assert.equal(before.nodes.left?.state, StepStatus.Passed);
+    assert.equal(before.nodes.right?.state, StepStatus.Passed);
+    assert.deepEqual(
+      (await readdir(resolve(root, "overlap"))).filter((file) => file.endsWith(".checked")).sort(),
+      ["left.checked", "right.checked"],
+    );
+    const phase = `${ExecutionPhase.FalsifierPrefix}0`;
+    assert.ok(before.nodes.finish?.phases[phase]?.session_id);
+    await assertStubDispatches(before, false);
+    first.kill("SIGKILL");
+    await first.exited;
+    await start();
+    await runCliCommand(cli, home, ["resume", before.run_id, "--watch"]);
+    const [after] = await settledPlans(client, [before.run_id]);
+    assert.ok(after);
+    assert.equal(after.state, RunStatus.Passed, after.nodes.finish?.phases[phase]?.error ?? "");
+    assert.equal(after.runtime_version, before.runtime_version);
+    if (controllerHash) {
+      assert.equal(before.runtime_build, controllerHash);
+      assert.equal(after.runtime_build, controllerHash);
+      assert.equal(hash(await readFileBytes(cli, Packaging.BundleMaximumBytes)), controllerHash);
+    }
+    assertMixedRestart(before, after);
+    await assertStubDispatches(after, true);
+    if (mutant) {
+      const changed = structuredClone(after);
+      const node = changed.nodes[mutant === "attempt" ? "finish" : "left"];
+      assert.ok(node);
+      if (mutant === "attempt") node.attempt++;
+      else {
+        const worker = node.phases[ExecutionPhase.Worker];
+        assert.ok(worker);
+        worker.executions++;
+      }
+      assert.throws(() => assertMixedRestart(before, changed), assert.AssertionError);
+    }
+    const eventKind = reverse ? RunEventKind.ExecutionBlocked : RunEventKind.ExecutionRecovering;
+    assert((await client.events(after.run_id)).events.some((event) => event.type === eventKind));
+    assert.equal((await client.usage(after.run_id)).executions, 7);
+    await inspectRestartDelivery(cli, home, after, project);
+    return true;
+  } finally {
+    for (const child of children) await stopCommand(child);
+  }
+}
+
+async function assertStubDispatches(run: Run, recovered: boolean) {
+  for (const id of ["left", "right", "finish"]) {
+    const work = run.nodes[id]?.work;
+    assert.ok(work);
+    const review = resolve(work, "..", `${RunFile.ReviewPrefix}0`);
+    for (const directory of [work, review]) {
+      const bytes = await readFileBytes(
+        resolve(directory, VendorFixture.StateDirectory, "calls.jsonl"),
+        IoLimit.DataBytes,
+      );
+      const resumed = bytes
+        .toString(FileEncoding.Utf8)
+        .trim()
+        .split("\n")
+        .map((line) => VendorStubCallSchema.parse(JSON.parse(line)).resume);
+      assert.deepEqual(
+        resumed,
+        recovered && id === "finish" && directory === review ? [false, true] : [false],
+      );
+    }
+  }
+}
+
+function assertMixedRestart(before: Run, after: Run) {
+  const phase = `${ExecutionPhase.FalsifierPrefix}0`;
+  for (const id of ["left", "right"]) assert.deepEqual(after.nodes[id], before.nodes[id]);
+  assert.deepEqual(
+    after.nodes.finish?.phases[ExecutionPhase.Worker],
+    before.nodes.finish?.phases[ExecutionPhase.Worker],
+  );
+  assert.equal(before.nodes.finish?.attempt, 1);
+  assert.equal(after.nodes.finish?.attempt, 1);
+  assert.equal(after.nodes.finish?.refutations, 0);
+  assert.equal(before.nodes.finish?.phases[phase]?.executions, 1);
+  assert.equal(
+    after.nodes.finish?.phases[phase]?.session_id,
+    before.nodes.finish?.phases[phase]?.session_id,
+  );
+  assert.equal(after.nodes.finish?.phases[phase]?.executions, 2);
+}
+
+async function inspectRestartDelivery(cli: string, home: string, run: Run, project: string) {
+  const artifact = ArtifactInspectionSchema.parse(
+    await runCliCommand(cli, home, ["artifacts", "list", run.run_id]),
+  );
+  assert.deepEqual(artifact.files.map(({ path }) => path).sort(), [
+    "finish.txt",
+    "left.txt",
+    "right.txt",
+    "source.txt",
+  ]);
+  const file = artifact.files.find(({ path }) => path === "finish.txt");
+  assert.ok(file);
+  const page = ArtifactPageSchema.parse(
+    await runCliCommand(cli, home, ["artifacts", "show", run.run_id, file.id]),
+  );
+  assert.equal(page.has_more, false);
+  assert.equal(Buffer.from(page.content, FileEncoding.Base64).toString(), "Delivered finish");
+  const delivery = ArtifactExportSchema.parse(
+    await runCliCommand(cli, home, [
+      "artifacts",
+      "export",
+      run.run_id,
+      file.id,
+      "--output",
+      resolve(home, "review"),
+    ]),
+  );
+  assert.equal(delivery.delivery.delivery_hash, artifact.hash);
+  const exported = resolve(delivery.directory, delivery.delivery.content);
+  const target = resolve(project, file.path);
+  assert.equal((await readFile(exported)).toString(), "Delivered finish");
+  assert.equal(await exists(target), false);
+  await copyFile(exported, target, constants.COPYFILE_EXCL);
+  await assert.rejects(copyFile(exported, target, constants.COPYFILE_EXCL), { code: "EEXIST" });
+  assert.equal((await readFile(target)).toString(), "Delivered finish");
+}
 
 function mixedWorkflow(root: string, mode: SdkPlanFixture, reverse: boolean, origin: string) {
   const base = vendorRecoveryWorkflow().personas;

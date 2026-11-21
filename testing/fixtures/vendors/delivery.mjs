@@ -7,7 +7,11 @@ export function deliveryTask(task) {
   if (typeof task !== "string" || !task.startsWith("{")) return null;
   const value = JSON.parse(task);
   if (
-    Object.keys(value).sort().join(",") !== "barrier,content,file,mode,requires" ||
+    ![
+      "barrier,content,file,mode,requires",
+      "barrier,content,file,interrupt,mode,requires",
+    ].includes(Object.keys(value).sort().join(",")) ||
+    (value.interrupt !== undefined && value.interrupt !== true) ||
     value.mode !== "delivery" ||
     !identifier.test(value.file) ||
     !identifier.test(value.content) ||

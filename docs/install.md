@@ -61,6 +61,8 @@ Running the same harness install again preserves identical generated files and r
 
 Normal installation prints the saved guide, MCP registration result, local model status and next steps. Doctor prints the selected home, project, agent, runtime tools and local prerequisites. It also reports whether live backend checks ran. Add `--json` to either command for its complete machine-readable report. A missing native command or failed registration stays visible in either format.
 
+The [offline recovery example](../examples/README.md#offline-restart-with-codex-and-claude) shows how to check the installed package, recover a run and inspect its files. It uses local provider stubs.
+
 ## Update Titan
 
 Set `update.source` in the selected Titan home's `config.yaml` to the Git repository that carries your release tags. Only the home owner can change this setting. For example, a home file can contain the following settings.

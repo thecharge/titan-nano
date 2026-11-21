@@ -70,7 +70,9 @@ if (task === "native_file_write" || task === "native_file_write_refused") {
 }
 const delivery = deliveryTask(task);
 let mode = delivery
-  ? "delivery"
+  ? delivery.interrupt
+    ? "recover_once"
+    : "delivery"
   : task === "delayed_recover_once"
     ? "recover_once"
     : await nativeTask(task, nativeTools, raw, cwd, writable);

@@ -42,3 +42,14 @@ export const sdkMixedDeliveryCases = {
     ),
   ],
 };
+
+export const sdkMixedRestartCases = {
+  positive: [
+    positive("mixed restart retains the Claude checker session", [false], true),
+    positive("mixed restart retains the Codex checker session", [true], true),
+  ],
+  negative: [
+    rejected("mixed restart rejects an extra quality attempt", [false, "attempt"], true),
+    rejected("mixed restart rejects a rerun of a completed peer", [true, "peer"], true),
+  ],
+};

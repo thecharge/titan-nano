@@ -464,8 +464,8 @@ distribution	Release packages install independently of the monorepo	Missing tran
 distribution	Release packages install independently of the monorepo	Secret in package files	31.1	local	integration	implemented
 distribution	Environment and optional capabilities are explicit	Minimal environment first use	31.2	local	integration	implemented
 distribution	Environment and optional capabilities are explicit	Unsupported native dependency	31.2	local	integration	pending
-distribution	A first working version has an executable acceptance path	Installed preview survives restart	31.3	local	end-to-end	pending
-distribution	A first working version has an executable acceptance path	Real adapter readiness needs evidence	31.3	local	end-to-end	pending
+distribution	A first working version has an executable acceptance path	Installed preview survives restart	31.3	local	end-to-end	implemented
+distribution	A first working version has an executable acceptance path	Real adapter readiness needs evidence	31.3	local	end-to-end	implemented
 distribution	Code documents research and operations have distinct completion evidence	Remote operation response is lost	31.4	local	end-to-end	pending
 distribution	Code documents research and operations have distinct completion evidence	Research report has uncertainty	31.4	local	end-to-end	pending
 distribution	Titan can develop itself without changing its active runtime	Titan edits Titan	31.5	release	end-to-end	pending

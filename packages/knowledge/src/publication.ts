@@ -172,8 +172,10 @@ export async function publishKnowledgeFiles(
       )
     : knowledgePath(root, entry.kind, entry.id);
   const bytes = change.after ? knowledgeBytes(change.after, settings.max_entry_bytes) : null;
-  if (bytes) await atomicWrite(path, bytes);
-  else await removeKnowledgeFile(path, dirname(path));
+  if (bytes) {
+    const published = await optionalKnowledgeBytes(path, settings.max_entry_bytes);
+    if (!published?.equals(bytes)) await atomicWrite(path, bytes);
+  } else await removeKnowledgeFile(path, dirname(path));
   await observe?.(KnowledgePublicationStage.File);
   return bytes;
 }

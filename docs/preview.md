@@ -158,6 +158,13 @@ Build a private local archive with `bun run pack:preview`. It bundles Titan's ru
 
 From the checkout, run `bun run check:package` to rebuild, install into a fresh temporary directory and check the installed CLI with no checkout mounted into its container. Dependency preparation can use the registry. The installed engine runs without external networking. It checks a fake mixed workflow and both pinned SDK libraries with versioned executable stubs. The check compares shipped schemas and guide with CLI output. It starts the server, runs the mixed dependency example and inspects events and artifacts. It confirms the original project file stays unchanged and stops the server. It removes only the temporary installation it created. This separate packaging check is not part of routine `bun run check`.
 
+| Backend | Installed restart check | Live provider recovery |
+| ------- | ----------------------- | ---------------------- |
+| Codex   | Scripted lost response  | Unverified             |
+| Claude  | Scripted rate limit     | Unverified             |
+
+Both recovery cases use local executables with the pinned SDK. The full release gate remains closed.
+
 Run `bun run check` for lint, types, the isolated default suite with coverage, the scenario map and documentation checks. The test command requires Linux and rootless Podman. Prepare its image once:
 
 ```sh
